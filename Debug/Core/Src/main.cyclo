@@ -1,11 +1,18 @@
-../Core/Src/main.c:83:5:main	1
-../Core/Src/main.c:134:6:SystemClock_Config	3
-../Core/Src/main.c:181:13:MX_ADC1_Init	4
-../Core/Src/main.c:256:13:MX_ADC2_Init	5
-../Core/Src/main.c:336:13:MX_CORDIC_Init	2
-../Core/Src/main.c:362:13:MX_FDCAN1_Init	2
-../Core/Src/main.c:405:13:MX_I2C1_Init	4
-../Core/Src/main.c:453:13:MX_TIM1_Init	7
-../Core/Src/main.c:532:13:MX_DMA_Init	1
-../Core/Src/main.c:554:13:MX_GPIO_Init	1
-../Core/Src/main.c:606:6:Error_Handler	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:300:22:void LL_CORDIC_Config(CORDIC_TypeDef*, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t)	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:730:22:void LL_CORDIC_WriteData(CORDIC_TypeDef*, uint32_t)	1
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:741:26:uint32_t LL_CORDIC_ReadData(const CORDIC_TypeDef*)	1
+../Core/Inc/user_math.h:32:3:Acrocantho::Cordic::Cordic()	1
+../Core/Inc/user_math.h:45:10:Acrocantho::SinCos Acrocantho::Cordic::operator()(int32_t) const	1
+../Core/Inc/user_math.h:53:10:Acrocantho::SinCos Acrocantho::Cordic::radians(float) const	3
+../Core/Inc/user_math.h:57:16:static float Acrocantho::Cordic::from_q31(uint32_t)	1
+../Core/Src/main.cpp:83:5:int main()	1
+../Core/Src/main.cpp:141:6:void SystemClock_Config()	3
+../Core/Src/main.cpp:188:13:void MX_ADC1_Init()	4
+../Core/Src/main.cpp:263:13:void MX_ADC2_Init()	5
+../Core/Src/main.cpp:343:13:void MX_CORDIC_Init()	2
+../Core/Src/main.cpp:369:13:void MX_FDCAN1_Init()	2
+../Core/Src/main.cpp:412:13:void MX_I2C1_Init()	4
+../Core/Src/main.cpp:460:13:void MX_TIM1_Init()	7
+../Core/Src/main.cpp:539:13:void MX_DMA_Init()	1
+../Core/Src/main.cpp:561:13:void MX_GPIO_Init()	1
+../Core/Src/main.cpp:613:6:void Error_Handler()	1

@@ -21,7 +21,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "user_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -118,8 +118,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  Acrocantho::Cordic cordic;
+  float a;
+  float b;
   while (1)
   {
+    Acrocantho::SinCos result = cordic.radians(Acrocantho::userpi);
+    a = result.c;
+    b = result.s;
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
