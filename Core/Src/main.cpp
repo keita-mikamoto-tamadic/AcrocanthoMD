@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "user_math.h"
+#include "can_communication.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,6 +75,7 @@ static void MX_CORDIC_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+CanCom canCom(hfdcan1);
 /* USER CODE END 0 */
 
 /**
@@ -118,7 +120,51 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_ADCEx_Calibration_Start(&hadc1, ADC_SINGLE_ENDED);
+  HAL_ADCEx_Calibration_Start(&hadc2, ADC_SINGLE_ENDED);
+  HAL_ADC_Start(&hadc1);
+  HAL_ADC_Start(&hadc2);
+  HAL_ADCEx_InjectedStart_IT(&hadc1);
+  //  HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_1);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_2);
+  HAL_TIMEx_PWMN_Start(&htim1, TIM_CHANNEL_3);
+
+  // CANフィルタ
+  FDCAN_FilterTypeDef CAN_FilterConfig;
+  CAN_FilterConfig.IdType = FDCAN_STANDARD_ID;
+  CAN_FilterConfig.FilterIndex = 0;
+  CAN_FilterConfig.FilterType = FDCAN_FILTER_MASK;
+  CAN_FilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  CAN_FilterConfig.FilterID1 = 0x000;  // フィルタID
+  CAN_FilterConfig.FilterID2 = 0x000;  // マスク
+
+    if (HAL_FDCAN_ConfigFilter(&hfdcan1, &CAN_FilterConfig) != HAL_OK)
+    {
+        // フィルタ設定エラー
+        Error_Handler();
+    } 
+  // STart FDCAN1
+  if(HAL_FDCAN_Start(&hfdcan1)!= HAL_OK) {
+	  Error_Handler();
+  }
+
+  // Activate the notification for new data in FIFO0 for FDCAN1
+  if (HAL_FDCAN_ActivateNotification(&hfdcan1, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
+    /* Notification Error */
+    Error_Handler();
+  }
+
   Acrocantho::Cordic cordic;
+  
+  canCom.initTxHeader(0x00, false, false);
+  uint8_t dataToSend[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+  canCom.sendData(dataToSend, sizeof(dataToSend));
+  HAL_Delay(1000);
+
   float a;
   float b;
   while (1)
@@ -126,6 +172,9 @@ int main(void)
     Acrocantho::SinCos result = cordic.radians(Acrocantho::userpi);
     a = result.c;
     b = result.s;
+    
+    canCom.rxTask();
+    
 
     /* USER CODE END WHILE */
 

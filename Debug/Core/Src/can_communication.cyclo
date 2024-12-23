@@ -1,0 +1,7 @@
+../Core/Src/can_communication.cpp:7:1:CanCom::CanCom(FDCAN_HandleTypeDef&)	1
+../Core/Src/can_communication.cpp:10:6:void CanCom::initTxHeader(uint32_t, bool, bool)	4
+../Core/Src/can_communication.cpp:22:6:void CanCom::sendData(const uint8_t*, size_t)	4
+../Core/Src/can_communication.cpp:39:6:void CanCom::rxFifo0Callback(uint32_t)	4
+../Core/Src/can_communication.cpp:55:6:void CanCom::handleRxData()	2
+../Core/Src/can_communication.cpp:62:6:void CanCom::rxTask()	4
+../Core/Src/can_communication.cpp:80:17:void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef*, uint32_t)	1
