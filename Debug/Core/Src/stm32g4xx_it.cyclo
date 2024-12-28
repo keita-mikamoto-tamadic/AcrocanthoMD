@@ -11,7 +11,6 @@
 ../Core/Src/stm32g4xx_it.c:223:6:DMA1_Channel2_IRQHandler	1
 ../Core/Src/stm32g4xx_it.c:237:6:ADC1_2_IRQHandler	1
 ../Core/Src/stm32g4xx_it.c:252:6:FDCAN1_IT0_IRQHandler	1
-../Core/Src/stm32g4xx_it.c:266:6:FDCAN1_IT1_IRQHandler	1
-../Core/Src/stm32g4xx_it.c:280:6:I2C1_EV_IRQHandler	1
-../Core/Src/stm32g4xx_it.c:294:6:I2C1_ER_IRQHandler	1
-../Core/Src/stm32g4xx_it.c:308:6:EXTI15_10_IRQHandler	1
+../Core/Src/stm32g4xx_it.c:266:6:I2C1_EV_IRQHandler	1
+../Core/Src/stm32g4xx_it.c:280:6:I2C1_ER_IRQHandler	1
+../Core/Src/stm32g4xx_it.c:294:6:EXTI15_10_IRQHandler	1

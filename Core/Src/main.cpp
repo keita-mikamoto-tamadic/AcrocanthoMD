@@ -19,10 +19,14 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
+#include <cstring>
+
 #include "user_math.h"
 #include "can_communication.h"
+#include "ang.h"
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,7 +79,10 @@ static void MX_CORDIC_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+// コールバックを使用するペリフェラルで、各クラスインスタンスに一貫性を持たせるため、
+// クラスの関数を使用する場所を限定して、extern なしのインスタンス作成は一か所とする。(基本はmain)
 CanCom canCom(hfdcan1);
+Ang ang(hi2c1);
 /* USER CODE END 0 */
 
 /**
@@ -160,21 +167,33 @@ int main(void)
 
   Acrocantho::Cordic cordic;
   
-  canCom.initTxHeader(0x00, false, false);
-  uint8_t dataToSend[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+  canCom.initTxHeader(0x01, false, false);
+  uint8_t dataToSend[8] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55};
   canCom.sendData(dataToSend, sizeof(dataToSend));
   HAL_Delay(1000);
 
   float a;
   float b;
+  float c;
+  uint8_t txBuffer[8];
   while (1)
   {
-    Acrocantho::SinCos result = cordic.radians(Acrocantho::userpi);
-    a = result.c;
-    b = result.s;
+    //Acrocantho::SinCos result = cordic.radians(Acrocantho::userpi);
+    //a = result.c;
+    //b = result.s;
     
+    //uint8_t dataToSend[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+    // data をバイトごとに txBuffer に格納
     canCom.rxTask();
+
+    ang.read();
+    ang.receive();
+    ang.prepareCanData(txBuffer, sizeof(txBuffer));
     
+    if (canCom.txFlag){
+      canCom.sendData(txBuffer, sizeof(txBuffer));
+      canCom.txFlag = 0;
+    }
 
     /* USER CODE END WHILE */
 
@@ -427,11 +446,11 @@ static void MX_FDCAN1_Init(void)
   /* USER CODE END FDCAN1_Init 1 */
   hfdcan1.Instance = FDCAN1;
   hfdcan1.Init.ClockDivider = FDCAN_CLOCK_DIV1;
-  hfdcan1.Init.FrameFormat = FDCAN_FRAME_FD_BRS;
+  hfdcan1.Init.FrameFormat = FDCAN_FRAME_CLASSIC;
   hfdcan1.Init.Mode = FDCAN_MODE_NORMAL;
   hfdcan1.Init.AutoRetransmission = DISABLE;
   hfdcan1.Init.TransmitPause = DISABLE;
-  hfdcan1.Init.ProtocolException = ENABLE;
+  hfdcan1.Init.ProtocolException = DISABLE;
   hfdcan1.Init.NominalPrescaler = 5;
   hfdcan1.Init.NominalSyncJumpWidth = 11;
   hfdcan1.Init.NominalTimeSeg1 = 56;
@@ -440,7 +459,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.DataSyncJumpWidth = 4;
   hfdcan1.Init.DataTimeSeg1 = 12;
   hfdcan1.Init.DataTimeSeg2 = 4;
-  hfdcan1.Init.StdFiltersNbr = 0;
+  hfdcan1.Init.StdFiltersNbr = 1;
   hfdcan1.Init.ExtFiltersNbr = 0;
   hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)

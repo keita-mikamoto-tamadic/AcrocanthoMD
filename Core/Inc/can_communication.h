@@ -11,12 +11,14 @@ private:
   uint8_t txData[8];
   uint8_t rxData[8];
   uint8_t prevGenFuncRef;
+  volatile int8_t canRxInterrupt;
 
 public:
-  volatile int8_t canRxInterrupt;
   struct CanData {
     uint8_t genFuncRef;
   } canData;
+
+  volatile uint8_t txFlag;
 
   // Constracta
   CanCom(FDCAN_HandleTypeDef& fdcanHandle);

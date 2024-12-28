@@ -6,7 +6,7 @@
 extern CanCom canCom;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
-  : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0){}
+  : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), txFlag(0){}
 
 void CanCom::initTxHeader(uint32_t canId, bool extendedId, bool fdFormat) {
   txHeader.Identifier = canId;
@@ -48,7 +48,6 @@ void CanCom::rxFifo0Callback(uint32_t RxFifo0ITs) {
     }
 
     canRxInterrupt = 1;
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 
   }
 }
@@ -57,16 +56,16 @@ void CanCom::handleRxData() {
   if (canRxInterrupt == 1) {
     canData.genFuncRef = rxData[0];
     canRxInterrupt = 0;
+    txFlag = 1;
   }
 }
 
 void CanCom::rxTask() {
   handleRxData();
-
+/* 
   uint8_t currentGenFuncRef = canData.genFuncRef;
-  uint8_t diff = prevGenFuncRef ^ currentGenFuncRef;
 
-  if (diff == 0) {
+  if (currentGenFuncRef == prevGenFuncRef) {
     return;
   }
 
@@ -75,7 +74,7 @@ void CanCom::rxTask() {
   } else if (canData.genFuncRef == 1) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
   }
-  prevGenFuncRef = currentGenFuncRef;
+  prevGenFuncRef = currentGenFuncRef; */
 }
 
 extern "C" void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs) {
