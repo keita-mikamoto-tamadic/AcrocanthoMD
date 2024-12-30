@@ -1,0 +1,7 @@
+C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\arm-none-eabi\include\c++\12.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	1
+../Core/Src/user_task.cpp:11:1:userTask::userTask()	1
+../Core/Src/user_task.cpp:15:6:void userTask::cyclic_task()	4
+../Core/Src/user_task.cpp:38:6:void userTask::idle_task()	1
+../Core/Src/user_task.cpp:42:6:void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef*)	1
+../Core/Src/user_task.cpp:45:1:void __static_initialization_and_destruction_0(int, int)	3
+../Core/Src/user_task.cpp:45:1:cpp)	1

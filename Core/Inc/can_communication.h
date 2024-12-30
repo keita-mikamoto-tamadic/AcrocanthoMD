@@ -1,7 +1,14 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 #include "main.h"
+
+struct canData {
+  uint8_t genFuncRef = 0;
+  uint8_t txBuff[8] = {0};
+  uint8_t rxBuff[8] = {0};
+};
 
 class CanCom {
 private:
@@ -11,14 +18,12 @@ private:
   uint8_t txData[8];
   uint8_t rxData[8];
   uint8_t prevGenFuncRef;
-  volatile int8_t canRxInterrupt;
+  volatile bool canRxInterrupt;
+
+  std::unique_ptr<canData> data;
 
 public:
-  struct CanData {
-    uint8_t genFuncRef;
-  } canData;
-
-  volatile uint8_t txFlag;
+  volatile bool canTxFlag;
 
   // Constracta
   CanCom(FDCAN_HandleTypeDef& fdcanHandle);
@@ -28,5 +33,6 @@ public:
   void rxFifo0Callback(uint32_t RxFifo0ITs);
   void handleRxData();
   void rxTask();
+  void txTask();
 };
 

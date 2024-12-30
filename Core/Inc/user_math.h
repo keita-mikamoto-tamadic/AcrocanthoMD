@@ -5,11 +5,9 @@
 
 #include "stm32g4xx_ll_cordic.h"
 
-namespace Acrocantho {
-
-// constexpr
 constexpr float user2pi = 6.283185307179586f;
 constexpr float userpi = 3.141592653589793f;
+namespace Acrocantho {
 
 struct SinCos {
   float s;

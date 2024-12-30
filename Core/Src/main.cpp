@@ -19,14 +19,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-#include <cstring>
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 
 #include "user_math.h"
 #include "can_communication.h"
 #include "ang.h"
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,11 +76,9 @@ static void MX_CORDIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-// コールバックを使用するペリフェラルで、各クラスインスタンスに一貫性を持たせるため、
-// クラスの関数を使用する場所を限定して、extern なしのインスタンス作成は一か所とする。(基本はmain)
-CanCom canCom(hfdcan1);
+CanCom cancom(hfdcan1);
 Ang ang(hi2c1);
+
 /* USER CODE END 0 */
 
 /**
@@ -167,33 +163,19 @@ int main(void)
 
   Acrocantho::Cordic cordic;
   
-  canCom.initTxHeader(0x01, false, false);
-  uint8_t dataToSend[8] = {0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55, 0x55};
-  canCom.sendData(dataToSend, sizeof(dataToSend));
-  HAL_Delay(1000);
+  cancom.initTxHeader(0x01, false, false);
 
   float a;
   float b;
   float c;
-  uint8_t txBuffer[8];
   while (1)
   {
     //Acrocantho::SinCos result = cordic.radians(Acrocantho::userpi);
     //a = result.c;
     //b = result.s;
     
-    //uint8_t dataToSend[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
-    // data をバイトごとに txBuffer に格納
-    canCom.rxTask();
-
-    ang.read();
-    ang.receive();
-    ang.prepareCanData(txBuffer, sizeof(txBuffer));
-    
-    if (canCom.txFlag){
-      canCom.sendData(txBuffer, sizeof(txBuffer));
-      canCom.txFlag = 0;
-    }
+    cancom.rxTask();
+    cancom.txTask();
 
     /* USER CODE END WHILE */
 
@@ -488,7 +470,7 @@ static void MX_I2C1_Init(void)
 
   /* USER CODE END I2C1_Init 1 */
   hi2c1.Instance = I2C1;
-  hi2c1.Init.Timing = 0x40B285C2;
+  hi2c1.Init.Timing = 0x4052060F;
   hi2c1.Init.OwnAddress1 = 0;
   hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
   hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
@@ -514,6 +496,10 @@ static void MX_I2C1_Init(void)
   {
     Error_Handler();
   }
+
+  /** I2C Fast mode Plus enable
+  */
+  HAL_I2CEx_EnableFastModePlus(I2C_FASTMODEPLUS_I2C1);
   /* USER CODE BEGIN I2C1_Init 2 */
 
   /* USER CODE END I2C1_Init 2 */
@@ -639,7 +625,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LD2_Pin|GPIO_PIN_8, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
@@ -655,12 +644,19 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF12_LPUART1;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LD2_Pin */
-  GPIO_InitStruct.Pin = LD2_Pin;
+  /*Configure GPIO pins : LD2_Pin PA8 */
+  GPIO_InitStruct.Pin = LD2_Pin|GPIO_PIN_8;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PC9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);

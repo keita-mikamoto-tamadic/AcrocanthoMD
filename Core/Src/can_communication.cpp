@@ -1,12 +1,15 @@
 #include "can_communication.h"
 
 #include "main.h"
+#include "ang.h"
 
 // グローバルなインスタンスを使用
-extern CanCom canCom;
+extern CanCom cancom;
+extern Ang ang;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
-  : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), txFlag(0){}
+  : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
+    data(std::make_unique<canData>()) {}
 
 void CanCom::initTxHeader(uint32_t canId, bool extendedId, bool fdFormat) {
   txHeader.Identifier = canId;
@@ -47,36 +50,44 @@ void CanCom::rxFifo0Callback(uint32_t RxFifo0ITs) {
       Error_Handler();
     }
 
-    canRxInterrupt = 1;
+    canRxInterrupt = true;
 
   }
 }
 
 void CanCom::handleRxData() {
-  if (canRxInterrupt == 1) {
-    canData.genFuncRef = rxData[0];
-    canRxInterrupt = 0;
-    txFlag = 1;
+  if (canRxInterrupt == true) {
+    data->genFuncRef = rxData[0];
+    canRxInterrupt = false;
+    canTxFlag = true;
   }
 }
 
 void CanCom::rxTask() {
   handleRxData();
-/* 
-  uint8_t currentGenFuncRef = canData.genFuncRef;
+ 
+  uint8_t currentGenFuncRef = data->genFuncRef;
 
   if (currentGenFuncRef == prevGenFuncRef) {
     return;
   }
 
-  if (canData.genFuncRef == 0) {
+  if (data->genFuncRef == 0) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-  } else if (canData.genFuncRef == 1) {
+  } else if (data->genFuncRef == 1) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
   }
-  prevGenFuncRef = currentGenFuncRef; */
+  prevGenFuncRef = currentGenFuncRef;
 }
 
-extern "C" void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs) {
-      canCom.rxFifo0Callback(RxFifo0ITs);
+void CanCom::txTask(){
+  if (canTxFlag) {
+    ang.prepareCanData(data->txBuff, sizeof(data->txBuff));
+    sendData(data->txBuff, sizeof(data->txBuff));
+    canTxFlag = false;
+  }
+}
+
+void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs) {
+      cancom.rxFifo0Callback(RxFifo0ITs);
 }
