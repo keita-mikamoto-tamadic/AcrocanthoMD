@@ -5,18 +5,28 @@
 #include <memory>
 #include "user_math.h"
 #include "user_task.h"
+#include "param.h"
 
-struct angData{
-  float elecAng = 0.0f;
-  float mechAng = 0.0f;
-  float actAng = 0.0f;
-  float actVel = 0.0f;
-  float actVelLPF = 0.0f;
-  int16_t veltemp = 0;
-};
+constexpr uint8_t rotDir = 0;
+constexpr uint8_t elecAngDir = 1;
+constexpr uint16_t polePairs = 14;
 
 class Ang {
+public:
+  struct angData{
+    float elecAng = 0.0f;
+    float elecVel = 0.0f;
+    float mechAng = 0.0f;
+    float actAng = 0.0f;
+    float actVel = 0.0f;
+    float actVelLPF = 0.0f;
+    int16_t veltemp = 0;
+  };
+
 private:
+  // ユニークポインタでデータ保持
+  std::unique_ptr<angData> data;
+
   const float lpfFreq = 50.0f;
 
   I2C_HandleTypeDef& hi2c1;
@@ -34,7 +44,21 @@ private:
   volatile int8_t i2c_tx_complete;
   volatile int8_t i2c_rx_complete;
   
+  float elecAngOfs = 0.0f;
+  
   int16_t compAng();
+
+  void read();
+
+  void receive();
+
+  void elecAng();
+  uint16_t rawElecComp = 0;
+  
+  void elecAngVirtual();
+
+  void elecAngVel();
+
   void mechAngleVelLPF();
   
   float raw2rad(uint16_t raw){
@@ -42,22 +66,20 @@ private:
   }
   
   float raw2rads(int16_t raw){
-    return static_cast<float>(raw) * user2pi / 4096.0f / (TaskTime * static_cast<float>(compTime));
+    return static_cast<float>(raw) * user2pi / 4096.0f / (TASK_TIME * static_cast<float>(compTime));
   }
-  
-  // ユニークポインタでデータ保持
-  std::unique_ptr<angData> data;
 
 
 public:
   Ang(I2C_HandleTypeDef& hi2c1);
   
-  void read();
-  void receive();
   void getAngle();
   void getVel();
+  void elecAngleIn();
   void i2cMasterTxCallback();
   void i2cMasterRxCallback();
   void prepareCanData(uint8_t* buffer, size_t bufferSize) const;
+  
+  angData* getAngData() const { return data.get(); }
   
 };

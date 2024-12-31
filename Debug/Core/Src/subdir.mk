@@ -8,6 +8,8 @@ CPP_SRCS += \
 ../Core/Src/ang.cpp \
 ../Core/Src/can_communication.cpp \
 ../Core/Src/main.cpp \
+../Core/Src/mode_contrl.cpp \
+../Core/Src/out_pwm.cpp \
 ../Core/Src/user_task.cpp 
 
 C_SRCS += \
@@ -28,6 +30,8 @@ OBJS += \
 ./Core/Src/ang.o \
 ./Core/Src/can_communication.o \
 ./Core/Src/main.o \
+./Core/Src/mode_contrl.o \
+./Core/Src/out_pwm.o \
 ./Core/Src/stm32g4xx_hal_msp.o \
 ./Core/Src/stm32g4xx_it.o \
 ./Core/Src/syscalls.o \
@@ -39,6 +43,8 @@ CPP_DEPS += \
 ./Core/Src/ang.d \
 ./Core/Src/can_communication.d \
 ./Core/Src/main.d \
+./Core/Src/mode_contrl.d \
+./Core/Src/out_pwm.d \
 ./Core/Src/user_task.d 
 
 
@@ -51,7 +57,7 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/ang.cyclo ./Core/Src/ang.d ./Core/Src/ang.o ./Core/Src/ang.su ./Core/Src/can_communication.cyclo ./Core/Src/can_communication.d ./Core/Src/can_communication.o ./Core/Src/can_communication.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32g4xx_hal_msp.cyclo ./Core/Src/stm32g4xx_hal_msp.d ./Core/Src/stm32g4xx_hal_msp.o ./Core/Src/stm32g4xx_hal_msp.su ./Core/Src/stm32g4xx_it.cyclo ./Core/Src/stm32g4xx_it.d ./Core/Src/stm32g4xx_it.o ./Core/Src/stm32g4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32g4xx.cyclo ./Core/Src/system_stm32g4xx.d ./Core/Src/system_stm32g4xx.o ./Core/Src/system_stm32g4xx.su ./Core/Src/user_task.cyclo ./Core/Src/user_task.d ./Core/Src/user_task.o ./Core/Src/user_task.su
+	-$(RM) ./Core/Src/ang.cyclo ./Core/Src/ang.d ./Core/Src/ang.o ./Core/Src/ang.su ./Core/Src/can_communication.cyclo ./Core/Src/can_communication.d ./Core/Src/can_communication.o ./Core/Src/can_communication.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/mode_contrl.cyclo ./Core/Src/mode_contrl.d ./Core/Src/mode_contrl.o ./Core/Src/mode_contrl.su ./Core/Src/out_pwm.cyclo ./Core/Src/out_pwm.d ./Core/Src/out_pwm.o ./Core/Src/out_pwm.su ./Core/Src/stm32g4xx_hal_msp.cyclo ./Core/Src/stm32g4xx_hal_msp.d ./Core/Src/stm32g4xx_hal_msp.o ./Core/Src/stm32g4xx_hal_msp.su ./Core/Src/stm32g4xx_it.cyclo ./Core/Src/stm32g4xx_it.d ./Core/Src/stm32g4xx_it.o ./Core/Src/stm32g4xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32g4xx.cyclo ./Core/Src/system_stm32g4xx.d ./Core/Src/system_stm32g4xx.o ./Core/Src/system_stm32g4xx.su ./Core/Src/user_task.cyclo ./Core/Src/user_task.d ./Core/Src/user_task.o ./Core/Src/user_task.su
 
 .PHONY: clean-Core-2f-Src
 

@@ -38,6 +38,7 @@ void Ang::getAngle() {
     
     readStart = false;
     i2c_rx_complete = false;
+    // 速度時間割りのためのカウンタ保存
     compTime = comp;
     comp = 0;
 
@@ -51,7 +52,6 @@ void Ang::getVel() {
   } else {
     // 速度計算
     diff = static_cast<int16_t>(rawAng - rawAngPast);
-    floatdiff = data->mechAng - mechAngPast;
 
     //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
     if (diff > 2048) {
@@ -70,8 +70,47 @@ void Ang::mechAngleVelLPF(){
   float timeConst, alpha;
   
   timeConst = 1.0f / (user2pi * lpfFreq);
-  alpha = (TaskTime * static_cast<float>(compTime)) / timeConst;
+  alpha = (TASK_TIME * static_cast<float>(compTime)) / timeConst;
   data->actVelLPF = alpha * data->actVel + (1.0f - alpha) * data->actVelLPF;
+
+}
+
+void Ang::elecAng() {
+  // comp = 0のときサンプル値更新あり
+  // 次の更新まで2周期を補間するので3で割った値を足す
+  if (comp == 0) rawElecComp = rawAng;
+  else rawElecComp = rawAng + (diff / 3);
+  
+  // 電気角反転
+  static uint16_t elecAngtemp_ = 0;
+  if (elecAngDir > 0) {
+    elecAngtemp_ = rawElecComp;
+  }else elecAngtemp_ = 4096 - rawElecComp;
+
+  // CWとCCWを切替
+  static float ofs_ = 0.0f;
+  if (rotDir > 0) {
+    ofs_ = elecAngOfs + user2pi;
+  }else ofs_ = elecAngOfs; // 極性反転不要
+
+  static uint16_t offset_ = 0;
+  static uint16_t elecAngtemp2_ = 0;
+  
+  offset_ = static_cast<uint16_t>(ofs_ * 4096.0f / user2pi);
+  elecAngtemp2_ = (elecAngtemp_ * polePairs + offset_) % 4096;
+  data->elecAng = static_cast<float>(elecAngtemp2_) / 4096.0f * user2pi;
+
+}
+
+void Ang::elecAngVirtual() {
+  // 仮想電気角
+  static float elecAngtemp = 0.0f;
+  elecAngtemp = data->mechAng * polePairs;
+  data->elecAng = elecAngtemp;
+}
+
+void Ang::elecAngleIn(){
+  elecAng();
 
 }
 
@@ -82,7 +121,7 @@ int16_t Ang::compAng() {
 
 void Ang::prepareCanData(uint8_t* buffer, size_t bufferSize) const {
 
-  memcpy(buffer, &(data->mechAng), sizeof(data->mechAng));
+  memcpy(buffer, &(data->elecAng), sizeof(data->elecAng));
 }
 
 void Ang::i2cMasterTxCallback() {

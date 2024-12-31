@@ -58,6 +58,7 @@ void CanCom::rxFifo0Callback(uint32_t RxFifo0ITs) {
 void CanCom::handleRxData() {
   if (canRxInterrupt == true) {
     data->genFuncRef = rxData[0];
+    data->drvMdRef = rxData[1];
     canRxInterrupt = false;
     canTxFlag = true;
   }
@@ -72,11 +73,11 @@ void CanCom::rxTask() {
     return;
   }
 
-  if (data->genFuncRef == 0) {
+/*   if (data->genFuncRef == 0) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
   } else if (data->genFuncRef == 1) {
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-  }
+  } */
   prevGenFuncRef = currentGenFuncRef;
 }
 

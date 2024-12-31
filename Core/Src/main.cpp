@@ -78,7 +78,7 @@ static void MX_CORDIC_Init(void);
 /* USER CODE BEGIN 0 */
 CanCom cancom(hfdcan1);
 Ang ang(hi2c1);
-
+extern UserTask usertask;
 /* USER CODE END 0 */
 
 /**
@@ -163,8 +163,6 @@ int main(void)
 
   Acrocantho::Cordic cordic;
   
-  cancom.initTxHeader(0x01, false, false);
-
   float a;
   float b;
   float c;
@@ -174,8 +172,7 @@ int main(void)
     //a = result.c;
     //b = result.s;
     
-    cancom.rxTask();
-    cancom.txTask();
+    usertask.idleTask();
 
     /* USER CODE END WHILE */
 

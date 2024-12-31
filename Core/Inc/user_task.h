@@ -2,8 +2,6 @@
 
 #include <cstdint>
 
-constexpr float TaskTime = 0.0001f;
-
 typedef enum {
     STEP00 = 0U,
     STEP01,
@@ -16,26 +14,6 @@ typedef enum {
     STEP08,
     STEP09,
     STEP10,
-    STEP11,
-    STEP12,
-    STEP13,
-    STEP14,
-    STEP15,
-    STEP16,
-    STEP17,
-    STEP18,
-    STEP19,
-    STEP20,
-    STEP21,
-    STEP22,
-    STEP23,
-    STEP24,
-    STEP25,
-    STEP26,
-    STEP27,
-    STEP28,
-    STEP29,
-    STEP30,
     LOOP,
     RUN,
     INIT,
@@ -44,15 +22,18 @@ typedef enum {
     END
 } SeqID_t;
 
-class userTask {
+class UserTask {
 public:
-  userTask();
+  UserTask();
 
-  void cyclic_task();
-  void idle_task();
+  void cyclicTask();
+  void idleTask();
+  void motorControl();
 
 private:
   uint8_t count = 0;
+  bool servocheck = false;
   SeqID_t seqID = STEP00;
 
+  bool servoCheck();
 };

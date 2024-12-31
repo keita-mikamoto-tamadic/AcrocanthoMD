@@ -4,14 +4,18 @@
 #include <memory>
 #include "main.h"
 
-struct canData {
-  uint8_t genFuncRef = 0;
-  uint8_t txBuff[8] = {0};
-  uint8_t rxBuff[8] = {0};
-};
-
 class CanCom {
+public:
+  struct canData {
+    uint8_t genFuncRef = 0;
+    uint8_t drvMdRef = 0;
+    uint8_t txBuff[8] = {0};
+    uint8_t rxBuff[8] = {0};
+  };
+
 private:
+  std::unique_ptr<canData> data;
+
   FDCAN_HandleTypeDef& hfdcan;
   FDCAN_TxHeaderTypeDef txHeader;
   FDCAN_RxHeaderTypeDef rxHeader;
@@ -19,8 +23,6 @@ private:
   uint8_t rxData[8];
   uint8_t prevGenFuncRef;
   volatile bool canRxInterrupt;
-
-  std::unique_ptr<canData> data;
 
 public:
   volatile bool canTxFlag;
@@ -34,5 +36,7 @@ public:
   void handleRxData();
   void rxTask();
   void txTask();
+
+  canData* getData() { return data.get(); }
 };
 
