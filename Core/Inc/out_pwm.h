@@ -22,8 +22,6 @@ private:
   float limp = 0.01f;
   float limm = 0.95f;
   
-  void setReg(float u, float v, float w);
-  
 
   std::unique_ptr<outPwmData> data;
 
@@ -31,6 +29,6 @@ public:
   OutPwm();
   void Pon();
   void Poff();
-  void outPwmSeq();
+  void setReg(float u, float v, float w);
 
 };

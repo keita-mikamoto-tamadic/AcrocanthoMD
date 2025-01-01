@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
 
 typedef enum {
     STEP00 = 0U,
@@ -25,15 +26,29 @@ typedef enum {
 class UserTask {
 public:
   UserTask();
+  
+  struct userTaskData {
+    uint8_t genFuncRef = 0;
+    uint8_t drvMdRef = 0;
+    float voltDRef = 0;
+    float voltQRef = 0;
+    float virAngFreq = 0;
+  };
 
   void cyclicTask();
   void idleTask();
   void motorControl();
 
+  // getter
+  userTaskData* getData() { return data.get(); }
+
 private:
+  std::unique_ptr<userTaskData> data;
+
   uint8_t count = 0;
   bool servocheck = false;
   SeqID_t seqID = STEP00;
 
   bool servoCheck();
+  void setRef();
 };

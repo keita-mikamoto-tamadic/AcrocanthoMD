@@ -9,6 +9,10 @@ public:
   struct canData {
     uint8_t genFuncRef = 0;
     uint8_t drvMdRef = 0;
+    uint8_t voltDRef = 0;
+    uint8_t voltQRef = 0;
+    uint8_t virAngFreq = 0;
+
     uint8_t txBuff[8] = {0};
     uint8_t rxBuff[8] = {0};
   };

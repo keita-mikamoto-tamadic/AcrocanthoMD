@@ -6,6 +6,7 @@
 #include "user_task.h"
 
 extern Ang ang;
+extern UserTask usertask;
 
 Ang::Ang(I2C_HandleTypeDef& i2cHandle)
   : hi2c1(i2cHandle), readStart(false), actAngle(0.0f), i2c_rx_complete(false), i2c_tx_complete(false),
@@ -75,7 +76,7 @@ void Ang::mechAngleVelLPF(){
 
 }
 
-void Ang::elecAng() {
+float Ang::elecAng() {
   // comp = 0のときサンプル値更新あり
   // 次の更新まで2周期を補間するので3で割った値を足す
   if (comp == 0) rawElecComp = rawAng;
@@ -98,20 +99,34 @@ void Ang::elecAng() {
   
   offset_ = static_cast<uint16_t>(ofs_ * 4096.0f / user2pi);
   elecAngtemp2_ = (elecAngtemp_ * polePairs + offset_) % 4096;
-  data->elecAng = static_cast<float>(elecAngtemp2_) / 4096.0f * user2pi;
+
+  return static_cast<float>(elecAngtemp2_) / 4096.0f * user2pi;
 
 }
 
-void Ang::elecAngVirtual() {
+float Ang::elecAngVirtual(float _virFreqRef) {
   // 仮想電気角
-  static float elecAngtemp = 0.0f;
-  elecAngtemp = data->mechAng * polePairs;
-  data->elecAng = elecAngtemp;
+  static float _theta = 0.0f;
+  // タスク周期で分割して足しこむ
+  float _deltatheta = _virFreqRef * TASK_TIME;
+  _theta += _deltatheta;
+
+  // 0~1の範囲に収める
+  if (_theta > 1.0f) _theta -= 1.0f;
+  if (_theta < 0.0f) _theta += 1.0f;
+
+  // ラジアンで返却
+  return _theta * user2pi;
 }
 
 void Ang::elecAngleIn(){
-  elecAng();
-
+  UserTask::userTaskData* usertaskdata = usertask.getData();
+  
+  if (usertaskdata->virAngFreq > 0.0f) {
+    data->elecAng = elecAngVirtual(usertaskdata->virAngFreq);
+  } else {
+    data->elecAng = elecAng();
+  }
 }
 
 int16_t Ang::compAng() {

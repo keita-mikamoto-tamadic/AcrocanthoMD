@@ -3,7 +3,7 @@ C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 ../Core/Src/out_pwm.cpp:13:6:void OutPwm::Pon()	16	static
 ../Core/Src/out_pwm.cpp:17:6:void OutPwm::Poff()	16	static
 ../Core/Src/out_pwm.cpp:23:6:void OutPwm::setReg(float, float, float)	24	static
-../Core/Src/out_pwm.cpp:30:7:float OutPwm::dutyGuard(float)	24	static
+../Core/Src/out_pwm.cpp:31:7:float OutPwm::dutyGuard(float)	24	static
 ../Core/Inc/out_pwm.h:8:8:constexpr outPwmData::outPwmData()	16	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/bits/unique_ptr.h:1064:5:) [with _Tp = outPwmData; _Args = {}]	24	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/bits/unique_ptr.h:390:7:std::unique_ptr<_Tp, _Dp>::~unique_ptr() [with _Tp = outPwmData; _Dp = std::default_delete<outPwmData>]	32	static
@@ -29,6 +29,6 @@ C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/tuple:80:17:constexpr std::_Head_base<_Idx, _Head, true>::_Head_base() [with unsigned int _Idx = 1; _Head = std::default_delete<outPwmData>]	16	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/tuple:124:7:static constexpr _Head& std::_Head_base<_Idx, _Head, true>::_M_head(std::_Head_base<_Idx, _Head, true>&) [with unsigned int _Idx = 1; _Head = std::default_delete<outPwmData>]	16	static
 ../Core/Inc/out_pwm.h:14:7:OutPwm::~OutPwm()	16	static
-../Core/Src/out_pwm.cpp:46:1:void __static_initialization_and_destruction_0(int, int)	16	static
-../Core/Src/out_pwm.cpp:46:1:cpp)	8	static
-../Core/Src/out_pwm.cpp:46:1:cpp)	8	static
+../Core/Src/out_pwm.cpp:47:1:void __static_initialization_and_destruction_0(int, int)	16	static
+../Core/Src/out_pwm.cpp:47:1:cpp)	8	static
+../Core/Src/out_pwm.cpp:47:1:cpp)	8	static

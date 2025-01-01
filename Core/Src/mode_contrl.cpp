@@ -1,13 +1,20 @@
 #include "mode_control.h"
+#include "user_task.h"
 
+ModeControl modecontrol;
+extern UserTask usertask;
 
 ModeControl::ModeControl()
   : mode(CTRLMODE_NONE){}
 
 
-void ModeControl::modeCtrl(){
+void ModeControl::modeCtrl(uint8_t mode){
+  UserTask::userTaskData* usertaskdata = usertask.getData();
+  
   switch (mode) {
     case CTRLMODE_NONE:
+      usertaskdata->voltDRef = 0.0f;
+      usertaskdata->voltQRef = 0.0f;
       break;
     case CTRLMODE_VOLT:
       break;
@@ -18,6 +25,7 @@ void ModeControl::modeCtrl(){
     case CTRLMODE_POS:
       break;
     default:
+      mode = CTRLMODE_NONE;
       break;
   }
 }

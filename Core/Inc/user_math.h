@@ -7,6 +7,10 @@
 
 constexpr float user2pi = 6.283185307179586f;
 constexpr float userpi = 3.141592653589793f;
+constexpr float usersqrt1 = 0.81649658f; // route(2/3) = 0.81649658f
+constexpr float usersqrt2 = 0.70710679f; // route(2/3) * route(3) / 2 = 0.70710679f
+constexpr float usersqrt3 = 0.40824829f; // route(2/3) / 2 = 0.40824829f
+
 namespace Acrocantho {
 
 struct SinCos {
@@ -55,6 +59,27 @@ class Cordic {
   static float from_q31(uint32_t val) {
     return static_cast<float>(static_cast<int32_t>(val)) * (1.0f / 2147483648.0f);
   }
+};
+struct TrigonTransform {
+  /* f4t_trigon1 : V_d*cos - V_q*sin */
+  /* f4t_trigon2 : V_d*sin + V_q*cos */
+  TrigonTransform(const SinCos& sc, float vd, float vq)
+    : _trigon1(sc.c * vd - sc.s * vq),
+      _trigon2(sc.s * vd + sc.c * vq) {}
+  
+  const float _trigon1;
+  const float _trigon2;
+};
+
+struct InverseDqTransform {
+  InverseDqTransform(float _tri1, float _tri2)
+      : u_ini(_tri1 * usersqrt1),
+        v_ini(-(_tri1 * usersqrt3) + _tri2 * usersqrt2),
+        w_ini(-(_tri1 * usersqrt3) - _tri2 * usersqrt2) {}
+
+  const float u_ini;
+  const float v_ini;
+  const float w_ini;
 };
 
 } // Acrocantho

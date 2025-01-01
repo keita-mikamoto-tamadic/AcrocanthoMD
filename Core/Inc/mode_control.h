@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <memory>
 
 typedef enum {
   CTRLMODE_NONE = 0U,
@@ -17,7 +16,7 @@ private:
 
 public:
   ModeControl();
-  void modeCtrl();
+  void modeCtrl(uint8_t mode);
   void modeCtrlReset();
 
 };

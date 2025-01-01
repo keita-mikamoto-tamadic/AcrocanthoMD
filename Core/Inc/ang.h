@@ -52,10 +52,10 @@ private:
 
   void receive();
 
-  void elecAng();
+  float elecAng();
   uint16_t rawElecComp = 0;
   
-  void elecAngVirtual();
+  float elecAngVirtual(float virfreq);
 
   void elecAngVel();
 

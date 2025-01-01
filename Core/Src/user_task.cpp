@@ -4,15 +4,17 @@
 #include "ang.h"
 #include "out_pwm.h"
 #include "can_communication.h"
+#include "mode_control.h"
 
 UserTask usertask;
 
 extern Ang ang;
 extern OutPwm outpwm;
 extern CanCom cancom;
+extern ModeControl modecontrol;
 
 UserTask::UserTask()
-  : count(0){}
+  : count(0), data(std::make_unique<userTaskData>()){}
 
 
 void UserTask::cyclicTask() {
@@ -64,20 +66,49 @@ void UserTask::cyclicTask() {
 }
 
 void UserTask::idleTask() {
-  cancom.initTxHeader(0x01, false, false);
+
   cancom.rxTask();
+  setRef();
+
+  cancom.initTxHeader(0x01, false, false);
   cancom.txTask();
   servocheck = servoCheck();
 }
 
 void UserTask::motorControl() {
+  Ang::angData* angdata = ang.getAngData();
+  Acrocantho::Cordic cordic;
+
+  // drvMdNONEのとき電圧を0にする
+  modecontrol.modeCtrl(data->drvMdRef);
+  
+  // SinCos演算
+  Acrocantho::SinCos result = cordic.radians(angdata->elecAng);
+  float s = result.s;
+  float c = result.c;
+  
+  // dq逆変換
+  Acrocantho::TrigonTransform tt(result, data->voltDRef, data->voltQRef);
+  Acrocantho::InverseDqTransform idt(tt._trigon1, tt._trigon2);
+  
+  outpwm.setReg(idt.u_ini, idt.v_ini, idt.w_ini);
+}
+
+// Canで受け取った指令地のセット
+void UserTask::setRef() {
+  CanCom::canData* candata = cancom.getData();
+  
+  data->genFuncRef = candata->genFuncRef;
+  data->drvMdRef = candata->drvMdRef;
+  data->voltDRef = static_cast<float>(candata->voltDRef);
+  data->voltQRef = static_cast<float>(candata->voltQRef);
+  data->virAngFreq = static_cast<float>(candata->virAngFreq);
+  
 }
 
 // Poffのみfalseを返す
 bool UserTask::servoCheck() {
-  CanCom::canData* candata = cancom.getData();
-  
-  switch (candata->genFuncRef) {
+  switch (data->genFuncRef) {
     case 0x00:
       return false;
     case 0x01:

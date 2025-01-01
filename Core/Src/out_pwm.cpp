@@ -27,6 +27,7 @@ void OutPwm::setReg(float u, float v, float w){
   TIM1->CCR3 = (uint16_t)((1.0f - dutyGuard(w)) * (float)CCR_MAX);
 }
 
+
 float OutPwm::dutyGuard(float _rawDuty){
     float result = 0.0f;
     float sum = 0.0f;
