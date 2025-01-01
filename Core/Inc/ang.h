@@ -13,7 +13,7 @@ constexpr uint16_t polePairs = 14;
 
 class Ang {
 public:
-  struct angData{
+  struct AngData{
     float elecAng = 0.0f;
     float elecVel = 0.0f;
     float mechAng = 0.0f;
@@ -25,7 +25,7 @@ public:
 
 private:
   // ユニークポインタでデータ保持
-  std::unique_ptr<angData> data;
+  std::unique_ptr<AngData> data;
 
   const float lpfFreq = 50.0f;
 
@@ -80,6 +80,6 @@ public:
   void i2cMasterRxCallback();
   void prepareCanData(uint8_t* buffer, size_t bufferSize) const;
   
-  angData* getAngData() const { return data.get(); }
+  AngData* getAngData() const { return data.get(); }
   
 };

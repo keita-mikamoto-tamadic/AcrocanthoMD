@@ -5,16 +5,18 @@
 #include "out_pwm.h"
 #include "can_communication.h"
 #include "mode_control.h"
+#include "sens_cur.h"
 
 UserTask usertask;
 
 extern Ang ang;
+extern SensCur senscur;
 extern OutPwm outpwm;
 extern CanCom cancom;
 extern ModeControl modecontrol;
 
 UserTask::UserTask()
-  : count(0), data(std::make_unique<userTaskData>()){}
+  : count(0), data(std::make_unique<UserTaskData>()){}
 
 
 void UserTask::cyclicTask() {
@@ -44,6 +46,9 @@ void UserTask::cyclicTask() {
         count++;
       } else {
         ang.getAngle();
+        // ゲートドライバENABLE
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+        senscur.sensCurIN();
         count = 0;
         seqID = STEP00;
       }
@@ -55,6 +60,7 @@ void UserTask::cyclicTask() {
         seqID = LOOP;
         break;
       }
+      senscur.sensCurIN();
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
       outpwm.Poff();
       break;
@@ -76,11 +82,13 @@ void UserTask::idleTask() {
 }
 
 void UserTask::motorControl() {
-  Ang::angData* angdata = ang.getAngData();
+  Ang::AngData* angdata = ang.getAngData();
   Acrocantho::Cordic cordic;
 
   // drvMdNONEのとき電圧を0にする
   modecontrol.modeCtrl(data->drvMdRef);
+  
+  senscur.sensCurIN();
   
   // SinCos演算
   Acrocantho::SinCos result = cordic.radians(angdata->elecAng);
@@ -94,9 +102,9 @@ void UserTask::motorControl() {
   outpwm.setReg(idt.u_ini, idt.v_ini, idt.w_ini);
 }
 
-// Canで受け取った指令地のセット
+// Canで受け取った指令値のセット
 void UserTask::setRef() {
-  CanCom::canData* candata = cancom.getData();
+  CanCom::CanData* candata = cancom.getData();
   
   data->genFuncRef = candata->genFuncRef;
   data->drvMdRef = candata->drvMdRef;

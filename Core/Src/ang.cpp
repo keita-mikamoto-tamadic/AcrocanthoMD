@@ -10,7 +10,7 @@ extern UserTask usertask;
 
 Ang::Ang(I2C_HandleTypeDef& i2cHandle)
   : hi2c1(i2cHandle), readStart(false), actAngle(0.0f), i2c_rx_complete(false), i2c_tx_complete(false),
-    rawAng(0), rawAngPast(0), diffRaw(0), data(std::make_unique<angData>()) {}
+    rawAng(0), rawAngPast(0), diffRaw(0), data(std::make_unique<AngData>()) {}
 
 void Ang::read() {
   if (!readStart) {
@@ -120,7 +120,7 @@ float Ang::elecAngVirtual(float _virFreqRef) {
 }
 
 void Ang::elecAngleIn(){
-  UserTask::userTaskData* usertaskdata = usertask.getData();
+  UserTask::UserTaskData* usertaskdata = usertask.getData();
   
   if (usertaskdata->virAngFreq > 0.0f) {
     data->elecAng = elecAngVirtual(usertaskdata->virAngFreq);

@@ -3,6 +3,7 @@
 "./Core/Src/main.o"
 "./Core/Src/mode_contrl.o"
 "./Core/Src/out_pwm.o"
+"./Core/Src/sens_cur.o"
 "./Core/Src/stm32g4xx_hal_msp.o"
 "./Core/Src/stm32g4xx_it.o"
 "./Core/Src/syscalls.o"

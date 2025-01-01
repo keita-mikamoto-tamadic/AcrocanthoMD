@@ -9,7 +9,7 @@ ModeControl::ModeControl()
 
 
 void ModeControl::modeCtrl(uint8_t mode){
-  UserTask::userTaskData* usertaskdata = usertask.getData();
+  UserTask::UserTaskData* usertaskdata = usertask.getData();
   
   switch (mode) {
     case CTRLMODE_NONE:

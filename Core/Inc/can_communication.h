@@ -6,7 +6,7 @@
 
 class CanCom {
 public:
-  struct canData {
+  struct CanData {
     uint8_t genFuncRef = 0;
     uint8_t drvMdRef = 0;
     uint8_t voltDRef = 0;
@@ -18,7 +18,7 @@ public:
   };
 
 private:
-  std::unique_ptr<canData> data;
+  std::unique_ptr<CanData> data;
 
   FDCAN_HandleTypeDef& hfdcan;
   FDCAN_TxHeaderTypeDef txHeader;
@@ -41,6 +41,6 @@ public:
   void rxTask();
   void txTask();
 
-  canData* getData() { return data.get(); }
+  CanData* getData() { return data.get(); }
 };
 

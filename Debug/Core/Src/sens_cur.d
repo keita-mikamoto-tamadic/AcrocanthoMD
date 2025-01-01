@@ -1,4 +1,4 @@
-Core/Src/user_task.o: ../Core/Src/user_task.cpp ../Core/Inc/user_task.h \
+Core/Src/sens_cur.o: ../Core/Src/sens_cur.cpp ../Core/Inc/sens_cur.h \
  ../Core/Inc/main.h ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../Core/Inc/stm32g4xx_hal_conf.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -33,12 +33,8 @@ Core/Src/user_task.o: ../Core/Src/user_task.cpp ../Core/Inc/user_task.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../Core/Inc/ang.h ../Core/Inc/main.h ../Core/Inc/user_math.h \
- ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h \
- ../Core/Inc/param.h ../Core/Inc/out_pwm.h \
- ../Core/Inc/can_communication.h ../Core/Inc/mode_control.h \
- ../Core/Inc/sens_cur.h
-../Core/Inc/user_task.h:
+ ../Core/Inc/main.h
+../Core/Inc/sens_cur.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -74,12 +70,4 @@ Core/Src/user_task.o: ../Core/Src/user_task.cpp ../Core/Inc/user_task.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
-../Core/Inc/ang.h:
 ../Core/Inc/main.h:
-../Core/Inc/user_math.h:
-../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:
-../Core/Inc/param.h:
-../Core/Inc/out_pwm.h:
-../Core/Inc/can_communication.h:
-../Core/Inc/mode_control.h:
-../Core/Inc/sens_cur.h:

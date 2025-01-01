@@ -27,7 +27,7 @@ class UserTask {
 public:
   UserTask();
   
-  struct userTaskData {
+  struct UserTaskData {
     uint8_t genFuncRef = 0;
     uint8_t drvMdRef = 0;
     float voltDRef = 0;
@@ -40,10 +40,10 @@ public:
   void motorControl();
 
   // getter
-  userTaskData* getData() { return data.get(); }
+  UserTaskData* getData() { return data.get(); }
 
 private:
-  std::unique_ptr<userTaskData> data;
+  std::unique_ptr<UserTaskData> data;
 
   uint8_t count = 0;
   bool servocheck = false;

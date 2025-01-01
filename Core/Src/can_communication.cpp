@@ -9,7 +9,7 @@ extern Ang ang;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
   : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
-    data(std::make_unique<canData>()) {}
+    data(std::make_unique<CanData>()) {}
 
 void CanCom::initTxHeader(uint32_t canId, bool extendedId, bool fdFormat) {
   txHeader.Identifier = canId;
@@ -76,12 +76,6 @@ void CanCom::rxTask() {
   if (currentGenFuncRef == prevGenFuncRef) {
     return;
   }
-
-/*   if (data->genFuncRef == 0) {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-  } else if (data->genFuncRef == 1) {
-    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-  } */
   prevGenFuncRef = currentGenFuncRef;
 }
 
