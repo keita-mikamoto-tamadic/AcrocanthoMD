@@ -3,6 +3,7 @@
 
 #include "main.h"
 
+#define CALCOUNT (100) /* キャリブレーション回数 */
 #define ADVOLT           (3.3f) /* AD入力電圧範囲は3.3[V] */
 #define AD_RESL (4095.0f) /* 12bit分解能 */
 #define GAIN_AMP                  (20.0f)  /* AD8418A */
@@ -18,19 +19,24 @@ public:
     float curU = 0.0f;
     float curV = 0.0f;
     float curW = 0.0f;
+    
   };
 
 private:
   std::unique_ptr<SensCurData> data;
   
+  uint32_t curOffsU = 0;
+  uint32_t curOffsW = 0;
   uint16_t rawCurU = 0;
   uint16_t rawCurW = 0;
   
   void getRawCur();
+  bool adjustCur();
 
 public:
   SensCur();
   
+  bool sensCurInit();
   void sensCurIN();
 
   SensCurData* getData() { return data.get(); }

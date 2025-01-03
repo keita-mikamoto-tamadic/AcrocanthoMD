@@ -20,7 +20,8 @@ UserTask::UserTask()
 
 
 void UserTask::cyclicTask() {
-  static SeqID_t seqID = STEP00;
+  static SeqID_t seqID = INIT;
+  static bool curcal = false;
 
    switch (seqID) {
     case LOOP:
@@ -45,16 +46,20 @@ void UserTask::cyclicTask() {
         ang.getAngle();
         count++;
       } else {
+        // 電流オフセット補正
         ang.getAngle();
-        // ゲートドライバENABLE
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
-        senscur.sensCurIN();
-        count = 0;
-        seqID = STEP00;
+        ang.getVel();
+        if (senscur.sensCurInit()) {
+          senscur.sensCurIN();
+          seqID = STEP00;
+          count = 0;
+        }
+        
       }
       break;
     case STEP00:
       ang.getAngle();
+      ang.getVel();
       if (servoCheck()){
         outpwm.Pon();
         seqID = LOOP;
@@ -85,7 +90,7 @@ void UserTask::motorControl() {
   Ang::AngData* angdata = ang.getAngData();
   Acrocantho::Cordic cordic;
 
-  // drvMdNONEのとき電圧を0にする
+  // drvMd0のとき電圧を0にする
   modecontrol.modeCtrl(data->drvMdRef);
   
   senscur.sensCurIN();
