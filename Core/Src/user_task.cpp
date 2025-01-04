@@ -100,8 +100,6 @@ void UserTask::motorControl() {
 
   modecontrol.modeCtrl();
 
-  // CalibModeでの動作(電気角を微小量操作して最大速度を探す)
-  
   senscur.sensCurIN();
   
   // SinCos演算
@@ -122,5 +120,6 @@ bool UserTask::servoCheck() {
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
+  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
   usertask.cyclicTask();
 }
