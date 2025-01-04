@@ -6,6 +6,8 @@
 #include "can_communication.h"
 #include "mode_control.h"
 #include "sens_cur.h"
+#include "util.h"
+#include "elecang_calib.h"
 
 UserTask usertask;
 
@@ -14,9 +16,11 @@ extern SensCur senscur;
 extern OutPwm outpwm;
 extern CanCom cancom;
 extern ModeControl modecontrol;
+extern Util util;
+extern ElecangCalib elecangcalib;
 
 UserTask::UserTask()
-  : count(0), data(std::make_unique<UserTaskData>()){}
+  : count(0){}
 
 
 void UserTask::cyclicTask() {
@@ -37,6 +41,8 @@ void UserTask::cyclicTask() {
       ang.getAngle();
       ang.getVel();
       ang.elecAngleIn();
+      
+      elecangcalib.elecCalSeq();
       motorControl();
 
       break;
@@ -60,6 +66,7 @@ void UserTask::cyclicTask() {
     case STEP00:
       ang.getAngle();
       ang.getVel();
+      ang.elecAngleIn();
       if (servoCheck()){
         outpwm.Pon();
         seqID = LOOP;
@@ -79,19 +86,21 @@ void UserTask::cyclicTask() {
 void UserTask::idleTask() {
 
   cancom.rxTask();
-  setRef();
+  util.genFuncCtrl();
 
   cancom.initTxHeader(0x01, false, false);
   cancom.txTask();
-  servocheck = servoCheck();
 }
 
+// PON後のモータ制御
 void UserTask::motorControl() {
+  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
   Ang::AngData* angdata = ang.getAngData();
   Acrocantho::Cordic cordic;
 
-  // drvMd0のとき電圧を0にする
-  modecontrol.modeCtrl(data->drvMdRef);
+  modecontrol.modeCtrl();
+
+  // CalibModeでの動作(電気角を微小量操作して最大速度を探す)
   
   senscur.sensCurIN();
   
@@ -101,34 +110,15 @@ void UserTask::motorControl() {
   float c = result.c;
   
   // dq逆変換
-  Acrocantho::TrigonTransform tt(result, data->voltDRef, data->voltQRef);
+  Acrocantho::TrigonTransform tt(result, mdctrldata->voltDRef, mdctrldata->voltQRef);
   Acrocantho::InverseDqTransform idt(tt._trigon1, tt._trigon2);
   
   outpwm.setReg(idt.u_ini, idt.v_ini, idt.w_ini);
 }
 
-// Canで受け取った指令値のセット
-void UserTask::setRef() {
-  CanCom::CanData* candata = cancom.getData();
-  
-  data->genFuncRef = candata->genFuncRef;
-  data->drvMdRef = candata->drvMdRef;
-  data->voltDRef = static_cast<float>(candata->voltDRef);
-  data->voltQRef = static_cast<float>(candata->voltQRef);
-  data->virAngFreq = static_cast<float>(candata->virAngFreq);
-  
-}
-
-// Poffのみfalseを返す
 bool UserTask::servoCheck() {
-  switch (data->genFuncRef) {
-    case 0x00:
-      return false;
-    case 0x01:
-      return true;
-    default:
-      return false;
-  }
+  CanCom::CanData* candata = cancom.getData();
+  return (candata->genFuncRef & 0x01) != 0 ? true : false;
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){

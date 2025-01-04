@@ -7,6 +7,8 @@
 #include "user_task.h"
 #include "param.h"
 
+#define ANG_RESL_12BIT (4095)
+
 constexpr uint8_t rotDir = 0;
 constexpr uint8_t elecAngDir = 1;
 constexpr uint16_t polePairs = 14;
@@ -21,13 +23,15 @@ public:
     float actVel = 0.0f;
     float actVelLPF = 0.0f;
     int16_t veltemp = 0;
+    float elecAngOfs = 0.0f;
+    float elecAngTest = 0.0f;
   };
 
 private:
   // ユニークポインタでデータ保持
   std::unique_ptr<AngData> data;
 
-  const float lpfFreq = 50.0f;
+  const float lpfFreq = 1000.0f;
 
   I2C_HandleTypeDef& hi2c1;
   bool readStart;
@@ -43,8 +47,6 @@ private:
   int16_t diffRaw;
   volatile int8_t i2c_tx_complete;
   volatile int8_t i2c_rx_complete;
-  
-  float elecAngOfs = 0.0f;
   
   int16_t compAng();
 

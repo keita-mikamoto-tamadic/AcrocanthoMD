@@ -35,7 +35,8 @@ Core/Src/ang.o: ../Core/Src/ang.cpp ../Core/Inc/ang.h ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
  ../Core/Inc/user_math.h ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h \
- ../Core/Inc/user_task.h ../Core/Inc/param.h
+ ../Core/Inc/user_task.h ../Core/Inc/param.h \
+ ../Core/Inc/can_communication.h
 ../Core/Inc/ang.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
@@ -77,3 +78,4 @@ Core/Src/ang.o: ../Core/Src/ang.cpp ../Core/Inc/ang.h ../Core/Inc/main.h \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:
 ../Core/Inc/user_task.h:
 ../Core/Inc/param.h:
+../Core/Inc/can_communication.h:

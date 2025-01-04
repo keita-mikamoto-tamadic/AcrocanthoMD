@@ -1,22 +1,33 @@
 #include "mode_control.h"
 #include "user_task.h"
+#include "can_communication.h"
+#include "util.h"
+#include "elecAng_calib.h"
 
 ModeControl modecontrol;
 extern UserTask usertask;
+extern CanCom cancom;
+extern Util util;
+extern ElecangCalib elecangcalib;
 
 ModeControl::ModeControl()
-  : mode(CTRLMODE_NONE){}
+  : data(std::make_unique<ModeControlData>()){}
 
 
-void ModeControl::modeCtrl(uint8_t mode){
-  UserTask::UserTaskData* usertaskdata = usertask.getData();
+void ModeControl::modeCtrl(){
+  float voltQRef_ = 0.0f;
+  float voltDRef_ = 0.0f;
   
-  switch (mode) {
+  refCtrl();
+  
+  switch (s_drvMdRef) {
     case CTRLMODE_NONE:
-      usertaskdata->voltDRef = 0.0f;
-      usertaskdata->voltQRef = 0.0f;
+      voltQRef_ = 0.0f;
+      voltDRef_ = 0.0f;
       break;
     case CTRLMODE_VOLT:
+      voltDRef_ = s_voltDRef;
+      voltQRef_ = s_voltQRef;
       break;
     case CTRLMODE_CUR:
       break;
@@ -27,5 +38,31 @@ void ModeControl::modeCtrl(uint8_t mode){
     default:
       mode = CTRLMODE_NONE;
       break;
+  }
+  
+  data->voltDRef = voltDRef_;
+  data->voltQRef = voltQRef_;
+  
+}
+
+void ModeControl::refCtrl(){
+  Util::UtilData* utildata = util.getUtilData();
+  CanCom::CanData* candata = cancom.getData();
+  ElecangCalib::ElecangCalibData* elecangcalibdata = elecangcalib.getData();
+
+  if (usertask.servoCheck()) {
+    // 電気角キャリブ
+    if (utildata->eCalib) {
+      s_drvMdRef = elecangcalibdata->drvMd;
+      s_voltQRef = elecangcalibdata->voltQRef;
+      
+    }
+    // どの特殊モードにも当てはまらない場合、上位指令をセット
+    else
+    {
+      s_drvMdRef = candata->drvMdRef;
+      s_voltDRef = candata->voltDRef;
+      s_voltQRef = candata->voltQRef;
+    }
   }
 }

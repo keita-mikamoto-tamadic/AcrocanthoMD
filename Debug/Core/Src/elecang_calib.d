@@ -1,6 +1,5 @@
-Core/Src/mode_contrl.o: ../Core/Src/mode_contrl.cpp \
- ../Core/Inc/mode_control.h ../Core/Inc/user_task.h \
- ../Core/Inc/can_communication.h ../Core/Inc/main.h \
+Core/Src/elecang_calib.o: ../Core/Src/elecang_calib.cpp \
+ ../Core/Inc/elecang_calib.h ../Core/Inc/user_task.h ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h \
  ../Core/Inc/stm32g4xx_hal_conf.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_rcc.h \
@@ -35,10 +34,12 @@ Core/Src/mode_contrl.o: ../Core/Src/mode_contrl.cpp \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
- ../Core/Inc/util.h ../Core/Inc/elecAng_calib.h
-../Core/Inc/mode_control.h:
+ ../Core/Inc/user_math.h \
+ ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h \
+ ../Core/Inc/ang.h ../Core/Inc/main.h ../Core/Inc/param.h \
+ ../Core/Inc/util.h ../Core/Inc/can_communication.h
+../Core/Inc/elecang_calib.h:
 ../Core/Inc/user_task.h:
-../Core/Inc/can_communication.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
 ../Core/Inc/stm32g4xx_hal_conf.h:
@@ -74,5 +75,10 @@ Core/Src/mode_contrl.o: ../Core/Src/mode_contrl.cpp \
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_pwr_ex.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h:
+../Core/Inc/user_math.h:
+../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:
+../Core/Inc/ang.h:
+../Core/Inc/main.h:
+../Core/Inc/param.h:
 ../Core/Inc/util.h:
-../Core/Inc/elecAng_calib.h:
+../Core/Inc/can_communication.h:

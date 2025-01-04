@@ -59,9 +59,9 @@ void CanCom::handleRxData() {
   if (canRxInterrupt == true) {
     data->genFuncRef = rxData[0];
     data->drvMdRef = rxData[1];
-    data->voltDRef = rxData[2];
-    data->voltQRef = rxData[3];
-    data->virAngFreq = rxData[4];
+    data->voltDRef = static_cast<float>(rxData[2]);
+    data->voltQRef = static_cast<float>(rxData[3]);
+    data->virAngFreq = static_cast<float>(rxData[4]);
 
     canRxInterrupt = false;
     canTxFlag = true;
@@ -70,12 +70,13 @@ void CanCom::handleRxData() {
 
 void CanCom::rxTask() {
   handleRxData();
- 
   uint8_t currentGenFuncRef = data->genFuncRef;
 
   if (currentGenFuncRef == prevGenFuncRef) {
+    data->genFuncCheck = false;   
     return;
   }
+  data->genFuncCheck = true;
   prevGenFuncRef = currentGenFuncRef;
 }
 

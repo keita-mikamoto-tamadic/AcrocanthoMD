@@ -1,11 +1,11 @@
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\arm-none-eabi\include\c++\12.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
-../Core/Src/sens_cur.cpp:12:1:SensCur::SensCur()	16	static
-../Core/Src/sens_cur.cpp:15:6:void SensCur::getRawCur()	16	static
-../Core/Src/sens_cur.cpp:20:6:void SensCur::sensCurIN()	24	static
-../Core/Src/sens_cur.cpp:31:6:bool SensCur::sensCurInit()	16	static
-../Core/Src/sens_cur.cpp:66:6:bool SensCur::adjustCur()	16	static
+../Core/Src/sens_cur.cpp:21:1:SensCur::SensCur()	16	static
+../Core/Src/sens_cur.cpp:24:6:void SensCur::getRawCur()	16	static
+../Core/Src/sens_cur.cpp:29:6:void SensCur::sensCurIN()	24	static
+../Core/Src/sens_cur.cpp:40:6:bool SensCur::sensCurInit()	16	static
+../Core/Src/sens_cur.cpp:75:6:bool SensCur::adjustCur()	16	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/bits/unique_ptr.h:461:7:std::unique_ptr<_Tp, _Dp>::pointer std::unique_ptr<_Tp, _Dp>::get() const [with _Tp = SensCur::SensCurData; _Dp = std::default_delete<SensCur::SensCurData>]	16	static
-../Core/Inc/sens_cur.h:18:10:constexpr SensCur::SensCurData::SensCurData()	16	static
+../Core/Inc/sens_cur.h:8:10:constexpr SensCur::SensCurData::SensCurData()	16	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/bits/unique_ptr.h:1064:5:) [with _Tp = SensCur::SensCurData; _Args = {}]	24	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/bits/unique_ptr.h:390:7:std::unique_ptr<_Tp, _Dp>::~unique_ptr() [with _Tp = SensCur::SensCurData; _Dp = std::default_delete<SensCur::SensCurData>]	32	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/bits/unique_ptr.h:452:7:std::unique_ptr<_Tp, _Dp>::pointer std::unique_ptr<_Tp, _Dp>::operator->() const [with _Tp = SensCur::SensCurData; _Dp = std::default_delete<SensCur::SensCurData>]	16	static
@@ -35,7 +35,7 @@ C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/tuple:424:7:static constexpr _Head& std::_Tuple_impl<_Idx, _Head>::_M_head(std::_Tuple_impl<_Idx, _Head>&) [with unsigned int _Idx = 1; _Head = std::default_delete<SensCur::SensCurData>]	16	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/tuple:80:17:constexpr std::_Head_base<_Idx, _Head, true>::_Head_base() [with unsigned int _Idx = 1; _Head = std::default_delete<SensCur::SensCurData>]	16	static
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/include/c++/12.3.1/tuple:124:7:static constexpr _Head& std::_Head_base<_Idx, _Head, true>::_M_head(std::_Head_base<_Idx, _Head, true>&) [with unsigned int _Idx = 1; _Head = std::default_delete<SensCur::SensCurData>]	16	static
-../Core/Inc/sens_cur.h:16:7:SensCur::~SensCur()	16	static
-../Core/Src/sens_cur.cpp:68:1:void __static_initialization_and_destruction_0(int, int)	16	static
-../Core/Src/sens_cur.cpp:68:1:cpp)	8	static
-../Core/Src/sens_cur.cpp:68:1:cpp)	8	static
+../Core/Inc/sens_cur.h:6:7:SensCur::~SensCur()	16	static
+../Core/Src/sens_cur.cpp:77:1:void __static_initialization_and_destruction_0(int, int)	16	static
+../Core/Src/sens_cur.cpp:77:1:cpp)	8	static
+../Core/Src/sens_cur.cpp:77:1:cpp)	8	static

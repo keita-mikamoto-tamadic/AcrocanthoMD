@@ -3,10 +3,10 @@
 
 #include "main.h"
 #include "param.h"
-#include "user_task.h"
+#include "can_communication.h"
 
 extern Ang ang;
-extern UserTask usertask;
+extern CanCom cancom;
 
 Ang::Ang(I2C_HandleTypeDef& i2cHandle)
   : hi2c1(i2cHandle), readStart(false), actAngle(0.0f), i2c_rx_complete(false), i2c_tx_complete(false),
@@ -54,11 +54,10 @@ void Ang::getVel() {
     // 速度計算
     diff = static_cast<int16_t>(rawAng - rawAngPast);
 
-    //HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_8);
-    if (diff > 2048) {
-      diff -= 4096;
-    } else if (diff < -2048) {
-      diff += 4096;
+    if (diff > ANG_RESL_12BIT / 2) {
+      diff -= ANG_RESL_12BIT;
+    } else if (diff < -ANG_RESL_12BIT / 2) {
+      diff += ANG_RESL_12BIT;
     }
     
     data->actVel = raw2rads(diff);
@@ -86,21 +85,21 @@ float Ang::elecAng() {
   static uint16_t elecAngtemp_ = 0;
   if (elecAngDir > 0) {
     elecAngtemp_ = rawElecComp;
-  }else elecAngtemp_ = 4096 - rawElecComp;
+  }else elecAngtemp_ = ANG_RESL_12BIT - rawElecComp;
 
   // CWとCCWを切替
   static float ofs_ = 0.0f;
   if (rotDir > 0) {
-    ofs_ = elecAngOfs + user2pi;
-  }else ofs_ = elecAngOfs; // 極性反転不要
+    ofs_ = data->elecAngOfs + user2pi;
+  }else ofs_ = data->elecAngOfs; // 極性反転不要
 
   static uint16_t offset_ = 0;
   static uint16_t elecAngtemp2_ = 0;
   
-  offset_ = static_cast<uint16_t>(ofs_ * 4096.0f / user2pi);
-  elecAngtemp2_ = (elecAngtemp_ * polePairs + offset_) % 4096;
+  offset_ = static_cast<uint16_t>(ofs_ * static_cast<float>(ANG_RESL_12BIT) / user2pi);
+  elecAngtemp2_ = (elecAngtemp_ * polePairs + offset_) % ANG_RESL_12BIT;
 
-  return static_cast<float>(elecAngtemp2_) / 4096.0f * user2pi;
+  return static_cast<float>(elecAngtemp2_) / static_cast<float>(ANG_RESL_12BIT) * user2pi;
 
 }
 
@@ -120,10 +119,11 @@ float Ang::elecAngVirtual(float _virFreqRef) {
 }
 
 void Ang::elecAngleIn(){
-  UserTask::UserTaskData* usertaskdata = usertask.getData();
+  CanCom::CanData* candata = cancom.getData();
   
-  if (usertaskdata->virAngFreq > 0.0f) {
-    data->elecAng = elecAngVirtual(usertaskdata->virAngFreq);
+  data->elecAngTest = elecAng();
+  if (candata->virAngFreq > 0.0f) {
+    data->elecAng = elecAngVirtual(candata->virAngFreq);
   } else {
     data->elecAng = elecAng();
   }
@@ -133,9 +133,7 @@ int16_t Ang::compAng() {
   return 0;
 }
 
-
 void Ang::prepareCanData(uint8_t* buffer, size_t bufferSize) const {
-
   memcpy(buffer, &(data->elecAng), sizeof(data->elecAng));
 }
 

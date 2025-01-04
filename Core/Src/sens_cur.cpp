@@ -6,6 +6,15 @@
 
 #include <cstdint>
 
+#define CALCOUNT (100) /* キャリブレーション回数 */
+#define ADVOLT           (3.3f) /* AD入力電圧範囲は3.3[V] */
+#define AD_RESL (4095.0f) /* 12bit分解能 */
+#define GAIN_AMP                  (20.0f)  /* AD8418A */
+#define GAIN_SHUNT                (0.010f) /* 10mohm */
+#define AMPGAIN                   (1.0f / (GAIN_AMP * GAIN_SHUNT))
+#define ADGAIN                    ((1.0f / AD_RESL) * ADVOLT * AMPGAIN)
+#define ADC_TO_CUR(U2_V, U2_OFFS) (((float)((int16_t)U2_V - (int16_t)U2_OFFS)) * ADGAIN) /* アンプからモータへの電流流し込みでプラス */
+
 SensCur senscur;
 extern OutPwm outpwm;
 
