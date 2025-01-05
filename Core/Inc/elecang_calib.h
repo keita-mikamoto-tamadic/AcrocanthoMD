@@ -11,9 +11,11 @@ class ElecangCalib
 public:
   struct ElecangCalibData
   {
-    float elecAngOfs = 0.0f;
+    float elecAngOfsPlus = 0.0f;
     uint8_t drvMd = 0;
     float voltQRef = 0.0f;
+    float elecAngOfs = 0.0f;
+
   };
 
 private:
@@ -25,6 +27,8 @@ private:
   float elecAngOfsRM = 0.0f;
   float elecAngOfsFP = 0.0f;
   float elecAngOfsFM = 0.0f;
+  int32_t idleCount = 0;
+  
 
   bool calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecAngOfsMax, float _calDelta);
 

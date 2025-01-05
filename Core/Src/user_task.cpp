@@ -24,6 +24,8 @@ UserTask::UserTask()
 
 
 void UserTask::cyclicTask() {
+  Ang::AngData* angdata = ang.getAngData();
+  ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
   static SeqID_t seqID = INIT;
   static bool curcal = false;
 
@@ -43,6 +45,9 @@ void UserTask::cyclicTask() {
       ang.elecAngleIn();
       
       elecangcalib.elecCalSeq();
+      //test = angdata->actVelLPF;
+      test_ofs = ecaldata->elecAngOfsPlus;
+      test_ang = angdata->mechAng;
       motorControl();
 
       break;
@@ -120,6 +125,5 @@ bool UserTask::servoCheck() {
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
-  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
   usertask.cyclicTask();
 }

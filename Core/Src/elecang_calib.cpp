@@ -32,8 +32,9 @@ ElecangCalib::ElecangCalib()
 void ElecangCalib::elecCalSeq(){
   Util::UtilData* utildata = util.getUtilData();
   CanCom::CanData* candata = cancom.getData();
-  static SeqID_t seqID = INIT;
 
+  static SeqID_t seqID = INIT;
+  static SeqID_t seqID_prev = STEP00;
   float elecAngOfsCur = 0.0f;
   float ecalVoltDRef = STIMUL_VOLTDREF;
   
@@ -47,33 +48,40 @@ void ElecangCalib::elecCalSeq(){
       break;
     case STEP00:
       if (calibSub(ecalVoltDRef, elecAngOfsCur, &elecAngOfsRP, CALIB_ROUGH)){
-        seqID = (seqIDSub == FAIL) ? END : STEP01;
+        seqID_prev = STEP00;
+        seqID = (seqIDSub == FAIL) ? END : IDLE;
       }
       break;
     case STEP01:
+      //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
       elecAngOfsCur = elecAngOfsRP - (FINE_WIDTH / 2);
       if (elecAngOfsCur < 0.0f) elecAngOfsCur += user2pi;
       if (calibSub(ecalVoltDRef, elecAngOfsCur, &elecAngOfsFP, CALIB_FINE)){
-        seqID = (seqIDSub == FAIL) ? END : STEP02;
+        seqID_prev = STEP01;
+        seqID = (seqIDSub == FAIL) ? END : IDLE;
+        data->elecAngOfsPlus = elecAngOfsFP;
       }
       break;
       
     case STEP02:
       if (calibSub(-ecalVoltDRef, elecAngOfsCur, &elecAngOfsRM, CALIB_ROUGH)){
-        seqID = (seqIDSub == FAIL) ? END : STEP03;
+        seqID_prev = STEP02;
+        seqID = (seqIDSub == FAIL) ? END : IDLE;
       }
       break;
     case STEP03:
       elecAngOfsCur = elecAngOfsRM + (FINE_WIDTH / 2);
       if (elecAngOfsCur < 0.0f) elecAngOfsCur += user2pi;
       if (calibSub(-ecalVoltDRef, elecAngOfsCur, &elecAngOfsFM, CALIB_FINE)){
-        seqID = (seqIDSub == FAIL) ? END : STEP04;
+        seqID_prev = STEP03;
+        seqID = (seqIDSub == FAIL) ? END : IDLE;
       }
       break;
       
     case STEP04:
       // 最終オフセット値算出
       seqID = END;
+      seqID_prev = IDLE;
       break;
       
     case END:
@@ -82,6 +90,41 @@ void ElecangCalib::elecCalSeq(){
       utildata->eCalib = false;
       seqID = INIT;
       break;
+      
+    case IDLE:
+      if (idleCount++ < 1000) {
+        data->drvMd = 0;
+        data->voltQRef = 0.0f;
+        break;
+
+      } else {
+        idleCount = 0;
+        switch (seqID_prev)
+        {
+        case STEP00:
+          seqID = STEP01;
+          break;
+        case STEP01:
+          seqID = STEP02;
+          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
+          break;
+        case STEP02:
+          seqID = STEP03;
+          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
+          break;
+        case STEP03:
+          seqID = STEP04;
+          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
+          break;
+        case IDLE:
+          break;  
+
+        default:
+          break;
+        }
+      }
+      break;
+      
     default:
       seqID = INIT;
       break;
@@ -92,7 +135,7 @@ void ElecangCalib::elecCalSeq(){
 bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecAngOfsMax, float _calDelta) {
   Ang::AngData* angdata = ang.getAngData();
   Util::UtilData* utildata = util.getUtilData();
-  static bool returnVal = false;
+  bool returnVal = false;
   
   // forloop用
   float velOutMax_ = 0.0f;
@@ -106,7 +149,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       angdata->elecAng += elecAngOfsVal;
 
       // 中断処理
-      if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
+      //if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < STANDBY_COUNT) {
         velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->actVel;
@@ -122,7 +165,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       angdata->elecAng += elecAngOfsVal;
 
       // 中断処理
-      if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
+      //if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < CALIB_COUNT) {
         if (user2pi < angdata->elecAng) angdata->elecAng -= user2pi;
@@ -145,7 +188,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       // Mesuring
       
       // 中断処理
-      if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
+      //if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       for (indexnum = 0; indexnum < CALIB_NUM; indexnum++) {
         if ((_voltDRef > 0.0f) && (velOut[indexnum] >= velOutMax_)) {

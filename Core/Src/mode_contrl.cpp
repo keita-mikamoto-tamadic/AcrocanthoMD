@@ -55,6 +55,7 @@ void ModeControl::refCtrl(){
     if (utildata->eCalib) {
       s_drvMdRef = elecangcalibdata->drvMd;
       s_voltQRef = elecangcalibdata->voltQRef;
+      s_voltDRef = 0.0f;
       
     }
     // どの特殊モードにも当てはまらない場合、上位指令をセット

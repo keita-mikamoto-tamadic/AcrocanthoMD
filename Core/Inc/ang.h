@@ -31,7 +31,7 @@ private:
   // ユニークポインタでデータ保持
   std::unique_ptr<AngData> data;
 
-  const float lpfFreq = 1000.0f;
+  const float lpfFreq = 50.0f;
 
   I2C_HandleTypeDef& hi2c1;
   bool readStart;

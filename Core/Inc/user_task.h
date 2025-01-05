@@ -26,6 +26,9 @@ class UserTask {
 public:
 
 private:
+  float test = 0.0f;
+  float test_ang = 0.0f;
+  float test_ofs = 0.0f;
 
   uint8_t count = 0;
   bool servocheck = false;
