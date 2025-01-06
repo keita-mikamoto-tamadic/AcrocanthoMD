@@ -46,14 +46,18 @@ void ElecangCalib::elecCalSeq(){
         seqID = STEP00;
       }
       break;
+    // 正の電圧印可 電気角オフセット遷移は0~2piの範囲
+    // elecAngOfsRPに正の回転方向でのオフセット値を記録
     case STEP00:
       if (calibSub(ecalVoltDRef, elecAngOfsCur, &elecAngOfsRP, CALIB_ROUGH)){
         seqID_prev = STEP00;
         seqID = (seqIDSub == FAIL) ? END : IDLE;
       }
       break;
+    // 正の電圧印可 電気角オフセット遷移はelecAngOfsRPからFINE_WIDTH/2戻った地点から
+    // FINE_WIDTHの範囲で分割
+    // elecAngOfsFPに正の回転方向での詳細オフセット値を記録
     case STEP01:
-      //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
       elecAngOfsCur = elecAngOfsRP - (FINE_WIDTH / 2);
       if (elecAngOfsCur < 0.0f) elecAngOfsCur += user2pi;
       if (calibSub(ecalVoltDRef, elecAngOfsCur, &elecAngOfsFP, CALIB_FINE)){
@@ -63,23 +67,37 @@ void ElecangCalib::elecCalSeq(){
       }
       break;
       
+    // 負の電圧印可 電気角オフセット遷移は0~2piの範囲
+    // elecAngOfsRMに負の回転方向でのオフセット値を記録
     case STEP02:
       if (calibSub(-ecalVoltDRef, elecAngOfsCur, &elecAngOfsRM, CALIB_ROUGH)){
         seqID_prev = STEP02;
         seqID = (seqIDSub == FAIL) ? END : IDLE;
       }
       break;
+    // 負の電圧印可 電気角オフセット遷移はelecAngOfsRMからFINE_WIDTH/2戻った地点から
+    // FINE_WIDTHの範囲で分割
+    // elecAngOfsFMに正の回転方向での詳細オフセット値を記録
     case STEP03:
-      elecAngOfsCur = elecAngOfsRM + (FINE_WIDTH / 2);
+      elecAngOfsCur = elecAngOfsRM - (FINE_WIDTH / 2);
       if (elecAngOfsCur < 0.0f) elecAngOfsCur += user2pi;
       if (calibSub(-ecalVoltDRef, elecAngOfsCur, &elecAngOfsFM, CALIB_FINE)){
         seqID_prev = STEP03;
         seqID = (seqIDSub == FAIL) ? END : IDLE;
+        data->elecAngOfsMinus = elecAngOfsFM;
       }
       break;
       
     case STEP04:
       // 最終オフセット値算出
+      if (!utildata->eCalib) { seqID = END; break; }
+      
+      if (((elecAngOfsFP + userpi) < elecAngOfsFM) || (elecAngOfsFM < (elecAngOfsFP - userpi))) {
+        data->elecAngOfs = ((elecAngOfsFP + elecAngOfsFM) / 2) - userpi;
+      } else {
+        data->elecAngOfs = (elecAngOfsFP + elecAngOfsFM) / 2;
+      }
+      if (data->elecAngOfs <= 0.0f) data->elecAngOfs += user2pi;
       seqID = END;
       seqID_prev = IDLE;
       break;
@@ -106,15 +124,12 @@ void ElecangCalib::elecCalSeq(){
           break;
         case STEP01:
           seqID = STEP02;
-          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
           break;
         case STEP02:
           seqID = STEP03;
-          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
           break;
         case STEP03:
           seqID = STEP04;
-          HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_9);
           break;
         case IDLE:
           break;  
@@ -149,7 +164,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       angdata->elecAng += elecAngOfsVal;
 
       // 中断処理
-      //if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
+      if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < STANDBY_COUNT) {
         velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->actVel;
@@ -165,7 +180,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       angdata->elecAng += elecAngOfsVal;
 
       // 中断処理
-      //if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
+      if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < CALIB_COUNT) {
         if (user2pi < angdata->elecAng) angdata->elecAng -= user2pi;
@@ -188,7 +203,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       // Mesuring
       
       // 中断処理
-      //if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
+      if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       for (indexnum = 0; indexnum < CALIB_NUM; indexnum++) {
         if ((_voltDRef > 0.0f) && (velOut[indexnum] >= velOutMax_)) {

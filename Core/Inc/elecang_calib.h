@@ -12,6 +12,7 @@ public:
   struct ElecangCalibData
   {
     float elecAngOfsPlus = 0.0f;
+    float elecAngOfsMinus = 0.0f;
     uint8_t drvMd = 0;
     float voltQRef = 0.0f;
     float elecAngOfs = 0.0f;

@@ -45,9 +45,7 @@ void UserTask::cyclicTask() {
       ang.elecAngleIn();
       
       elecangcalib.elecCalSeq();
-      //test = angdata->actVelLPF;
-      test_ofs = ecaldata->elecAngOfsPlus;
-      test_ang = angdata->mechAng;
+      test = ecaldata->elecAngOfs;
       motorControl();
 
       break;

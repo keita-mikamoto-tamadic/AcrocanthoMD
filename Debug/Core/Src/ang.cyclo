@@ -1,6 +1,6 @@
 C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\arm-none-eabi\include\c++\12.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	1
-../Core/Inc/ang.h:66:9:float Ang::raw2rad(uint16_t)	1
-../Core/Inc/ang.h:70:9:float Ang::raw2rads(int16_t)	1
+../Core/Inc/ang.h:65:9:float Ang::raw2rad(uint16_t)	1
+../Core/Inc/ang.h:69:9:float Ang::raw2rads(int16_t)	1
 ../Core/Inc/can_communication.h:45:12:CanCom::CanData* CanCom::getData()	1
 ../Core/Src/ang.cpp:11:1:Ang::Ang(I2C_HandleTypeDef&)	1
 ../Core/Src/ang.cpp:15:6:void Ang::read()	2
@@ -8,7 +8,7 @@ C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.external
 ../Core/Src/ang.cpp:30:6:void Ang::getAngle()	2
 ../Core/Src/ang.cpp:50:6:void Ang::getVel()	4
 ../Core/Src/ang.cpp:69:6:void Ang::mechAngleVelLPF()	1
-../Core/Src/ang.cpp:78:7:float Ang::elecAng()	2
+../Core/Src/ang.cpp:78:7:float Ang::elecAng(float)	2
 ../Core/Src/ang.cpp:106:7:float Ang::elecAngVirtual(float)	3
 ../Core/Src/ang.cpp:121:6:void Ang::elecAngleIn()	2
 ../Core/Src/ang.cpp:132:9:int16_t Ang::compAng()	1

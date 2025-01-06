@@ -75,7 +75,7 @@ void Ang::mechAngleVelLPF(){
 
 }
 
-float Ang::elecAng() {
+float Ang::elecAng(float _eofs) {
   // comp = 0のときサンプル値更新あり
   // 次の更新まで2周期を補間するので3で割った値を足す
   if (comp == 0) rawElecComp = rawAng;
@@ -90,8 +90,8 @@ float Ang::elecAng() {
   // CWとCCWを切替
   static float ofs_ = 0.0f;
   if (rotDir > 0) {
-    ofs_ = data->elecAngOfs + user2pi;
-  }else ofs_ = data->elecAngOfs; // 極性反転不要
+    ofs_ = _eofs + user2pi;
+  }else ofs_ = _eofs; // 極性反転不要
 
   static uint16_t offset_ = 0;
   static uint16_t elecAngtemp2_ = 0;
@@ -121,11 +121,11 @@ float Ang::elecAngVirtual(float _virFreqRef) {
 void Ang::elecAngleIn(){
   CanCom::CanData* candata = cancom.getData();
   
-  data->elecAngTest = elecAng();
+  data->elecAngTest = elecAng(EOFS);
   if (candata->virAngFreq > 0.0f) {
     data->elecAng = elecAngVirtual(candata->virAngFreq);
   } else {
-    data->elecAng = elecAng();
+    data->elecAng = elecAng(EOFS);
   }
 }
 

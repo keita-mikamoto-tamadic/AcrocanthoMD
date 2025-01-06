@@ -11,3 +11,7 @@
 // 三角波なのでカウント数の2倍が1周期分
 #define TASK_TIME           ((1/CCLK_Hz)*CCR_END)
 #define DUTY_BASE           (0.5F)
+
+// motor
+#define POLE_PAIRS          (14)
+#define EOFS               (3.03687f)

@@ -23,7 +23,6 @@ public:
     float actVel = 0.0f;
     float actVelLPF = 0.0f;
     int16_t veltemp = 0;
-    float elecAngOfs = 0.0f;
     float elecAngTest = 0.0f;
   };
 
@@ -54,7 +53,7 @@ private:
 
   void receive();
 
-  float elecAng();
+  float elecAng(float _eofs);
   uint16_t rawElecComp = 0;
   
   float elecAngVirtual(float virfreq);
