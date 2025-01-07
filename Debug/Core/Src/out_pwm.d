@@ -35,7 +35,7 @@ Core/Src/out_pwm.o: ../Core/Src/out_pwm.cpp ../Core/Inc/out_pwm.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal_tim_ex.h \
  ../Core/Inc/user_math.h ../Core/Inc/main.h \
  ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h \
- ../Core/Inc/param.h ../Core/Inc/can_communication.h
+ ../Core/Inc/param.h
 ../Core/Inc/out_pwm.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_hal.h:
@@ -76,4 +76,3 @@ Core/Src/out_pwm.o: ../Core/Src/out_pwm.cpp ../Core/Inc/out_pwm.h \
 ../Core/Inc/main.h:
 ../Drivers/STM32G4xx_HAL_Driver/Inc/stm32g4xx_ll_cordic.h:
 ../Core/Inc/param.h:
-../Core/Inc/can_communication.h:

@@ -3,12 +3,10 @@
 #include "main.h"
 #include "user_math.h"
 #include "param.h"
-#include "can_communication.h"
 
 OutPwm outpwm;
 
-OutPwm::OutPwm()
-    : data(std::make_unique<outPwmData>()) {}
+OutPwm::OutPwm(){}
 
 void OutPwm::Pon(){
   setReg(DUTY_BASE, DUTY_BASE, DUTY_BASE);

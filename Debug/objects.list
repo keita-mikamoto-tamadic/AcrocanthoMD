@@ -1,6 +1,7 @@
 "./Core/Src/ang.o"
 "./Core/Src/can_communication.o"
 "./Core/Src/elecang_calib.o"
+"./Core/Src/foc.o"
 "./Core/Src/main.o"
 "./Core/Src/mode_contrl.o"
 "./Core/Src/out_pwm.o"

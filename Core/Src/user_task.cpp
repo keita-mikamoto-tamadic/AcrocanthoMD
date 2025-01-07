@@ -8,6 +8,7 @@
 #include "sens_cur.h"
 #include "util.h"
 #include "elecang_calib.h"
+#include "foc.h"
 
 UserTask usertask;
 
@@ -18,6 +19,7 @@ extern CanCom cancom;
 extern ModeControl modecontrol;
 extern Util util;
 extern ElecangCalib elecangcalib;
+extern Foc foc;
 
 UserTask::UserTask()
   : count(0){}
@@ -40,6 +42,7 @@ void UserTask::cyclicTask() {
       }
 
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+      senscur.sensCurIN();
       ang.getAngle();
       ang.getVel();
       ang.elecAngleIn();
@@ -67,6 +70,7 @@ void UserTask::cyclicTask() {
       }
       break;
     case STEP00:
+      senscur.sensCurIN();
       ang.getAngle();
       ang.getVel();
       ang.elecAngleIn();
@@ -75,7 +79,6 @@ void UserTask::cyclicTask() {
         seqID = LOOP;
         break;
       }
-      senscur.sensCurIN();
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
       outpwm.Poff();
       break;
@@ -97,24 +100,28 @@ void UserTask::idleTask() {
 
 // PON後のモータ制御
 void UserTask::motorControl() {
+  using namespace Acrocantho;
   ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
   Ang::AngData* angdata = ang.getAngData();
-  Acrocantho::Cordic cordic;
+  Foc::FocData* focdata = foc.getData();
+  Cordic cordic;
 
+  // SinCos演算
+  SinCos result = cordic.radians(angdata->elecAng);
+
+  // dq変換
+  foc.forwardCtrl(result);
+  
+  testid = focdata->id;
+  testiq = focdata->iq;
+  
+  // drvMdとgenfuncによる指令値切替
   modecontrol.modeCtrl();
 
-  senscur.sensCurIN();
-  
-  // SinCos演算
-  Acrocantho::SinCos result = cordic.radians(angdata->elecAng);
-  float s = result.s;
-  float c = result.c;
-  
   // dq逆変換
-  Acrocantho::TrigonTransform tt(result, mdctrldata->voltDRef, mdctrldata->voltQRef);
-  Acrocantho::InverseDqTransform idt(tt._trigon1, tt._trigon2);
-  
-  outpwm.setReg(idt.u_ini, idt.v_ini, idt.w_ini);
+  foc.inverseCtrl(result, mdctrldata->voltDRef, mdctrldata->voltQRef);
+  // PWM出力
+  outpwm.setReg(focdata->vu, focdata->vv, focdata->vw);
 }
 
 bool UserTask::servoCheck() {
