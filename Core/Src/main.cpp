@@ -76,8 +76,7 @@ static void MX_CORDIC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-CanCom cancom(hfdcan1);
-Ang ang(hi2c1);
+extern CanCom cancom;
 extern UserTask usertask;
 /* USER CODE END 0 */
 

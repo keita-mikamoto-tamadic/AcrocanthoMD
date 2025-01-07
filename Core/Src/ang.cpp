@@ -5,7 +5,10 @@
 #include "param.h"
 #include "can_communication.h"
 
-extern Ang ang;
+// main.cppと同じインスタンスを使用
+extern I2C_HandleTypeDef hi2c1;
+
+Ang ang(hi2c1);
 extern CanCom cancom;
 
 Ang::Ang(I2C_HandleTypeDef& i2cHandle)
@@ -54,6 +57,7 @@ void Ang::getVel() {
     // 速度計算
     diff = static_cast<int16_t>(rawAng - rawAngPast);
 
+    // 0またぎ判定処理
     if (diff > ANG_RESL_12BIT / 2) {
       diff -= ANG_RESL_12BIT;
     } else if (diff < -ANG_RESL_12BIT / 2) {

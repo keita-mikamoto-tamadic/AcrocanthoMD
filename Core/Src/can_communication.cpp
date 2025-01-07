@@ -3,8 +3,11 @@
 #include "main.h"
 #include "ang.h"
 
-// グローバルなインスタンスを使用
-extern CanCom cancom;
+// main.cppと同じインスタンスを使用
+extern FDCAN_HandleTypeDef hfdcan1;
+
+// ユーザーインスタンス
+CanCom cancom(hfdcan1);
 extern Ang ang;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
