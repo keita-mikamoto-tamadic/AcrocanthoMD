@@ -1,8 +1,0 @@
-C:\ST\STM32CubeIDE_1.17.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.12.3.rel1.win32_1.1.0.202410251130\tools\arm-none-eabi\include\c++\12.3.1\arm-none-eabi\thumb\v7e-m+fp\hard\bits\gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
-../Core/Src/out_pwm.cpp:9:1:OutPwm::OutPwm()	16	static
-../Core/Src/out_pwm.cpp:11:6:void OutPwm::Pon()	16	static
-../Core/Src/out_pwm.cpp:15:6:void OutPwm::Poff()	16	static
-../Core/Src/out_pwm.cpp:21:6:void OutPwm::setReg(float, float, float)	24	static
-../Core/Src/out_pwm.cpp:29:7:float OutPwm::dutyGuard(float)	24	static
-../Core/Src/out_pwm.cpp:45:1:void __static_initialization_and_destruction_0(int, int)	16	static
-../Core/Src/out_pwm.cpp:45:1:cpp)	8	static
