@@ -22,19 +22,28 @@ SensCur::SensCur()
   : data(std::make_unique<SensCurData>()) {}
   
 void SensCur::getRawCur() {
-  rawCurU = ADC1 -> JDR1;
-  rawCurW = ADC2 -> JDR1;
+  adcRawU = ADC1 -> JDR1;
+  adcRawW = ADC2 -> JDR1;
 }
 
 void SensCur::sensCurIN() {
   getRawCur();
   
-  data->curU = ADC_TO_CUR(rawCurU, curOffsU);
-  data->curW = ADC_TO_CUR(rawCurW, curOffsW);
-  
+  curURaw = ADC_TO_CUR(adcRawU, curOffsU);
+  curWRaw = ADC_TO_CUR(adcRawW, curOffsW);
 
   // V相電流はIu + Iv + Iw = 0より計算
-  data->curV = -data->curU - data->curW;
+  curVRaw = -curURaw - curWRaw;
+  
+  data->curU = lpfCur(curURaw, 0.0f);
+  data->curV = lpfCur(curVRaw, 0.0f);
+  data->curW = lpfCur(curWRaw, 0.0f);
+  
+}
+
+float SensCur::lpfCur(float _curRaw, float _cutOffFreq) {
+  float curLPF_ = _curRaw;
+  return curLPF_;
 }
 
 bool SensCur::sensCurInit() {
@@ -52,8 +61,8 @@ bool SensCur::sensCurInit() {
       // キャリブレーション
       if (_calcount < CALCOUNT) {
         getRawCur();
-        curOffsU += rawCurU;
-        curOffsW += rawCurW;
+        curOffsU += adcRawU;
+        curOffsW += adcRawW;
         _calcount++;
       } else {
         curOffsU /= _calcount;
@@ -72,6 +81,3 @@ bool SensCur::sensCurInit() {
   return _getReady;
 }
 
-bool SensCur::adjustCur() {
-  
-}

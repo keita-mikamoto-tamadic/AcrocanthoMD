@@ -36,6 +36,7 @@ private:
 
   void setRef();
   void motorControl();
+  void resetAll();
   
 public:
   UserTask();

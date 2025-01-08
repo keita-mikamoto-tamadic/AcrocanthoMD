@@ -9,6 +9,7 @@
 #include "util.h"
 #include "elecang_calib.h"
 #include "foc.h"
+#include "bldc_ctrl.h"
 
 UserTask usertask;
 
@@ -20,6 +21,7 @@ extern ModeControl modecontrol;
 extern Util util;
 extern ElecangCalib elecangcalib;
 extern Foc foc;
+extern BldcCtrl pidctrl;
 
 UserTask::UserTask()
   : count(0){}
@@ -127,6 +129,10 @@ void UserTask::motorControl() {
 bool UserTask::servoCheck() {
   CanCom::CanData* candata = cancom.getData();
   return (candata->genFuncRef & 0x01) != 0 ? true : false;
+}
+
+void UserTask::resetAll() {
+  pidctrl.resetData();
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
