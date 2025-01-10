@@ -21,17 +21,15 @@ extern ModeControl modecontrol;
 extern Util util;
 extern ElecangCalib elecangcalib;
 extern Foc foc;
-extern BldcCtrl pidctrl;
+extern BldcCtrl bldcctrl;
 
 UserTask::UserTask()
   : count(0){}
 
 
 void UserTask::cyclicTask() {
-  Ang::AngData* angdata = ang.getAngData();
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
   static SeqID_t seqID = INIT;
-  static bool curcal = false;
 
    switch (seqID) {
     case LOOP:
@@ -39,6 +37,8 @@ void UserTask::cyclicTask() {
       // 強制停止
       if (!servoCheck()) {
         outpwm.Poff();
+        resetAll();
+
         seqID = STEP00;
         break;
       }
@@ -56,6 +56,7 @@ void UserTask::cyclicTask() {
       break;
     case INIT:
       // 初期化のためにエンコーダ値の初回読み取り
+      resetAll();
       if (count < 10) {
         ang.getAngle();
         count++;
@@ -65,8 +66,9 @@ void UserTask::cyclicTask() {
         ang.getVel();
         if (senscur.sensCurInit()) {
           senscur.sensCurIN();
-          seqID = STEP00;
           count = 0;
+
+          seqID = STEP00;
         }
         
       }
@@ -78,6 +80,7 @@ void UserTask::cyclicTask() {
       ang.elecAngleIn();
       if (servoCheck()){
         outpwm.Pon();
+
         seqID = LOOP;
         break;
       }
@@ -132,7 +135,7 @@ bool UserTask::servoCheck() {
 }
 
 void UserTask::resetAll() {
-  pidctrl.resetData();
+  bldcctrl.resetData();
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){

@@ -11,10 +11,14 @@ extern Foc foc;
 BldcCtrl::BldcCtrl(){}
   
 float BldcCtrl::voltDCtrl(float _curD) {
+  curDPidCtrl(_curD);
+  voltData.voltD = curData.CurDPid;
   return voltData.voltD;
 }
 
 float BldcCtrl::voltQCtrl(float _curQ) {
+  curQPidCtrl(_curQ);
+  voltData.voltQ = curData.curQPid;
   return voltData.voltQ;
 }
 
@@ -52,8 +56,8 @@ float BldcCtrl::curQPidCtrl(float _curQRef) {
   
   // IControl
   // アンチワインドアップ
-  if ((volMin < curData.CurQPid) &&
-      (curData.CurQPid < volMax)) {
+  if ((volMin < curData.curQPid) &&
+      (curData.curQPid < volMax)) {
     curQErrSum += (curQErr_ * TASK_TIME);
   } else {
     // Do nothing
@@ -64,8 +68,8 @@ float BldcCtrl::curQPidCtrl(float _curQRef) {
   // 微分用前回値
   curQErrLPFPast = curQErrLPF;
 
-  curData.CurQPid = 
+  curData.curQPid = 
     curKp * curQErr_ + curKi * curQErrSum + curKd * curQErrDiff_;
   
-  return curData.CurQPid;
+  return curData.curQPid;
 }

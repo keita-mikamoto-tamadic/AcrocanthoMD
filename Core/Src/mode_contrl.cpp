@@ -3,18 +3,23 @@
 #include "can_communication.h"
 #include "util.h"
 #include "elecAng_calib.h"
+#include "foc.h"
+#include "bldc_ctrl.h"
 
 ModeControl modecontrol;
 extern UserTask usertask;
 extern CanCom cancom;
 extern Util util;
 extern ElecangCalib elecangcalib;
+extern BldcCtrl bldcctrl;
 
 ModeControl::ModeControl()
   : data(std::make_unique<ModeControlData>()){}
 
 
 void ModeControl::modeCtrl(){
+
+
   float voltQRef_ = 0.0f;
   float voltDRef_ = 0.0f;
   
@@ -30,6 +35,8 @@ void ModeControl::modeCtrl(){
       voltQRef_ = s_voltQRef;
       break;
     case CTRLMODE_CUR:
+      voltDRef_ = bldcctrl.voltDCtrl(s_curDRef);
+      voltQRef_ = bldcctrl.voltQCtrl(s_curQRef);
       break;
     case CTRLMODE_VEL:
       break;
@@ -64,6 +71,8 @@ void ModeControl::refCtrl(){
       s_drvMdRef = candata->drvMdRef;
       s_voltDRef = candata->voltDRef;
       s_voltQRef = candata->voltQRef;
+      s_curDRef = candata->curDRef;
+      s_curQRef = candata->curQRef;
     }
   }
 }

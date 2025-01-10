@@ -15,7 +15,7 @@ private:
 
   struct CurPidData {
     float CurDPid = 0.0f;
-    float CurQPid = 0.0f;
+    float curQPid = 0.0f;
   };
 
   struct VelPidData {
@@ -38,8 +38,8 @@ private:
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 0.0f;
-  const float curKi = 0.0f;
+  const float curKp = 0.1f;
+  const float curKi = 1.0f;
   const float curKd = 0.0f;
   // parameter
   

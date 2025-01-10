@@ -12,6 +12,8 @@ public:
     float voltDRef = 0;
     float voltQRef = 0;
     float virAngFreq = 0;
+    float curQRef = 0;
+    float curDRef = 0;
 
     bool genFuncCheck = false;
     uint8_t txBuff[8] = {0};
