@@ -9,6 +9,10 @@ class OutPwm{
 private:
 
   float dutyGuard(float _rawDuty);
+  void midVol(float u, float v, float w);
+  float maxvol = 0.0f;
+  float midvol = 0.0f;
+  float minvol = 0.0f;
 
 public:
   OutPwm();

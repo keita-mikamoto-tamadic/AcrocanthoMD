@@ -35,6 +35,9 @@ private:
   // parameter
   const float volMin = 12.0f;
   const float volMax = 24.0f;
+  const float curMin = -1.0f;
+  const float curMax = 1.0f;
+
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;

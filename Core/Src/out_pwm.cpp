@@ -4,6 +4,9 @@
 #include "user_math.h"
 #include "param.h"
 
+constexpr float DutyGuard = 0.99f;
+constexpr float VoltGuard = 14.0f;
+
 OutPwm outpwm;
 
 OutPwm::OutPwm(){}
@@ -19,6 +22,7 @@ void OutPwm::Poff(){
 }
 
 void OutPwm::setReg(float u, float v, float w){
+  midVol(u, v, w);
 
   TIM1->CCR1 = (uint16_t)((1.0f - dutyGuard(u)) * (float)CCR_MAX);
   TIM1->CCR2 = (uint16_t)((1.0f - dutyGuard(v)) * (float)CCR_MAX);
@@ -27,19 +31,43 @@ void OutPwm::setReg(float u, float v, float w){
 
 
 float OutPwm::dutyGuard(float _rawDuty){
-    float result = 0.0f;
-    float sum = 0.0f;
-    static float limp = 0.95f;
-    static float limm = 0.01f;
-    
-    sum = (_rawDuty / VOLT_PBM) + DUTY_BASE;
-    
-    if (sum > limp){
-        result = limp;
-    }else if(sum < limm){
-        result = limm;
-    }else{
-        result = sum;
-    }
-    return result;
+  float result_ = 0.0f;
+  float limp = 0.0f;
+  float limm = 0.0f;
+  float powerSwitch_ = 0.0f;
+  
+  if (VOLT_PBM >= VoltGuard) {
+    powerSwitch_ = VOLT_PBM;
+  } else {
+    powerSwitch_ = VoltGuard;
+  }
+  
+  // 中間電位差し引く
+  limp = ((_rawDuty - midvol) / powerSwitch_) + DUTY_BASE;
+  limm = 1.0f - DutyGuard;
+  
+  if (limp > DutyGuard){
+    result_ = DutyGuard;
+  } else if (limp < limm){
+    result_ = limm;
+  } else {
+    result_ = limp;
+  }
+  
+  return result_;
+}
+
+void OutPwm::midVol(float u_, float v_, float w_){
+  // 3相の中で最大電圧を算出
+  maxvol = u_;
+  if (v_ > maxvol) maxvol = v_;
+  if (w_ > maxvol) maxvol = w_;
+  
+  // 3相の中で最小電圧を算出
+  minvol = u_;
+  if (v_ < minvol) minvol = v_;
+  if (w_ < minvol) minvol = w_;
+  
+  // 中間電位を算出
+  midvol = (maxvol + minvol) / 2.0f;
 }
