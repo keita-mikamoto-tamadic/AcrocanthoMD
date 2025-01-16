@@ -91,13 +91,20 @@ void ElecangCalib::elecCalSeq(){
     case STEP04:
       // 最終オフセット値算出
       if (!utildata->eCalib) { seqID = END; break; }
+
+     
+      tuneDiff = elecAngOfsFM - elecAngOfsFP;
       
-      if (((elecAngOfsFP + userpi) < elecAngOfsFM) || (elecAngOfsFM < (elecAngOfsFP - userpi))) {
+      if (tuneDiff > userpi) {
         data->elecAngOfs = ((elecAngOfsFP + elecAngOfsFM) / 2) - userpi;
+      } else if (tuneDiff < -userpi) {
+        data->elecAngOfs = ((elecAngOfsFP + elecAngOfsFM) / 2) + userpi;
       } else {
         data->elecAngOfs = (elecAngOfsFP + elecAngOfsFM) / 2;
       }
+
       if (data->elecAngOfs <= 0.0f) data->elecAngOfs += user2pi;
+
       seqID = END;
       seqID_prev = IDLE;
       break;

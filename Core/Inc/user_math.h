@@ -77,8 +77,8 @@ struct ClarkeTransform {
 // αβ→dq(Park)変換
 struct ParkTransform {
   ParkTransform(const SinCos& sc, float alpha, float beta)
-    : id(sc.c * alpha + sc.s * beta),
-      iq(-sc.s * alpha + sc.c * beta) {}
+    : id(-sc.c * alpha - sc.s * beta),
+      iq(sc.s * alpha - sc.c * beta) {}
   
   const float id;
   const float iq;

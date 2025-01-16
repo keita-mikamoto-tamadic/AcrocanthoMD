@@ -33,25 +33,27 @@ private:
   PosPidData posData;
 
   // parameter
-  const float volMin = 12.0f;
-  const float volMax = 24.0f;
+  const float volMin = -12.0f;
+  const float volMax = 12.0f;
   const float curMin = -1.0f;
   const float curMax = 1.0f;
 
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 0.1f;
+  const float curKp = 0.5f;
   const float curKi = 1.0f;
   const float curKd = 0.0f;
   // parameter
   
   float curDPidCtrl(float _curDRef);
+  float curDCtrlOut = 0.0f;
   float curDErrSum = 0.0f;
   float curDErrLPF = 0.0f;
   float curDErrLPFPast = 0.0f;
 
   float curQPidCtrl(float _curQRef);
+  float curQCtrlOut = 0.0f;
   float curQErrSum = 0.0f;
   float curQErrLPF = 0.0f;
   float curQErrLPFPast = 0.0f;

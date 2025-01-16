@@ -122,6 +122,9 @@ void UserTask::motorControl() {
   
   // drvMdとgenfuncによる指令値切替
   modecontrol.modeCtrl();
+  
+  testvd = mdctrldata->voltDRef;
+  testvq = mdctrldata->voltQRef;
 
   // dq逆変換
   foc.inverseCtrl(result, mdctrldata->voltDRef, mdctrldata->voltQRef);

@@ -28,6 +28,7 @@ private:
   float elecAngOfsRM = 0.0f;
   float elecAngOfsFP = 0.0f;
   float elecAngOfsFM = 0.0f;
+  float tuneDiff = 0.0f;
   int32_t idleCount = 0;
   
 

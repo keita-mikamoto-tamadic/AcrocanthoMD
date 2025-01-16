@@ -15,7 +15,7 @@ extern Util util;
 extern ElecangCalib elecangcalib;
 extern BldcCtrl bldcctrl;
 
-#define PBM_SCALEFACTOR (1.155f)
+#define PBM_SCALEFACTOR (1.0f)
 
 ModeControl::ModeControl()
   : data(std::make_unique<ModeControlData>()){}
