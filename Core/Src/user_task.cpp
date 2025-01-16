@@ -29,6 +29,7 @@ UserTask::UserTask()
 
 void UserTask::cyclicTask() {
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
+  Ang::AngData* angdata = ang.getData();
   static SeqID_t seqID = INIT;
 
    switch (seqID) {
@@ -85,6 +86,9 @@ void UserTask::cyclicTask() {
         break;
       }
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+      testvel = angdata->actVelLPF;
+      testpos = angdata->mechAng;
+      testelec = angdata->elecAng;
       outpwm.Poff();
       break;
 
@@ -107,7 +111,7 @@ void UserTask::idleTask() {
 void UserTask::motorControl() {
   using namespace Acrocantho;
   ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  Ang::AngData* angdata = ang.getAngData();
+  Ang::AngData* angdata = ang.getData();
   Foc::FocData* focdata = foc.getData();
   Cordic cordic;
 

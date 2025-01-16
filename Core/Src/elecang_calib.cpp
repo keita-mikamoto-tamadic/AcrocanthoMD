@@ -155,7 +155,7 @@ void ElecangCalib::elecCalSeq(){
 }
 
 bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecAngOfsMax, float _calDelta) {
-  Ang::AngData* angdata = ang.getAngData();
+  Ang::AngData* angdata = ang.getData();
   Util::UtilData* utildata = util.getUtilData();
   bool returnVal = false;
   

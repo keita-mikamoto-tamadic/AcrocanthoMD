@@ -26,11 +26,16 @@ class UserTask {
 public:
 
 private:
+  // test
   float test = 0.0f;
   float testid = 0.0f;
   float testiq = 0.0f;
   float testvd = 0.0f;
   float testvq = 0.0f;
+  float testpos = 0.0f;
+  float testvel = 0.0f;
+  float testelec = 0.0f;
+  // test
 
   uint8_t count = 0;
   bool servocheck = false;

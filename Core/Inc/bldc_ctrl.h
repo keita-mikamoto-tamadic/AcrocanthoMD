@@ -8,19 +8,29 @@
 
 class BldcCtrl {
 private:
+  // クリアしたいデータは構造体に入れておく
   struct VoltCtrlData {
     float voltD = 0.0f;
     float voltQ = 0.0f;
   };
 
   struct CurPidData {
-    float CurDPid = 0.0f;
-    float curQPid = 0.0f;
+    float curDPidRaw = 0.0f;
+    float curDErrSum = 0.0f;
+    float curDErrLPF = 0.0f;
+    float curDErrLPFPast = 0.0f;
+
+    float curQPidRaw = 0.0f;
+    float curQErrSum = 0.0f;
+    float curQErrLPF = 0.0f;
+    float curQErrLPFPast = 0.0f;
   };
 
   struct VelPidData {
-    float CurD = 0.0f;
-    float CurQ = 0.0f;
+    float velPidRaw = 0.0f;
+    float velErrLPF = 0.0f;
+    float velErrLPFPast = 0.0f;
+    float velErrSum = 0.0f;
   };
   
   struct PosPidData {
@@ -32,31 +42,25 @@ private:
   VelPidData velData;
   PosPidData posData;
 
-  // parameter
+  // hw param
   const float volMin = -12.0f;
   const float volMax = 12.0f;
   const float curMin = -1.0f;
   const float curMax = 1.0f;
 
+  // cur param
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
   const float curKp = 0.5f;
   const float curKi = 1.0f;
   const float curKd = 0.0f;
-  // parameter
-  
-  float curDPidCtrl(float _curDRef);
-  float curDCtrlOut = 0.0f;
-  float curDErrSum = 0.0f;
-  float curDErrLPF = 0.0f;
-  float curDErrLPFPast = 0.0f;
 
+  // vel param
+
+  float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);
-  float curQCtrlOut = 0.0f;
-  float curQErrSum = 0.0f;
-  float curQErrLPF = 0.0f;
-  float curQErrLPFPast = 0.0f;
+  float velPidCtrl(float _velRef);
   
 public:
   BldcCtrl();
@@ -70,13 +74,6 @@ public:
     curData = CurPidData();
     velData = VelPidData();
     posData = PosPidData();
-
-    curDErrSum = 0.0f;
-    curQErrSum = 0.0f;
-    curDErrLPF = 0.0f;
-    curQErrLPF = 0.0f;
-    curDErrLPFPast = 0.0f;
-    curQErrLPFPast = 0.0f;
   }
 
 };

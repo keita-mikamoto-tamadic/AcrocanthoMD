@@ -26,6 +26,8 @@ void ModeControl::modeCtrl(){
 
   float voltQRef_ = 0.0f;
   float voltDRef_ = 0.0f;
+  float curDRef_ = 0.0f;
+  float curQRef_ = 0.0f;
   
   refCtrl();
   

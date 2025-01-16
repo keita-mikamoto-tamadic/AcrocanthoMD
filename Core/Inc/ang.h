@@ -30,7 +30,7 @@ private:
   // ユニークポインタでデータ保持
   std::unique_ptr<AngData> data;
 
-  const float lpfFreq = 50.0f;
+  const float lpfFreq = 250.0f;
 
   I2C_HandleTypeDef& hi2c1;
   bool readStart;
@@ -63,11 +63,11 @@ private:
   void mechAngleVelLPF();
   
   float raw2rad(uint16_t raw){
-    return static_cast<float>(raw) * user2pi / 4096.0f;
+    return static_cast<float>(raw) * user2pi / 4095.0f;
   }
   
   float raw2rads(int16_t raw){
-    return static_cast<float>(raw) * user2pi / 4096.0f / (TASK_TIME * static_cast<float>(compTime));
+    return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME * static_cast<float>(compTime));
   }
 
 
@@ -81,6 +81,6 @@ public:
   void i2cMasterRxCallback();
   void prepareCanData(uint8_t* buffer, size_t bufferSize) const;
   
-  AngData* getAngData() const { return data.get(); }
+  AngData* getData() const { return data.get(); }
   
 };

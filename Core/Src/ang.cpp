@@ -55,7 +55,11 @@ void Ang::getVel() {
     // 更新なしのため速度更新不要
   } else {
     // 速度計算
-    diff = static_cast<int16_t>(rawAng - rawAngPast);
+    if (rawAng != rawAngPast) {
+      diff = static_cast<int16_t>(rawAng - rawAngPast);
+    } else {
+      diff = 0;
+    }
 
     // 0またぎ判定処理
     if (diff > ANG_RESL_12BIT / 2) {
@@ -67,7 +71,6 @@ void Ang::getVel() {
     data->actVel = raw2rads(diff);
     mechAngleVelLPF();
   }
-  data->veltemp = diff;
 }
 
 void Ang::mechAngleVelLPF(){

@@ -2,11 +2,13 @@
 
 #include <memory>
 
+#include "ang.h"
 #include "param.h"
 #include "foc.h"
 
 BldcCtrl bldcctrl;
 extern Foc foc;
+extern Ang ang;
 
 BldcCtrl::BldcCtrl(){}
   
@@ -22,36 +24,38 @@ float BldcCtrl::voltQCtrl(float _curQ) {
 
 float BldcCtrl::curDPidCtrl(float _curDRef) {
   Foc::FocData* focdata = foc.getData();
+  
+  float curDCtrlOut = 0.0f;
 
   // ==== PControl ====
   float curDErr_ = _curDRef - focdata->id;
 
   // ==== IControl ====
   // アンチワインドアップ
-  if ((volMin < curData.CurDPid) &&
-      (curData.CurDPid < volMax)) {
-    curDErrSum += (curDErr_ * TASK_TIME);
+  if ((volMin < curData.curDPidRaw) &&
+      (curData.curDPidRaw < volMax)) {
+    curData.curDErrSum += (curDErr_ * TASK_TIME);
   } else {
     // Do nothing
   }
 
   //==== DControl ====
-  curDErrLPF = (1.0f - lpfcoef) * curDErrLPF + lpfcoef * curDErr_;
-  float curDErrDiff_ = (curDErr_ - curDErrLPFPast) / TASK_TIME;
+  curData.curDErrLPF = (1.0f - lpfcoef) * curData.curDErrLPF + lpfcoef * curDErr_;
+  float curDErrDiff_ = (curDErr_ - curData.curDErrLPFPast) / TASK_TIME;
   // 微分用前回値
-  curDErrLPFPast = curDErrLPF;
+  curData.curDErrLPFPast = curData.curDErrLPF;
   
   // ==== PID Control ====
-  curData.CurDPid = 
-    curKp * curDErr_ + curKi * curDErrSum + curKd * curDErrDiff_;
+  curData.curDPidRaw = 
+    curKp * curDErr_ + curKi * curData.curDErrSum + curKd * curDErrDiff_;
   
   // 出力飽和
-  if (curData.CurDPid > volMax) {
+  if (curData.curDPidRaw > volMax) {
     curDCtrlOut = volMax;
-  } else if (curData.CurDPid < volMin) {
+  } else if (curData.curDPidRaw < volMin) {
     curDCtrlOut = volMin;
   } else {
-    curDCtrlOut = curData.CurDPid;
+    curDCtrlOut = curData.curDPidRaw;
   }
 
   return curDCtrlOut;
@@ -59,36 +63,61 @@ float BldcCtrl::curDPidCtrl(float _curDRef) {
 
 float BldcCtrl::curQPidCtrl(float _curQRef) {
   Foc::FocData* focdata = foc.getData();
+  float curQCtrlOut = 0.0f;
   
   // ==== PControl ====
   float curQErr_ = _curQRef - focdata->iq;
   
   // ==== IControl ====
   // アンチワインドアップ
-  if ((volMin < curData.curQPid) &&
-      (curData.curQPid < volMax)) {
-    curQErrSum += (curQErr_ * TASK_TIME);
+  if ((volMin < curData.curQPidRaw) &&
+      (curData.curQPidRaw < volMax)) {
+    curData.curQErrSum += (curQErr_ * TASK_TIME);
   } else {
     // Do nothing
   }
 
   // ==== DControl ====
-  curQErrLPF = (1.0f - lpfcoef) * curQErrLPF + lpfcoef * curQErr_;
-  float curQErrDiff_ = (curQErr_ - curQErrLPFPast) / TASK_TIME;
+  curData.curQErrLPF = (1.0f - lpfcoef) * curData.curQErrLPF + lpfcoef * curQErr_;
+  float curQErrDiff_ = (curQErr_ - curData.curQErrLPFPast) / TASK_TIME;
   // 微分用前回値
-  curQErrLPFPast = curQErrLPF;
+  curData.curQErrLPFPast = curData.curQErrLPF;
 
   // ==== PID Control ====
-  curData.curQPid = 
-    curKp * curQErr_ + curKi * curQErrSum + curKd * curQErrDiff_;
+  curData.curQPidRaw = 
+    curKp * curQErr_ + curKi * curData.curQErrSum + curKd * curQErrDiff_;
   
-  if (curData.curQPid > volMax) {
+  if (curData.curQPidRaw > volMax) {
     curQCtrlOut = volMax;
-  } else if (curData.curQPid < volMin) {
+  } else if (curData.curQPidRaw < volMin) {
     curQCtrlOut = volMin;
   } else {
-    curQCtrlOut = curData.curQPid;
+    curQCtrlOut = curData.curQPidRaw;
   }
   
   return curQCtrlOut;
+}
+
+float BldcCtrl::velPidCtrl(float _velRef) {
+  Ang::AngData* angdata = ang.getData();
+
+  float velCtrlOut = 0.0f;
+  
+  // ==== PControl ====
+  float velErr_ = _velRef - angdata->actVel;
+  
+  // ==== IControl ====
+  if (curMin < velErr_ && velErr_ < curMax) {
+    velData.velErrSum += (velErr_ * TASK_TIME);
+  } else {
+    // Do nothing
+  }
+  // ==== DControl ====
+  velData.velErrLPF = (1.0f - lpfcoef) * velData.velErrLPF + lpfcoef * velErr_;
+  float velErrDiff_ = (velErr_ - velData.velErrLPFPast) / TASK_TIME;
+  // 微分用前回値
+  velData.velErrLPFPast = velData.velErrLPF;
+
+
+  return velCtrlOut;
 }
