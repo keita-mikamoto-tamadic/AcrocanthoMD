@@ -66,7 +66,9 @@ void CanCom::handleRxData() {
     data->voltQRef = static_cast<float>(rxData[3]);
     data->virAngFreq = static_cast<float>(rxData[4]);
     data->curDRef = static_cast<float>(rxData[5]);
-    data->curQRef = static_cast<float>(rxData[6]);
+    data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[6]));
+    if (data->curQRef > 0.0f) data->curQRef = 0.5f;
+    if (data->curQRef < 0.0f) data->curQRef = -0.5f;
 
     canRxInterrupt = false;
     canTxFlag = true;

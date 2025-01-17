@@ -52,6 +52,7 @@ void UserTask::cyclicTask() {
       
       elecangcalib.elecCalSeq();
       test = ecaldata->elecAngOfs;
+      testvel = angdata->actVelLPF;
       motorControl();
 
       break;
@@ -86,7 +87,6 @@ void UserTask::cyclicTask() {
         break;
       }
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-      testvel = angdata->actVelLPF;
       testpos = angdata->mechAng;
       testelec = angdata->elecAng;
       outpwm.Poff();

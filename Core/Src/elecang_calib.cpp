@@ -191,7 +191,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
 
       if (count++ < CALIB_COUNT) {
         if (user2pi < angdata->elecAng) angdata->elecAng -= user2pi;
-        velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->actVel;
+          velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->actVel;
       } else {
         // 電気角オフセットの更新
         if (indexnum < CALIB_NUM) {

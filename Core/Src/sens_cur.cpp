@@ -13,7 +13,9 @@
 #define GAIN_SHUNT                (0.010f) /* 10mohm */
 #define AMPGAIN                   (1.0f / (GAIN_AMP * GAIN_SHUNT))
 #define ADGAIN                    ((1.0f / AD_RESL) * ADVOLT * AMPGAIN)
-#define ADC_TO_CUR(U2_V, U2_OFFS) (((float)((int16_t)U2_V - (int16_t)U2_OFFS)) * ADGAIN) /* アンプからモータへの電流流し込みでプラス */
+// キャリア波比較でのPWM生成をmode1で設定しており、update event　= キャリア波谷検出時 = PWM High時に
+// ADCをスキャンしているため、DUTYBASE基準で電圧正のときに電流は電圧とは逆の符号で流れる。
+#define ADC_TO_CUR(U2_V, U2_OFFS) (((float)((int16_t)U2_V - (int16_t)U2_OFFS)) * ADGAIN * -1) /* アンプからモータへの電流流し込みでプラス */
 
 SensCur senscur;
 extern OutPwm outpwm;
