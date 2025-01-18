@@ -43,8 +43,8 @@ private:
   PosPidData posData;
 
   // hw param
-  const float volMin = -12.0f;
-  const float volMax = 12.0f;
+  const float volMin = -24.0f;
+  const float volMax = 24.0f;
   const float curMin = -1.0f;
   const float curMax = 1.0f;
 
@@ -52,8 +52,8 @@ private:
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 0.1f;
-  const float curKi = 0.1f;
+  const float curKp = 1.261f;
+  const float curKi = 1000.0f;
   const float curKd = 0.0f;
 
   // vel param

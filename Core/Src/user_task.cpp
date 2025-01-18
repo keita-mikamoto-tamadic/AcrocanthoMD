@@ -88,7 +88,7 @@ void UserTask::cyclicTask() {
       }
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
       testpos = angdata->mechAng;
-      testelec = angdata->elecAng;
+      testelec = ecaldata->elecAngOfs;
       outpwm.Poff();
       break;
 
