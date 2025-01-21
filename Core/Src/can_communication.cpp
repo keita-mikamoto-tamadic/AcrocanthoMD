@@ -14,8 +14,8 @@ CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
   : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
     data(std::make_unique<CanData>()) {}
 
-void CanCom::initTxHeader(uint32_t canId, bool extendedId, bool fdFormat) {
-  txHeader.Identifier = canId;
+void CanCom::initTxHeader(bool extendedId, bool fdFormat) {
+  txHeader.Identifier = canDevID;
   txHeader.IdType = extendedId ? FDCAN_EXTENDED_ID : FDCAN_STANDARD_ID;
   txHeader.TxFrameType = FDCAN_DATA_FRAME;
   txHeader.DataLength = FDCAN_DLC_BYTES_8;
@@ -24,6 +24,27 @@ void CanCom::initTxHeader(uint32_t canId, bool extendedId, bool fdFormat) {
   txHeader.FDFormat = fdFormat ? FDCAN_FD_CAN : FDCAN_CLASSIC_CAN;
   txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
   txHeader.MessageMarker = 0;
+}
+
+void CanCom::initFilter(void) {
+  FDCAN_FilterTypeDef filter;
+
+  filter.IdType = FDCAN_STANDARD_ID;
+  filter.FilterIndex = 0;
+  filter.FilterType = FDCAN_FILTER_MASK;
+  filter.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  filter.FilterID1 = canDevID;
+  filter.FilterID2 = 0x00F;
+  HAL_FDCAN_ConfigFilter(&hfdcan1, &filter);
+
+  // filter 2 global用
+  filter.FilterIndex = 1;
+  filter.FilterID1 = 0x000;
+  filter.FilterID2 = 0x00F;
+  HAL_FDCAN_ConfigFilter(&hfdcan1, &filter);
+  
+  HAL_FDCAN_ConfigGlobalFilter(&hfdcan1, FDCAN_REJECT, FDCAN_REJECT, FDCAN_FILTER_REMOTE, FDCAN_FILTER_REMOTE);
+  
 }
 
 void CanCom::sendData(const uint8_t* data, size_t size) {

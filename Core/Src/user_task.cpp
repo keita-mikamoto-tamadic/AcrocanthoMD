@@ -103,7 +103,7 @@ void UserTask::idleTask() {
   cancom.rxTask();
   util.genFuncCtrl();
 
-  cancom.initTxHeader(0x01, false, false);
+  cancom.initTxHeader(false, false);
   cancom.txTask();
 }
 

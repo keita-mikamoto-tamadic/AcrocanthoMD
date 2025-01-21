@@ -139,19 +139,7 @@ int main(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
 
   // CANフィルタ
-  FDCAN_FilterTypeDef CAN_FilterConfig;
-  CAN_FilterConfig.IdType = FDCAN_STANDARD_ID;
-  CAN_FilterConfig.FilterIndex = 0;
-  CAN_FilterConfig.FilterType = FDCAN_FILTER_MASK;
-  CAN_FilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  CAN_FilterConfig.FilterID1 = 0x000;  // フィルタID
-  CAN_FilterConfig.FilterID2 = 0x000;  // マスク
-
-    if (HAL_FDCAN_ConfigFilter(&hfdcan1, &CAN_FilterConfig) != HAL_OK)
-    {
-        // フィルタ設定エラー
-        Error_Handler();
-    } 
+  cancom.initFilter();
   // STart FDCAN1
   if(HAL_FDCAN_Start(&hfdcan1)!= HAL_OK) {
 	  Error_Handler();
@@ -440,7 +428,7 @@ static void MX_FDCAN1_Init(void)
   hfdcan1.Init.DataSyncJumpWidth = 4;
   hfdcan1.Init.DataTimeSeg1 = 12;
   hfdcan1.Init.DataTimeSeg2 = 4;
-  hfdcan1.Init.StdFiltersNbr = 1;
+  hfdcan1.Init.StdFiltersNbr = 2;
   hfdcan1.Init.ExtFiltersNbr = 0;
   hfdcan1.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan1) != HAL_OK)

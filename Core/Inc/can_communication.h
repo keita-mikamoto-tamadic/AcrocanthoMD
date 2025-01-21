@@ -4,6 +4,8 @@
 #include <memory>
 #include "main.h"
 
+constexpr uint32_t canDevID = 1;
+
 class CanCom {
 public:
   struct CanData {
@@ -37,7 +39,8 @@ public:
   // Constracta
   CanCom(FDCAN_HandleTypeDef& fdcanHandle);
 
-  void initTxHeader(uint32_t canId, bool extendedId = false, bool fdFormat = false);
+  void initTxHeader(bool extendedId = false, bool fdFormat = false);
+  void initFilter(void);
   void sendData(const uint8_t* data, size_t size);
   void rxFifo0Callback(uint32_t RxFifo0ITs);
   void handleRxData();
