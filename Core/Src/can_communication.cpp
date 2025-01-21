@@ -95,7 +95,8 @@ void CanCom::handleRxData() {
 }
 
 void CanCom::rxTask() {
-  handleRxData();
+  //handleRxData();
+  rxMsglist(rxData);
   uint8_t currentGenFuncRef = data->genFuncRef;
 
   if (currentGenFuncRef == prevGenFuncRef) {
@@ -111,6 +112,28 @@ void CanCom::txTask(){
     ang.prepareCanData(data->txBuff, sizeof(data->txBuff));
     sendData(data->txBuff, sizeof(data->txBuff));
     canTxFlag = false;
+  }
+}
+
+void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
+
+  if (canRxInterrupt == true) {
+    uint8_t funcbit = (rxHeader.Identifier >> 3);
+    switch (funcbit) {
+      case (0x200 >> 3):
+        data->genFuncRef = rx[0];
+        data->drvMdRef = rx[1];
+        break;
+      case (0x300 >> 3):
+        data->virAngFreq = static_cast<float>(rx[0]);
+        data->voltDRef = static_cast<float>(rx[1]);
+        data->voltQRef = static_cast<float>(rx[2]);
+        data->curDRef = static_cast<float>(rx[3]);
+        data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[4]));
+        break;
+    }
+    canRxInterrupt = false;
+    canTxFlag = true;
   }
 }
 

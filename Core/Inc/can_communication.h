@@ -32,6 +32,8 @@ private:
   uint8_t rxData[8];
   uint8_t prevGenFuncRef;
   volatile bool canRxInterrupt;
+  
+  void rxMsglist(const uint8_t (&rx)[8]);
 
 public:
   volatile bool canTxFlag;
