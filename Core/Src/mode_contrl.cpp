@@ -48,8 +48,8 @@ void ModeControl::modeCtrl(){
     case CTRLMODE_VEL:
       velPIDOut_ = bldcctrl.velPidCtrl(s_velRef);
       data->vel = velPIDOut_;
-      voltDRef_ = bldcctrl.voltDCtrl(s_curDRef);
-      voltQRef_ = bldcctrl.voltQCtrl(s_curQRef);
+      voltDRef_ = bldcctrl.voltDCtrl(0.0f);
+      voltQRef_ = bldcctrl.voltQCtrl(velPIDOut_);
       break;
     case CTRLMODE_POS:
       break;
@@ -95,7 +95,9 @@ void ModeControl::refCtrl(){
       s_drvMdRef = elecangcalibdata->drvMd;
       s_voltQRef = elecangcalibdata->voltQRef;
       s_voltDRef = 0.0f;
-      
+      s_curDRef = 0.0f;
+      s_curQRef = 0.0f;
+      s_velRef = 0.0f;
     }
     // どの特殊モードにも当てはまらない場合、上位指令をセット
     else
