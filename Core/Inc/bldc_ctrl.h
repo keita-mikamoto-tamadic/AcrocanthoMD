@@ -45,8 +45,8 @@ private:
   // hw param
   const float volMin = -24.0f;
   const float volMax = 24.0f;
-  const float curMin = -1.0f;
-  const float curMax = 1.0f;
+  const float curQMin = -1.0f;
+  const float curQMax = 1.0f;
 
   // cur param
   const float cutOffFreq = 100.0f;
@@ -57,16 +57,19 @@ private:
   const float curKd = 0.0f;
 
   // vel param
+  const float velKp = 0.1f;
+  const float velKi = 0.1f;
+  const float velKd = 0.0f;
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);
-  float velPidCtrl(float _velRef);
   
 public:
   BldcCtrl();
 
   float voltDCtrl(float _curD);
   float voltQCtrl(float _curQ);
+  float velPidCtrl(float _velRef);
 
   // サーボオフ時にデータをリセット
   void resetData() {

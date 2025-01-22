@@ -28,6 +28,7 @@ void ModeControl::modeCtrl(){
   float voltDRef_ = 0.0f;
   float curDRef_ = 0.0f;
   float curQRef_ = 0.0f;
+  float velPIDOut_ = 0.0f;
   
   refCtrl();
   
@@ -45,6 +46,10 @@ void ModeControl::modeCtrl(){
       voltQRef_ = bldcctrl.voltQCtrl(s_curQRef);
       break;
     case CTRLMODE_VEL:
+      velPIDOut_ = bldcctrl.velPidCtrl(s_velRef);
+      data->vel = velPIDOut_;
+      voltDRef_ = bldcctrl.voltDCtrl(s_curDRef);
+      voltQRef_ = bldcctrl.voltQCtrl(s_curQRef);
       break;
     case CTRLMODE_POS:
       break;
@@ -72,6 +77,7 @@ void ModeControl::modeCtrl(){
     if (voltQMax < voltDRef_) voltDRef_ = voltDMax;
     else if (voltDRef_ < -voltDMax) voltDRef_ = -voltDMax;
   }
+  data->vel = velPIDOut_;
   
   data->voltDRef = voltDRef_;
   data->voltQRef = voltQRef_;
@@ -99,6 +105,7 @@ void ModeControl::refCtrl(){
       s_voltQRef = candata->voltQRef;
       s_curDRef = candata->curDRef;
       s_curQRef = candata->curQRef;
+      s_velRef = candata->velRef;
     }
   }
 }

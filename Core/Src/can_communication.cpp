@@ -79,23 +79,7 @@ void CanCom::rxFifo0Callback(uint32_t RxFifo0ITs) {
   }
 }
 
-void CanCom::handleRxData() {
-  if (canRxInterrupt == true) {
-    data->genFuncRef = rxData[0];
-    data->drvMdRef = rxData[1];
-    data->voltDRef = static_cast<float>(rxData[2]);
-    data->voltQRef = static_cast<float>(rxData[3]);
-    data->virAngFreq = static_cast<float>(rxData[4]);
-    data->curDRef = static_cast<float>(rxData[5]);
-    data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[6]));
-
-    canRxInterrupt = false;
-    canTxFlag = true;
-  }
-}
-
 void CanCom::rxTask() {
-  //handleRxData();
   rxMsglist(rxData);
   uint8_t currentGenFuncRef = data->genFuncRef;
 
@@ -121,16 +105,24 @@ void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
     uint8_t funcbit = (rxHeader.Identifier >> 3);
     switch (funcbit) {
       case (0x200 >> 3):
-        data->genFuncRef = rx[0];
-        data->drvMdRef = rx[1];
+        data->genFuncRef = rxData[0];
+        data->drvMdRef = rxData[1];
+        data->virAngFreq = static_cast<float>(rxData[2]);
+        data->voltDRef = static_cast<float>(rxData[3]);
+        data->voltQRef = static_cast<float>(rxData[4]);
         break;
       case (0x300 >> 3):
-        data->virAngFreq = static_cast<float>(rx[0]);
-        data->voltDRef = static_cast<float>(rx[1]);
-        data->voltQRef = static_cast<float>(rx[2]);
-        data->curDRef = static_cast<float>(rx[3]);
-        data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[4]));
+        data->genFuncRef = rxData[0];
+        data->drvMdRef = rxData[1];
+        data->curDRef = static_cast<float>(rxData[2]);
+        data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[3]));
         break;
+      case (0x400 >> 3):
+        data->genFuncRef = rxData[0];
+        data->drvMdRef = rxData[1];
+        data->velRef = static_cast<float>(static_cast<int8_t>(rxData[2]));
+        break;
+
     }
     canRxInterrupt = false;
     canTxFlag = true;

@@ -16,6 +16,7 @@ public:
     float virAngFreq = 0;
     float curQRef = 0;
     float curDRef = 0;
+    float velRef = 0.0f;
 
     bool genFuncCheck = false;
     uint8_t txBuff[8] = {0};
@@ -34,6 +35,7 @@ private:
   volatile bool canRxInterrupt;
   
   void rxMsglist(const uint8_t (&rx)[8]);
+  
 
 public:
   volatile bool canTxFlag;
@@ -45,7 +47,6 @@ public:
   void initFilter(void);
   void sendData(const uint8_t* data, size_t size);
   void rxFifo0Callback(uint32_t RxFifo0ITs);
-  void handleRxData();
   void rxTask();
   void txTask();
 

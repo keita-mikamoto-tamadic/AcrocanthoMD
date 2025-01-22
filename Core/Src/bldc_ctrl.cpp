@@ -107,7 +107,7 @@ float BldcCtrl::velPidCtrl(float _velRef) {
   float velErr_ = _velRef - angdata->actVel;
   
   // ==== IControl ====
-  if (curMin < velErr_ && velErr_ < curMax) {
+  if (curQMin < velErr_ && velErr_ < curQMax) {
     velData.velErrSum += (velErr_ * TASK_TIME);
   } else {
     // Do nothing
@@ -117,7 +117,19 @@ float BldcCtrl::velPidCtrl(float _velRef) {
   float velErrDiff_ = (velErr_ - velData.velErrLPFPast) / TASK_TIME;
   // 微分用前回値
   velData.velErrLPFPast = velData.velErrLPF;
-
+  
+  // ==== PID Control ====
+  velData.velPidRaw = 
+    velKp * velErr_ + velKi * velData.velErrSum + velKd * velErrDiff_;
+  
+  // 出力飽和
+  if (velData.velPidRaw > curQMax) {
+    velCtrlOut = curQMax;
+  } else if (velData.velPidRaw < curQMin) {
+    velCtrlOut = curQMin;
+  } else {
+    velCtrlOut = velData.velPidRaw;
+  }
 
   return velCtrlOut;
 }

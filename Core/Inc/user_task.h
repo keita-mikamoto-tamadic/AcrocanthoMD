@@ -35,6 +35,7 @@ private:
   float testpos = 0.0f;
   float testvel = 0.0f;
   float testelec = 0.0f;
+  float testvelact = 0.0f;
   // test
 
   uint8_t count = 0;

@@ -52,7 +52,6 @@ void UserTask::cyclicTask() {
       
       elecangcalib.elecCalSeq();
       test = ecaldata->elecAngOfs;
-      testvel = angdata->actVelLPF;
       motorControl();
 
       break;
@@ -129,6 +128,8 @@ void UserTask::motorControl() {
   
   testvd = mdctrldata->voltDRef;
   testvq = mdctrldata->voltQRef;
+  testvel = mdctrldata->vel;
+  testvelact = angdata->actVel;
 
   // dq逆変換
   foc.inverseCtrl(result, mdctrldata->voltDRef, mdctrldata->voltQRef);

@@ -19,6 +19,7 @@ public:
     float voltDRef = 0;
     float voltQRef = 0;
     float virAngFreq = 0;
+    float vel = 0.0f;
   };
   
 private:
@@ -29,6 +30,7 @@ private:
   float s_virAngFreq = 0.0f;
   float s_curDRef = 0.0f;
   float s_curQRef  = 0.0f;
+  float s_velRef = 0.0f;
   st_mode mode = CTRLMODE_NONE;
   void refCtrl();
 
