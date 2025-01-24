@@ -52,8 +52,8 @@ private:
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 1.261f;
-  const float curKi = 1000.0f;
+  const float curKp = 1.1f;
+  const float curKi = 250.0f;
   const float curKd = 0.0f;
 
   // vel param
