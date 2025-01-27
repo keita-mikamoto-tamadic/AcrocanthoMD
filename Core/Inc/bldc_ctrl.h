@@ -7,6 +7,12 @@
 #include "user_math.h"
 
 class BldcCtrl {
+public:
+  struct BldcCtrlData {
+    float testerrQ = 0.0f;
+    float testerrD = 0.0f;
+  };
+
 private:
   // クリアしたいデータは構造体に入れておく
   struct VoltCtrlData {
@@ -53,7 +59,7 @@ private:
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
   const float curKp = 1.1f;
-  const float curKi = 250.0f;
+  const float curKi = 120.0f;
   const float curKd = 0.0f;
 
   // vel param
@@ -63,6 +69,8 @@ private:
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);
+  
+  std::unique_ptr<BldcCtrlData> data;
   
 public:
   BldcCtrl();
@@ -78,5 +86,7 @@ public:
     velData = VelPidData();
     posData = PosPidData();
   }
+  
+  BldcCtrl::BldcCtrlData* getData() { return data.get(); }
 
 };

@@ -94,15 +94,14 @@ void ElecangCalib::elecCalSeq(){
 
      
       tuneDiff = elecAngOfsFM - elecAngOfsFP;
-      
-      if (tuneDiff > userpi) {
+      data->elecAngOfsPlus = elecAngOfsFP;
+      data->elecAngOfsMinus = elecAngOfsFM;
+      if (((elecAngOfsFP + userpi) < elecAngOfsFM) || (elecAngOfsFM < (elecAngOfsFP - userpi))) {
         data->elecAngOfs = ((elecAngOfsFP + elecAngOfsFM) / 2) - userpi;
-      } else if (tuneDiff < -userpi) {
-        data->elecAngOfs = ((elecAngOfsFP + elecAngOfsFM) / 2) + userpi;
-      } else {
+      }else{
         data->elecAngOfs = (elecAngOfsFP + elecAngOfsFM) / 2;
       }
-
+      
       if (data->elecAngOfs <= 0.0f) data->elecAngOfs += user2pi;
 
       seqID = END;

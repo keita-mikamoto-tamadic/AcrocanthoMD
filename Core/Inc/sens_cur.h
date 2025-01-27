@@ -10,6 +10,9 @@ public:
     float curV = 0.0f;
     float curW = 0.0f;
     
+    uint16_t testU = 0.0f;
+    uint16_t testW = 0.0f;
+    
   };
 
 private:

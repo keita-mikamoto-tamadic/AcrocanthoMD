@@ -50,8 +50,13 @@ void UserTask::cyclicTask() {
       ang.getVel();
       ang.elecAngleIn();
       
+      // elecAng offset
       elecangcalib.elecCalSeq();
       test = ecaldata->elecAngOfs;
+      eofsm = ecaldata->elecAngOfsMinus;
+      eofsp = ecaldata->elecAngOfsPlus;
+      // 
+      
       motorControl();
 
       break;
@@ -86,8 +91,7 @@ void UserTask::cyclicTask() {
         break;
       }
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-      testpos = angdata->mechAng;
-      testelec = ecaldata->elecAngOfs;
+
       outpwm.Poff();
       break;
 
@@ -112,6 +116,9 @@ void UserTask::motorControl() {
   ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
   Ang::AngData* angdata = ang.getData();
   Foc::FocData* focdata = foc.getData();
+  CanCom::CanData* candata = cancom.getData();
+  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
+  SensCur::SensCurData* senscurdata = senscur.getData();
   Cordic cordic;
 
   // SinCos演算
@@ -128,8 +135,16 @@ void UserTask::motorControl() {
   
   testvd = mdctrldata->voltDRef;
   testvq = mdctrldata->voltQRef;
-  testvel = mdctrldata->vel;
-  testvelact = angdata->actVel;
+//  testvel = mdctrldata->vel;
+//  testvelact = angdata->actVel;
+//  testpos = angdata->mechAng;
+  testelec = angdata->elecAng;
+  testerrD = candata->curDRef;
+  testerrQ = candata->curQRef;
+  testCurU = senscurdata->testU;
+  testCurW = senscurdata->testW;
+  testcomp = angdata->eleccomp;
+
 
   // dq逆変換
   foc.inverseCtrl(result, mdctrldata->voltDRef, mdctrldata->voltQRef);

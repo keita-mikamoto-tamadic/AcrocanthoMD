@@ -26,6 +26,8 @@ SensCur::SensCur()
 void SensCur::getRawCur() {
   adcRawU = ADC1 -> JDR1;
   adcRawW = ADC2 -> JDR1;
+  data->testU = adcRawU;
+  data->testW = adcRawW;
 }
 
 void SensCur::sensCurIN() {

@@ -67,7 +67,7 @@ void Ang::getVel() {
     } else if (diff < -ANG_RESL_12BIT / 2) {
       diff += ANG_RESL_12BIT;
     }
-    
+    data->eleccomp = comp;
     data->actVel = raw2rads(diff);
     mechAngleVelLPF();
   }

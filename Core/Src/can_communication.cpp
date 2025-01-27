@@ -116,6 +116,7 @@ void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
         data->drvMdRef = rxData[1];
         data->curDRef = static_cast<float>(rxData[2]);
         data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[3]));
+        if(data->curQRef < 0.0f) data->curQRef = -1.0f;
         break;
       case (0x400 >> 3):
         data->genFuncRef = rxData[0];

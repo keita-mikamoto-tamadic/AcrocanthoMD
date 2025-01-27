@@ -10,7 +10,8 @@ BldcCtrl bldcctrl;
 extern Foc foc;
 extern Ang ang;
 
-BldcCtrl::BldcCtrl(){}
+BldcCtrl::BldcCtrl()
+  : data(std::make_unique<BldcCtrlData>()){}
   
 float BldcCtrl::voltDCtrl(float _curD) {
   voltData.voltD = curDPidCtrl(_curD);
@@ -29,6 +30,7 @@ float BldcCtrl::curDPidCtrl(float _curDRef) {
 
   // ==== PControl ====
   float curDErr_ = _curDRef - focdata->id;
+  data->testerrD = curDErr_;
 
   // ==== IControl ====
   // アンチワインドアップ
@@ -67,6 +69,7 @@ float BldcCtrl::curQPidCtrl(float _curQRef) {
   
   // ==== PControl ====
   float curQErr_ = _curQRef - focdata->iq;
+  data->testerrQ = curQErr_;
   
   // ==== IControl ====
   // アンチワインドアップ

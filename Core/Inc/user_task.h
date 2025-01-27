@@ -28,6 +28,8 @@ public:
 private:
   // test
   float test = 0.0f;
+  float eofsp = 0.0f;
+  float eofsm = 0.0f;
   float testid = 0.0f;
   float testiq = 0.0f;
   float testvd = 0.0f;
@@ -36,6 +38,11 @@ private:
   float testvel = 0.0f;
   float testelec = 0.0f;
   float testvelact = 0.0f;
+  float testerrQ = 0.0f;
+  float testerrD = 0.0f;
+  float testCurU = 0.0f;
+  float testCurW = 0.0f;
+  uint32_t testcomp = 0;
   // test
 
   uint8_t count = 0;

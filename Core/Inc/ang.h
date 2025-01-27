@@ -24,6 +24,7 @@ public:
     float actVelLPF = 0.0f;
     int16_t veltemp = 0;
     float elecAngTest = 0.0f;
+    uint32_t eleccomp = 0;
   };
 
 private:
