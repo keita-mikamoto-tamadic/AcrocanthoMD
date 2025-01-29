@@ -25,13 +25,16 @@ public:
     int16_t veltemp = 0;
     float elecAngTest = 0.0f;
     uint32_t eleccomp = 0;
+    int16_t testdiff = 0.0f;
+    uint16_t rawAngtest = 0;
+    uint16_t rawAngPasttest = 0;
   };
 
 private:
   // ユニークポインタでデータ保持
   std::unique_ptr<AngData> data;
 
-  const float lpfFreq = 250.0f;
+  const float lpfFreq = 50.0f;
 
   I2C_HandleTypeDef& hi2c1;
   bool readStart;

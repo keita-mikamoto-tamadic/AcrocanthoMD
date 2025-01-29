@@ -63,9 +63,9 @@ private:
   const float curKd = 0.0f;
 
   // vel param
-  const float velKp = 0.1f;
-  const float velKi = 0.1f;
-  const float velKd = 0.0f;
+  const float velKp = 0.3f;
+  const float velKi = 1.0f;
+  const float velKd = 0.0001f;
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);

@@ -36,7 +36,9 @@ void Ang::getAngle() {
 
   if (i2c_rx_complete) {
     rawAngPast = rawAng;
+    data->rawAngPasttest = rawAng;
     rawAng = static_cast<uint16_t>(rawEnc[0] << 8) | rawEnc[1];
+    data->rawAngtest = rawAng;
     mechAngPast = data->mechAng;
     data->mechAng = raw2rad(rawAng);
     
@@ -47,6 +49,7 @@ void Ang::getAngle() {
     comp = 0;
 
   } else ++comp;
+  data->eleccomp = comp;
 
 }
 
@@ -67,10 +70,10 @@ void Ang::getVel() {
     } else if (diff < -ANG_RESL_12BIT / 2) {
       diff += ANG_RESL_12BIT;
     }
-    data->eleccomp = comp;
     data->actVel = raw2rads(diff);
     mechAngleVelLPF();
   }
+  data->testdiff = diff;
 }
 
 void Ang::mechAngleVelLPF(){

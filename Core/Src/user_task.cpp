@@ -135,15 +135,18 @@ void UserTask::motorControl() {
   
   testvd = mdctrldata->voltDRef;
   testvq = mdctrldata->voltQRef;
-//  testvel = mdctrldata->vel;
+  testvel = angdata->actVelLPF;
+  testdiff = angdata->testdiff;
 //  testvelact = angdata->actVel;
-//  testpos = angdata->mechAng;
+  testpos = angdata->mechAng;
   testelec = angdata->elecAng;
   testerrD = candata->curDRef;
   testerrQ = candata->curQRef;
   testCurU = senscurdata->testU;
   testCurW = senscurdata->testW;
   testcomp = angdata->eleccomp;
+  testrawAng = angdata->rawAngtest;
+  testrawAngPast = angdata->rawAngPasttest;
 
 
   // dq逆変換
