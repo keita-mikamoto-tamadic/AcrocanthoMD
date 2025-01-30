@@ -11,6 +11,8 @@ public:
   struct BldcCtrlData {
     float testerrQ = 0.0f;
     float testerrD = 0.0f;
+    float testvelErr = 0.0f;
+    float testvelErrSum = 0.0f;
   };
 
 private:
@@ -58,14 +60,14 @@ private:
   const float cutOffFreq = 100.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 1.1f;
-  const float curKi = 120.0f;
+  const float curKp = 0.51f;
+  const float curKi = 100.0f;
   const float curKd = 0.0f;
 
   // vel param
-  const float velKp = 0.3f;
-  const float velKi = 1.0f;
-  const float velKd = 0.0001f;
+  const float velKp = 0.25f;
+  const float velKi = 30.0f;
+  const float velKd = 0.0f;
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);

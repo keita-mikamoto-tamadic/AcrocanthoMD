@@ -139,14 +139,16 @@ void UserTask::motorControl() {
   testdiff = angdata->testdiff;
 //  testvelact = angdata->actVel;
   testpos = angdata->mechAng;
-  testelec = angdata->elecAng;
-  testerrD = candata->curDRef;
-  testerrQ = candata->curQRef;
-  testCurU = senscurdata->testU;
-  testCurW = senscurdata->testW;
-  testcomp = angdata->eleccomp;
+  //testelec = angdata->elecAng;
+  //testerrD = candata->curDRef;
+  //testerrQ = candata->curQRef;
+  //testCurU = senscurdata->testU;
+  //testCurW = senscurdata->testW;
+  //testcomp = angdata->eleccomp;
   testrawAng = angdata->rawAngtest;
   testrawAngPast = angdata->rawAngPasttest;
+  testvelerr = bldcdata->testvelErr;
+  testvelerrsum = bldcdata->testvelErrSum;
 
 
   // dq逆変換

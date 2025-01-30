@@ -107,16 +107,19 @@ float BldcCtrl::velPidCtrl(float _velRef) {
   float velCtrlOut = 0.0f;
   
   // ==== PControl ====
-  float velErr_ = _velRef - angdata->actVelLPF;
+  float velErr_ = _velRef + angdata->actVelLPF;
+  // test
+  data->testvelErr = velErr_;
   
   // ==== IControl ====
   // アンチワインドアップ - 出力が制限値内の場合のみ積分を実行
   if (curQMin < velData.velPidRaw && velData.velPidRaw < curQMax) {
     velData.velErrSum += (velErr_ * TASK_TIME);
   } else {
-    // 積分項をリセット
-    velData.velErrSum = 0.0f;
   }
+  data->testvelErrSum = velData.velErrSum;
+  
+  
   // ==== DControl ====
   velData.velErrLPF = (1.0f - lpfcoef) * velData.velErrLPF + lpfcoef * velErr_;
   float velErrDiff_ = (velErr_ - velData.velErrLPFPast) / TASK_TIME;

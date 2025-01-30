@@ -46,6 +46,8 @@ private:
   uint16_t testrawAng = 0;
   uint16_t testrawAngPast = 0;
   int16_t testdiff = 0;
+  float testvelerr = 0.0f;
+  float testvelerrsum = 0.0f;
   // test
 
   uint8_t count = 0;
