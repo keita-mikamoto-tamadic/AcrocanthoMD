@@ -3,6 +3,7 @@
 #include "main.h"
 #include "user_math.h"
 #include "param.h"
+#include "util.h"
 
 constexpr float DutyGuard = 0.99f;
 constexpr float VoltGuard = 14.0f;
@@ -16,17 +17,32 @@ void OutPwm::Pon(){
 }
 
 void OutPwm::Poff(){
+#if defined(PWMTIM_NO_1)
   TIM1->CCR1 = 0; 
   TIM1->CCR2 = 0; 
   TIM1->CCR3 = 0; 
+
+#elif defined(PWMTIM_NO_8)
+  TIM8->CCR1 = 0; 
+  TIM8->CCR2 = 0; 
+  TIM8->CCR3 = 0; 
+#endif
+
 }
 
 void OutPwm::setReg(float u, float v, float w){
   midVol(u, v, w);
 
+#if defined(PWMTIM_NO_1)
   TIM1->CCR1 = (uint16_t)((1.0f - dutyGuard(u)) * (float)CCR_MAX);
   TIM1->CCR2 = (uint16_t)((1.0f - dutyGuard(v)) * (float)CCR_MAX);
   TIM1->CCR3 = (uint16_t)((1.0f - dutyGuard(w)) * (float)CCR_MAX);
+
+#elif defined(PWMTIM_NO_8)
+  TIM8->CCR1 = (uint16_t)((1.0f - dutyGuard(u)) * (float)CCR_MAX);
+  TIM8->CCR2 = (uint16_t)((1.0f - dutyGuard(v)) * (float)CCR_MAX);
+  TIM8->CCR3 = (uint16_t)((1.0f - dutyGuard(w)) * (float)CCR_MAX);
+#endif
 }
 
 

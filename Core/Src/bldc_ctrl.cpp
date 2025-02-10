@@ -107,7 +107,7 @@ float BldcCtrl::velPidCtrl(float _velRef) {
   float velCtrlOut = 0.0f;
   
   // ==== PControl ====
-  float velErr_ = _velRef + angdata->actVelLPF;
+  float velErr_ = _velRef - angdata->actVelLPF;
   // test
   data->testvelErr = velErr_;
   

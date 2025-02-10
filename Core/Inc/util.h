@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <memory>
 
+// コンパイルスイッチ用マクロ定義
+#define PWMTIM_NO_8
+
 class Util {
 public:
   struct UtilData {
