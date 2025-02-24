@@ -6,7 +6,7 @@
 #include "util.h"
 
 constexpr float DutyGuard = 0.99f;
-constexpr float VoltGuard = 14.0f;
+constexpr float VoltGuard = 24.0f;
 
 OutPwm outpwm;
 
@@ -45,6 +45,19 @@ void OutPwm::setReg(float u, float v, float w){
 #endif
 }
 
+void OutPwm::TEST_setReg(float u, float v, float w){
+
+#if defined(PWMTIM_NO_1)
+  TIM1->CCR1 = (uint16_t)((1.0f - u) * (float)CCR_MAX);
+  TIM1->CCR2 = (uint16_t)((1.0f - v) * (float)CCR_MAX);
+  TIM1->CCR3 = (uint16_t)((1.0f - w) * (float)CCR_MAX);
+
+#elif defined(PWMTIM_NO_8)
+  TIM8->CCR1 = (uint16_t)((1.0f - u) * (float)CCR_MAX);
+  TIM8->CCR2 = (uint16_t)((1.0f - v) * (float)CCR_MAX);
+  TIM8->CCR3 = (uint16_t)((1.0f - w) * (float)CCR_MAX);
+#endif
+}
 
 float OutPwm::dutyGuard(float _rawDuty){
   float result_ = 0.0f;

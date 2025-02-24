@@ -7,6 +7,8 @@
 // コンパイルスイッチ用マクロ定義
 #define PWMTIM_NO_8
 
+#define TEST_MODE
+
 class Util {
 public:
   struct UtilData {

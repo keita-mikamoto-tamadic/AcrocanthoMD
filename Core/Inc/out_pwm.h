@@ -19,5 +19,6 @@ public:
   void Pon();
   void Poff();
   void setReg(float u, float v, float w);
+  void TEST_setReg(float u, float v, float w);
   
 };

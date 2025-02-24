@@ -30,7 +30,19 @@ UserTask::UserTask()
 void UserTask::cyclicTask() {
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
   Ang::AngData* angdata = ang.getData();
+
+  static bool toggleState = false;  // 出力状態
+  static GPIO_PinState prevB1State = GPIO_PIN_RESET;  // 前回のボタン状態
+      
+  // 現在のボタン状態を取得
+  GPIO_PinState currentB1State = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+
+#if defined (TEST_MODE) 
+  // TEST_MODE有効
+  static SeqID_t seqID = TEST;
+#else
   static SeqID_t seqID = INIT;
+#endif
 
    switch (seqID) {
     case LOOP:
@@ -84,6 +96,7 @@ void UserTask::cyclicTask() {
       ang.getAngle();
       ang.getVel();
       ang.elecAngleIn();
+      testrawAng = angdata->rawAngtest;
       if (servoCheck()){
         outpwm.Pon();
 
@@ -94,6 +107,27 @@ void UserTask::cyclicTask() {
 
       outpwm.Poff();
       break;
+    
+    case TEST:
+      // テストモード 50%Duty出力
+      // ボタンの立ち上がりエッジを検出
+      if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
+        toggleState = !toggleState;  // 状態を反転
+      }
+      
+      // 状態に応じて出力を切り替え
+      if (toggleState) {
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+        outpwm.TEST_setReg(0.5f, 0.5f, 0.5f);
+      } else {
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+        outpwm.Poff();
+      }
+      
+      // ボタンの状態を保存
+      prevB1State = currentB1State;
+      break;
+      
 
     default:
       seqID = INIT;
@@ -145,7 +179,7 @@ void UserTask::motorControl() {
   //testCurU = senscurdata->testU;
   //testCurW = senscurdata->testW;
   //testcomp = angdata->eleccomp;
-  testrawAng = angdata->rawAngtest;
+  //testrawAng = angdata->rawAngtest;
   testrawAngPast = angdata->rawAngPasttest;
   testvelerr = bldcdata->testvelErr;
   testvelerrsum = bldcdata->testvelErrSum;
