@@ -13,6 +13,8 @@ public:
     float testerrD = 0.0f;
     float testvelErr = 0.0f;
     float testvelErrSum = 0.0f;
+    float testposErr = 0.0f;
+    float testposErrSum = 0.0f;
   };
 
 private:
@@ -42,7 +44,10 @@ private:
   };
   
   struct PosPidData {
-    float Vel = 0.0f;
+    float posPidRaw = 0.0f;
+    float posErrSum = 0.0f;
+    float posErrLPF = 0.0f;
+    float posErrLPFPast = 0.0f;
   };
 
   VoltCtrlData voltData;
@@ -53,8 +58,10 @@ private:
   // hw param
   const float volMin = -24.0f;
   const float volMax = 24.0f;
-  const float curQMin = -3.0f;
-  const float curQMax = 3.0f;
+  const float curQMin = -5.0f;
+  const float curQMax = 5.0f;
+  const float velMin = -100.0f;
+  const float velMax = 100.0f;
 
   // cur param
   const float cutOffFreq = 100.0f;
@@ -66,8 +73,13 @@ private:
 
   // vel param
   const float velKp = 0.25f;
-  const float velKi = 30.0f;
+  const float velKi = 50.0f;
   const float velKd = 0.0f;
+
+  // pos param
+  const float posKp = 50.0f;
+  const float posKi = 10.0f;
+  const float posKd = 0.0f;
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);
@@ -80,6 +92,7 @@ public:
   float voltDCtrl(float _curD);
   float voltQCtrl(float _curQ);
   float velPidCtrl(float _velRef);
+  float posPidCtrl(float _posRef);
 
   // サーボオフ時にデータをリセット
   void resetData() {

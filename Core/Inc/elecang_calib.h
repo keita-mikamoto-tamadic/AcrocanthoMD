@@ -4,7 +4,7 @@
 #include <memory>
 #include "user_task.h"
 
-#define CALIB_NUM       (60)                           /* 分割数 [-] */
+#define CALIB_NUM       (90)                           /* 分割数 [-] */
 
 class ElecangCalib
 {

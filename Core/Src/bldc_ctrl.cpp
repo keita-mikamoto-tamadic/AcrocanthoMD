@@ -141,3 +141,41 @@ float BldcCtrl::velPidCtrl(float _velRef) {
 
   return velCtrlOut;
 }
+
+float BldcCtrl::posPidCtrl(float _posRef) {
+  Ang::AngData* angdata = ang.getData();
+  float posCtrlOut = 0.0f;
+  
+  // ==== PControl ====
+  float posErr_ = _posRef - angdata->mechAng;
+  data->testposErr = posErr_;
+  
+  // ==== IControl ====
+  // アンチワインドアップ - 出力が制限値内の場合のみ積分を実行
+  if (velMin < posData.posPidRaw && posData.posPidRaw < velMax) {
+    posData.posErrSum += (posErr_ * TASK_TIME);
+  } else {
+  }
+  data->testposErrSum = posData.posErrSum;
+  
+  // ==== DControl ====
+  posData.posErrLPF = (1.0f - lpfcoef) * posData.posErrLPF + lpfcoef * posErr_;
+  float posErrDiff_ = (posErr_ - posData.posErrLPFPast) / TASK_TIME;
+  // 微分用前回値
+  posData.posErrLPFPast = posData.posErrLPF;
+
+  // ==== PID Control ====
+  posData.posPidRaw = 
+    posKp * posErr_ + posKi * posData.posErrSum + posKd * posErrDiff_;
+  
+  // 出力飽和
+  if (posData.posPidRaw > velMax) {
+    posCtrlOut = velMax;
+  } else if (posData.posPidRaw < velMin) {
+    posCtrlOut = velMin;
+  } else {
+    posCtrlOut = posData.posPidRaw;
+  }
+
+  return posCtrlOut;
+}

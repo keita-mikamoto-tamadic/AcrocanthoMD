@@ -17,6 +17,7 @@ public:
     float curQRef = 0;
     float curDRef = 0;
     float velRef = 0.0f;
+    float posRef = 0.0f;
 
     bool genFuncCheck = false;
     uint8_t txBuff[8] = {0};

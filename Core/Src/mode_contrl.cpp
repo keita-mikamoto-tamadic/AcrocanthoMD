@@ -29,6 +29,7 @@ void ModeControl::modeCtrl(){
   float curDRef_ = 0.0f;
   float curQRef_ = 0.0f;
   float velPIDOut_ = 0.0f;
+  float posPIDout_ = 0.0f;
   
   refCtrl();
   
@@ -52,6 +53,11 @@ void ModeControl::modeCtrl(){
       voltQRef_ = bldcctrl.voltQCtrl(velPIDOut_);
       break;
     case CTRLMODE_POS:
+      posPIDout_ = bldcctrl.posPidCtrl(s_posRef);
+      velPIDOut_ = bldcctrl.velPidCtrl(posPIDout_);
+      data->posout = posPIDout_;
+      voltDRef_ = bldcctrl.voltDCtrl(0.0f);
+      voltQRef_ = bldcctrl.voltQCtrl(velPIDOut_);
       break;
     default:
       mode = CTRLMODE_NONE;

@@ -77,6 +77,7 @@ void UserTask::cyclicTask() {
       resetAll();
       if (count < 10) {
         ang.getAngle();
+        ang.zeroPosOffset();
         count++;
       } else {
         // 電流オフセット補正
@@ -96,10 +97,15 @@ void UserTask::cyclicTask() {
       ang.getAngle();
       ang.getVel();
       ang.elecAngleIn();
-      testrawAng = angdata->rawAngtest;
+      ang.mechAngleIn();
+
+      // test
+      testpos = angdata->mechAng;
+      testelec = angdata->elecAngTest;
+      
+
       if (servoCheck()){
         outpwm.Pon();
-
         seqID = LOOP;
         break;
       }
@@ -172,17 +178,20 @@ void UserTask::motorControl() {
   testvel = angdata->actVelLPF;
   testdiff = angdata->testdiff;
 //  testvelact = angdata->actVel;
-  testpos = angdata->mechAng;
+  //testpos = angdata->mechAng;
   //testelec = angdata->elecAng;
   //testerrD = candata->curDRef;
   //testerrQ = candata->curQRef;
   //testCurU = senscurdata->testU;
   //testCurW = senscurdata->testW;
   //testcomp = angdata->eleccomp;
-  //testrawAng = angdata->rawAngtest;
+  testrawAng = angdata->rawAngtest;
   testrawAngPast = angdata->rawAngPasttest;
-  testvelerr = bldcdata->testvelErr;
-  testvelerrsum = bldcdata->testvelErrSum;
+  //testvelerr = bldcdata->testvelErr;
+  //testvelerrsum = bldcdata->testvelErrSum;
+  testposerr = bldcdata->testposErr;
+  testposerrsum = bldcdata->testposErrSum;
+  testposout = mdctrldata->posout;
 
 
   // dq逆変換

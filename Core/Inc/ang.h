@@ -8,10 +8,12 @@
 #include "param.h"
 
 #define ANG_RESL_12BIT (4095)
+#define MULT_TURN_NONE (0)
+#define MULT_TURN_POS (1)
+#define MULT_TURN_NEG (2)
 
 constexpr uint8_t rotDir = 0;
-constexpr uint8_t elecAngDir = 1;
-constexpr uint16_t polePairs = 14;
+constexpr uint8_t elecAngDir = 0;
 
 class Ang {
 public:
@@ -28,13 +30,14 @@ public:
     int16_t testdiff = 0.0f;
     uint16_t rawAngtest = 0;
     uint16_t rawAngPasttest = 0;
+    float zeroPosOffs = 0.0f;
   };
 
 private:
   // ユニークポインタでデータ保持
   std::unique_ptr<AngData> data;
 
-  const float lpfFreq = 100.0f;
+  const float lpfFreq = 200.0f;
 
   I2C_HandleTypeDef& hi2c1;
   bool readStart;
@@ -44,24 +47,23 @@ private:
   uint8_t rawEnc[2];
   uint16_t rawAng;
   uint16_t rawAngPast;
+  float mtAng = 0.0f;
   float mechAngPast;
   int16_t diff;
   float floatdiff;
   int16_t diffRaw;
   volatile int8_t i2c_tx_complete;
   volatile int8_t i2c_rx_complete;
+  uint8_t zeroPointTh = 0;
+  int32_t mtCount = 0;
   
-  int16_t compAng();
-
   void read();
-
   void receive();
 
   float elecAng(float _eofs);
   uint16_t rawElecComp = 0;
   
   float elecAngVirtual(float virfreq);
-
   void elecAngVel();
 
   void mechAngleVelLPF();
@@ -81,6 +83,8 @@ public:
   void getAngle();
   void getVel();
   void elecAngleIn();
+  void mechAngleIn();
+  void zeroPosOffset();
   void i2cMasterTxCallback();
   void i2cMasterRxCallback();
   void prepareCanData(uint8_t* buffer, size_t bufferSize) const;

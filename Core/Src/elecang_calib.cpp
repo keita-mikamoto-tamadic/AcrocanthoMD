@@ -9,7 +9,7 @@
 
 #define CALIB_PERIOD    (0.5f)                         /* 計測時間 [s] */
 #define FINE_WIDTH      (0.6f)                         /* FINE_TUNE測定範囲 [rad] */
-#define STIMUL_VOLTDREF (1.0f)                         /* 電気角オフセットキャリブレーション印加電圧 [V] */
+#define STIMUL_VOLTDREF (1.5f)                         /* 電気角オフセットキャリブレーション印加電圧 [V] */
 #define STANDBY_PERIOD  (0.5f)                         /* 助走時間 */
 #define CUTOFF_FREQ     (2)                            /* LPFのカットオフ周波数 [Hz] */
 #define TIME_CONST      (1 / (user2pi * CUTOFF_FREQ)) /* 時定数 [s] */

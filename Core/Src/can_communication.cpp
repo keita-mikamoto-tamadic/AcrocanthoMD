@@ -104,6 +104,7 @@ void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
   if (canRxInterrupt == true) {
     uint8_t funcbit = (rxHeader.Identifier >> 3);
     switch (funcbit) {
+      // volt control
       case (0x200 >> 3):
         data->genFuncRef = rxData[0];
         data->drvMdRef = rxData[1];
@@ -111,17 +112,25 @@ void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
         data->voltDRef = static_cast<float>(rxData[3]);
         data->voltQRef = static_cast<float>(rxData[4]);
         break;
+      // current control
       case (0x300 >> 3):
         data->genFuncRef = rxData[0];
         data->drvMdRef = rxData[1];
         data->curDRef = static_cast<float>(rxData[2]);
         data->curQRef = static_cast<float>(static_cast<int8_t>(rxData[3]));
-        if(data->curQRef < 0.0f) data->curQRef = -1.0f;
         break;
+      // velocity control
       case (0x400 >> 3):
         data->genFuncRef = rxData[0];
         data->drvMdRef = rxData[1];
         data->velRef = static_cast<float>(static_cast<int8_t>(rxData[2]));
+        break;
+      // position control
+      case (0x500 >> 3):
+        data->genFuncRef = rxData[0];
+        data->drvMdRef = rxData[1];
+        //data->posRef = static_cast<float>(static_cast<int8_t>(rxData[2]));
+        data->posRef = 3.0f;
         break;
 
     }

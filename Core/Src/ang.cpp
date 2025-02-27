@@ -38,9 +38,10 @@ void Ang::getAngle() {
     rawAngPast = rawAng;
     data->rawAngPasttest = rawAng;
     rawAng = static_cast<uint16_t>(rawEnc[0] << 8) | rawEnc[1];
+
+    // test
     data->rawAngtest = rawAng;
-    mechAngPast = data->mechAng;
-    data->mechAng = raw2rad(rawAng);
+    // test
     
     readStart = false;
     i2c_rx_complete = false;
@@ -67,8 +68,10 @@ void Ang::getVel() {
     // 0またぎ判定処理
     if (diff > ANG_RESL_12BIT / 2) {
       diff -= ANG_RESL_12BIT;
+      zeroPointTh = MULT_TURN_NEG;
     } else if (diff < -ANG_RESL_12BIT / 2) {
       diff += ANG_RESL_12BIT;
+      zeroPointTh = MULT_TURN_POS;
     }
     data->actVel = raw2rads(diff);
     mechAngleVelLPF();
@@ -107,7 +110,7 @@ float Ang::elecAng(float _eofs) {
   static uint16_t elecAngtemp2_ = 0;
   
   offset_ = static_cast<uint16_t>(ofs_ * static_cast<float>(ANG_RESL_12BIT) / user2pi);
-  elecAngtemp2_ = (elecAngtemp_ * polePairs + offset_) % ANG_RESL_12BIT;
+  elecAngtemp2_ = (elecAngtemp_ * POLE_PAIRS + offset_) % ANG_RESL_12BIT;
 
   return static_cast<float>(elecAngtemp2_) / static_cast<float>(ANG_RESL_12BIT) * user2pi;
 
@@ -115,17 +118,17 @@ float Ang::elecAng(float _eofs) {
 
 float Ang::elecAngVirtual(float _virFreqRef) {
   // 仮想電気角
-  static float _theta = 0.0f;
+  static float theta_ = 0.0f;
   // タスク周期で分割して足しこむ
   float _deltatheta = _virFreqRef * TASK_TIME;
-  _theta += _deltatheta;
+  theta_ += _deltatheta;
 
   // 0~1の範囲に収める
-  if (_theta > 1.0f) _theta -= 1.0f;
-  if (_theta < 0.0f) _theta += 1.0f;
+  if (theta_ > 1.0f) theta_ -= 1.0f;
+  if (theta_ < 0.0f) theta_ += 1.0f;
 
   // ラジアンで返却
-  return _theta * user2pi;
+  return theta_ * user2pi;
 }
 
 void Ang::elecAngleIn(){
@@ -139,8 +142,33 @@ void Ang::elecAngleIn(){
   }
 }
 
-int16_t Ang::compAng() {
-  return 0;
+// 位置生値から機械角（減速比込み）を算出
+// 電気角から算出したほうが初期応答が良くなりそうだが、
+// エンコーダ値の更新が毎周期ではなく一定値補間が入るので、
+// 位置制御の速度の収束が遅くなりそう。よって機械角から計算する。
+void Ang::mechAngleIn() {
+  // シングルターン値をラジアンに変換（0-2πの範囲）
+  float tempMtAng_ = raw2rad(rawAng);
+  
+  // 一回転の判定とカウント更新
+  if (zeroPointTh == MULT_TURN_NEG) {
+    // 負の方向に回転
+    mtCount--;
+  } else if (zeroPointTh == MULT_TURN_POS) {
+    // 正の方向に回転
+    mtCount++;
+  }
+  
+  // マルチターン分を加算（2πの倍数を加算）
+  data->mechAng = (tempMtAng_ - data->zeroPosOffs + (static_cast<float>(mtCount) * user2pi)) * GR_RATIO;
+  
+  // マルチターンフラグリセット
+  zeroPointTh = MULT_TURN_NONE;
+}
+
+// ゼロ点設定（userTaskの初期化処理時に数回実行）
+void Ang::zeroPosOffset() {
+  data->zeroPosOffs = raw2rad(rawAng);
 }
 
 void Ang::prepareCanData(uint8_t* buffer, size_t bufferSize) const {
