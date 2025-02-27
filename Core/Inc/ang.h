@@ -22,8 +22,8 @@ public:
     float elecVel = 0.0f;
     float mechAng = 0.0f;
     float actAng = 0.0f;
-    float actVel = 0.0f;
-    float actVelLPF = 0.0f;
+    float mechAngVel = 0.0f;
+    float mechAngVelLPF = 0.0f;
     int16_t veltemp = 0;
     float elecAngTest = 0.0f;
     uint32_t eleccomp = 0;

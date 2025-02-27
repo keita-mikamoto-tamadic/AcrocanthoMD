@@ -173,7 +173,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < STANDBY_COUNT) {
-        velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->actVel;
+        velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->mechAngVel;
       } else {
         count = 0;
         seqIDSub = STEP01;
@@ -190,7 +190,7 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
 
       if (count++ < CALIB_COUNT) {
         if (user2pi < angdata->elecAng) angdata->elecAng -= user2pi;
-          velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->actVel;
+          velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->mechAngVel;
       } else {
         // 電気角オフセットの更新
         if (indexnum < CALIB_NUM) {

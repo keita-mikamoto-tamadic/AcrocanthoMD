@@ -73,7 +73,7 @@ void Ang::getVel() {
       diff += ANG_RESL_12BIT;
       zeroPointTh = MULT_TURN_POS;
     }
-    data->actVel = raw2rads(diff);
+    data->mechAngVel = raw2rads(diff);
     mechAngleVelLPF();
   }
   data->testdiff = diff;
@@ -84,7 +84,7 @@ void Ang::mechAngleVelLPF(){
   
   timeConst = 1.0f / (user2pi * lpfFreq);
   alpha = (TASK_TIME * static_cast<float>(compTime)) / timeConst;
-  data->actVelLPF = alpha * data->actVel + (1.0f - alpha) * data->actVelLPF;
+  data->mechAngVelLPF = (alpha * data->mechAngVel + (1.0f - alpha) * data->mechAngVelLPF) * GR_RATIO;
 
 }
 

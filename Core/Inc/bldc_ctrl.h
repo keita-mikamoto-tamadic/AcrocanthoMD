@@ -60,8 +60,8 @@ private:
   const float volMax = 24.0f;
   const float curQMin = -5.0f;
   const float curQMax = 5.0f;
-  const float velMin = -100.0f;
-  const float velMax = 100.0f;
+  const float velMin = -15.0f;
+  const float velMax = 15.0f;
 
   // cur param
   const float cutOffFreq = 100.0f;
@@ -72,13 +72,13 @@ private:
   const float curKd = 0.0f;
 
   // vel param
-  const float velKp = 0.25f;
-  const float velKi = 50.0f;
+  const float velKp = 0.15f;
+  const float velKi = 10.0f;
   const float velKd = 0.0f;
 
   // pos param
-  const float posKp = 50.0f;
-  const float posKi = 10.0f;
+  const float posKp = 0.1f;
+  const float posKi = 1.0f;
   const float posKd = 0.0f;
 
   float curDPidCtrl(float _curDRef);

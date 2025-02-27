@@ -175,9 +175,9 @@ void UserTask::motorControl() {
   
   testvd = mdctrldata->voltDRef;
   testvq = mdctrldata->voltQRef;
-  testvel = angdata->actVelLPF;
+  testvel = angdata->mechAngVelLPF;
   testdiff = angdata->testdiff;
-//  testvelact = angdata->actVel;
+//  testvelact = angdata->mechAngVel;
   //testpos = angdata->mechAng;
   //testelec = angdata->elecAng;
   //testerrD = candata->curDRef;
