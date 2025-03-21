@@ -1,9 +1,9 @@
 #include "elecang_calib.h"
 
 #include "main.h"
+#include "ma735_enc.h"
 #include "user_task.h"
 #include "user_math.h"
-#include "ang.h"
 #include "util.h"
 #include "can_communication.h"
 
@@ -21,7 +21,7 @@
 
 ElecangCalib elecangcalib;
 
-extern Ang ang;
+extern MA735Enc ma735enc;
 extern UserTask usertask;
 extern Util util;
 extern CanCom cancom;
@@ -154,7 +154,7 @@ void ElecangCalib::elecCalSeq(){
 }
 
 bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecAngOfsMax, float _calDelta) {
-  Ang::AngData* angdata = ang.getData();
+  MA735Enc::MA735Data* ma735data = ma735enc.getData();
   Util::UtilData* utildata = util.getUtilData();
   bool returnVal = false;
   
@@ -167,13 +167,13 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       data->drvMd = 1;
       data->voltQRef = _voltDRef;
       elecAngOfsVal = _elecAngOfsCur;
-      angdata->elecAng += elecAngOfsVal;
+      ma735data->elecAng += elecAngOfsVal;
 
       // 中断処理
       if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < STANDBY_COUNT) {
-        velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->mechAngVel;
+        velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * ma735data->mechAngVel;
       } else {
         count = 0;
         seqIDSub = STEP01;
@@ -183,14 +183,14 @@ bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecA
       // Run
       data->drvMd = 1;
       data->voltQRef = _voltDRef;
-      angdata->elecAng += elecAngOfsVal;
+      ma735data->elecAng += elecAngOfsVal;
 
       // 中断処理
       if (!(utildata->eCalib)) { seqIDSub = FAIL; break; }
 
       if (count++ < CALIB_COUNT) {
-        if (user2pi < angdata->elecAng) angdata->elecAng -= user2pi;
-          velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * angdata->mechAngVel;
+        if (user2pi < ma735data->elecAng) ma735data->elecAng -= user2pi;
+          velOutAxLast = (1 - LPF_COEFF) * velOutAxLast + LPF_COEFF * ma735data->mechAngVel;
       } else {
         // 電気角オフセットの更新
         if (indexnum < CALIB_NUM) {

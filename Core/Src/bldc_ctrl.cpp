@@ -2,13 +2,13 @@
 
 #include <memory>
 
-#include "ang.h"
+#include "ma735_enc.h"
 #include "param.h"
 #include "foc.h"
 
 BldcCtrl bldcctrl;
 extern Foc foc;
-extern Ang ang;
+extern MA735Enc ma735enc;
 
 BldcCtrl::BldcCtrl()
   : data(std::make_unique<BldcCtrlData>()){}
@@ -102,12 +102,12 @@ float BldcCtrl::curQPidCtrl(float _curQRef) {
 }
 
 float BldcCtrl::velPidCtrl(float _velRef) {
-  Ang::AngData* angdata = ang.getData();
+	MA735Enc::MA735Data* angdata = ma735enc.getData();
 
   float velCtrlOut = 0.0f;
   
   // ==== PControl ====
-  float velErr_ = _velRef - angdata->mechAngVelLPF;
+  float velErr_ = _velRef + angdata->mechAngVelLPF;
   // test
   data->testvelErr = velErr_;
   
@@ -143,11 +143,11 @@ float BldcCtrl::velPidCtrl(float _velRef) {
 }
 
 float BldcCtrl::posPidCtrl(float _posRef) {
-  Ang::AngData* angdata = ang.getData();
+  MA735Enc::MA735Data* angdata = ma735enc.getData();
   float posCtrlOut = 0.0f;
   
   // ==== PControl ====
-  float posErr_ = _posRef - angdata->mechAng;
+  float posErr_ = _posRef + angdata->mechAng;
   data->testposErr = posErr_;
   
   // ==== IControl ====

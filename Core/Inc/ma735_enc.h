@@ -13,11 +13,11 @@
 #define MULT_TURN_NEG (2)
 
 constexpr uint8_t rotDir = 0;
-constexpr uint8_t elecAngDir = 0;
+constexpr uint8_t elecAngDir = 1;
 
-class Ang {
+class MA735Enc {
 public:
-  struct AngData{
+  struct MA735Data{
     float elecAng = 0.0f;
     float elecVel = 0.0f;
     float mechAng = 0.0f;
@@ -31,34 +31,33 @@ public:
     uint16_t rawAngtest = 0;
     uint16_t rawAngPasttest = 0;
     float zeroPosOffs = 0.0f;
+    uint16_t rawAng;
+    uint16_t rawAngPast;
   };
 
 private:
   // ユニークポインタでデータ保持
-  std::unique_ptr<AngData> data;
+  std::unique_ptr<MA735Data> data;
 
-  const float lpfFreq = 200.0f;
+  const float lpfFreq = 150.0f;
 
-  I2C_HandleTypeDef& hi2c1;
+  SPI_HandleTypeDef& hspi2;
   bool readStart;
   uint8_t comp = 0;
-  uint8_t compTime  = 0;
+  uint8_t compTime = 0;
   float actAngle;
   uint8_t rawEnc[2];
-  uint16_t rawAng;
-  uint16_t rawAngPast;
   float mtAng = 0.0f;
   float mechAngPast;
   int16_t diff;
   float floatdiff;
   int16_t diffRaw;
-  volatile int8_t i2c_tx_complete;
-  volatile int8_t i2c_rx_complete;
+  volatile int8_t spi_tx_complete;
+  volatile int8_t spi_rx_complete;
   uint8_t zeroPointTh = 0;
   int32_t mtCount = 0;
   
   void read();
-  void receive();
 
   float elecAng(float _eofs);
   uint16_t rawElecComp = 0;
@@ -76,19 +75,18 @@ private:
     return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME * static_cast<float>(compTime));
   }
 
-
 public:
-  Ang(I2C_HandleTypeDef& hi2c1);
+  MA735Enc(SPI_HandleTypeDef& hspi2);
   
+  bool ma735Init();
+  void ma735angle();
   void getAngle();
   void getVel();
   void elecAngleIn();
   void mechAngleIn();
   void zeroPosOffset();
-  void i2cMasterTxCallback();
-  void i2cMasterRxCallback();
+  void spiTxRxCallback();
   void prepareCanData(uint8_t* buffer, size_t bufferSize) const;
   
-  AngData* getData() const { return data.get(); }
-  
+  MA735Data* getData() const { return data.get(); }
 };

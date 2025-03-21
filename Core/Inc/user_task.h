@@ -52,6 +52,7 @@ private:
   float testposerr = 0.0f;
   float testposerrsum = 0.0f;
   float testposout = 0.0f;
+  float testmechpos = 0.0f;
   // test
 
   uint8_t count = 0;

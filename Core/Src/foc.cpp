@@ -2,12 +2,12 @@
 
 #include "main.h"
 #include "user_math.h"
-#include "ang.h"
+#include "ma735_enc.h"
 #include "sens_cur.h"
 
 Foc foc;
 
-extern Ang ang;
+extern MA735Enc ang;
 extern SensCur senscur;
 
 using namespace Acrocantho;

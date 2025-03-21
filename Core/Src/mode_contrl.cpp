@@ -114,6 +114,7 @@ void ModeControl::refCtrl(){
       s_curDRef = candata->curDRef;
       s_curQRef = candata->curQRef;
       s_velRef = candata->velRef;
+      s_posRef = candata->posRef;
     }
   }
 }

@@ -1,14 +1,14 @@
 #include "can_communication.h"
 
 #include "main.h"
-#include "ang.h"
+#include "ma735_enc.h"
 
 // main.cppと同じインスタンスを使用
 extern FDCAN_HandleTypeDef hfdcan1;
 
 // ユーザーインスタンス
 CanCom cancom(hfdcan1);
-extern Ang ang;
+extern MA735Enc ma735enc;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
   : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
@@ -93,7 +93,7 @@ void CanCom::rxTask() {
 
 void CanCom::txTask(){
   if (canTxFlag) {
-    ang.prepareCanData(data->txBuff, sizeof(data->txBuff));
+    ma735enc.prepareCanData(data->txBuff, sizeof(data->txBuff));
     sendData(data->txBuff, sizeof(data->txBuff));
     canTxFlag = false;
   }
@@ -129,8 +129,8 @@ void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
       case (0x500 >> 3):
         data->genFuncRef = rxData[0];
         data->drvMdRef = rxData[1];
-        //data->posRef = static_cast<float>(static_cast<int8_t>(rxData[2]));
-        data->posRef = 3.0f;
+        data->posRef = static_cast<float>(static_cast<int8_t>(rxData[2]));
+        //data->posRef = 3.0f;
         break;
 
     }

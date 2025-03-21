@@ -3,6 +3,7 @@
 #include "main.h"
 #include "out_pwm.h"
 #include "user_task.h"
+#include "param.h"
 
 #include <cstdint>
 
@@ -39,14 +40,21 @@ void SensCur::sensCurIN() {
   // V相電流はIu + Iv + Iw = 0より計算
   curVRaw = -curURaw - curWRaw;
   
-  data->curU = lpfCur(curURaw, 0.0f);
-  data->curV = lpfCur(curVRaw, 0.0f);
-  data->curW = lpfCur(curWRaw, 0.0f);
-  
+  data->curU = curURaw;
+  data->curV = curVRaw;
+  data->curW = curWRaw;
+  //data->curU = lpfCur(curURaw, data->curU, 5000.0f);
+  //data->curV = lpfCur(curVRaw, data->curV, 5000.0f);
+  //data->curW = lpfCur(curWRaw, data->curW, 5000.0f);
 }
 
-float SensCur::lpfCur(float _curRaw, float _cutOffFreq) {
-  float curLPF_ = _curRaw;
+float SensCur::lpfCur(float _curRaw, float _curPast, float _cutOffFreq) {
+  float timeConst, alpha;
+  
+  timeConst = 1.0f / (user2pi * _cutOffFreq);
+  alpha = TASK_TIME / timeConst;
+  float curLPF_ = (alpha * _curRaw + (1.0f - alpha) * _curPast);
+
   return curLPF_;
 }
 

@@ -18,9 +18,9 @@ void OutPwm::Pon(){
 
 void OutPwm::Poff(){
 #if defined(PWMTIM_NO_1)
-  TIM1->CCR1 = 0; 
-  TIM1->CCR2 = 0; 
-  TIM1->CCR3 = 0; 
+  //TIM1->CCR1 = 0; 
+  //TIM1->CCR2 = 0; 
+  //TIM1->CCR3 = 0; 
 
 #elif defined(PWMTIM_NO_8)
   TIM8->CCR1 = 0; 

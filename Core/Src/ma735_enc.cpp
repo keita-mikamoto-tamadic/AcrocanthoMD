@@ -1,4 +1,4 @@
-#include "ang.h"
+#include "ma735_enc.h"
 #include <cstring>
 
 #include "main.h"
@@ -6,64 +6,73 @@
 #include "can_communication.h"
 
 // main.cppと同じインスタンスを使用
-extern I2C_HandleTypeDef hi2c1;
+extern SPI_HandleTypeDef hspi2;
 
-Ang ang(hi2c1);
+MA735Enc ma735enc(hspi2);
 extern CanCom cancom;
 
-Ang::Ang(I2C_HandleTypeDef& i2cHandle)
-  : hi2c1(i2cHandle), readStart(false), actAngle(0.0f), i2c_rx_complete(false), i2c_tx_complete(false),
-    rawAng(0), rawAngPast(0), diffRaw(0), data(std::make_unique<AngData>()) {}
+MA735Enc::MA735Enc(SPI_HandleTypeDef& spiHandle)
+  : hspi2(spiHandle), readStart(false), actAngle(0.0f), spi_rx_complete(false), spi_tx_complete(false),
+    diffRaw(0), data(std::make_unique<MA735Data>()) {}
 
-void Ang::read() {
+bool MA735Enc::ma735Init(){
+  static uint8_t count = 0;
+  getAngle();
+  zeroPosOffset();
+  count++;
+  if (count > 10) return true;
+  return false;
+};
+
+void MA735Enc::ma735angle(){
+  getAngle();
+  getVel();
+  elecAngleIn();
+  mechAngleIn();
+};
+
+void MA735Enc::read() {
   if (!readStart) {
-    uint8_t readRegAddr = 0x0C;
-    HAL_I2C_Master_Transmit_DMA(&hi2c1, AS5600ADDR, &readRegAddr, 1);
+    uint16_t command = 0x0000;
+    
+    // CSアクティブLow
+    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);
+    HAL_SPI_TransmitReceive_DMA(&hspi2, (uint8_t*)&command, (uint8_t*)rawEnc, 2);
     readStart = true;
   }
 }
 
-void Ang::receive() {
-  if (i2c_tx_complete) {
-    HAL_I2C_Master_Receive_DMA(&hi2c1, AS5600ADDR, rawEnc, 2);
-    i2c_tx_complete = false;
-  }
-}
-
-void Ang::getAngle() {
+void MA735Enc::getAngle() {
   read();
-  receive();
 
-  if (i2c_rx_complete) {
-    rawAngPast = rawAng;
-    data->rawAngPasttest = rawAng;
-    rawAng = static_cast<uint16_t>(rawEnc[0] << 8) | rawEnc[1];
+  if (spi_rx_complete) {
+    // CS非アクティブ
+    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
+    
+    data->rawAngPast = data->rawAng;
+    // 16ビットデータを受信し、後ろ4ビットを削除して12ビットに変換
+    data->rawAng = (static_cast<uint16_t>(rawEnc[1] << 8) | rawEnc[0]) >> 4;
 
     // test
-    data->rawAngtest = rawAng;
+    data->rawAngtest = data->rawAng;
     // test
     
     readStart = false;
-    i2c_rx_complete = false;
+    spi_rx_complete = false;
     // 速度時間割りのためのカウンタ保存
     compTime = comp;
     comp = 0;
 
   } else ++comp;
   data->eleccomp = comp;
-
 }
 
-void Ang::getVel() {
+void MA735Enc::getVel() {
   if (comp) {
     // 更新なしのため速度更新不要
   } else {
     // 速度計算
-    if (rawAng != rawAngPast) {
-      diff = static_cast<int16_t>(rawAng - rawAngPast);
-    } else {
-      diff = 0;
-    }
+    diff = static_cast<int16_t>(data->rawAng - data->rawAngPast);
 
     // 0またぎ判定処理
     if (diff > ANG_RESL_12BIT / 2) {
@@ -79,20 +88,18 @@ void Ang::getVel() {
   data->testdiff = diff;
 }
 
-void Ang::mechAngleVelLPF(){
+void MA735Enc::mechAngleVelLPF(){
   float timeConst, alpha;
   
   timeConst = 1.0f / (user2pi * lpfFreq);
   alpha = (TASK_TIME * static_cast<float>(compTime)) / timeConst;
   data->mechAngVelLPF = (alpha * data->mechAngVel + (1.0f - alpha) * data->mechAngVelLPF) * GR_RATIO;
-
 }
 
-float Ang::elecAng(float _eofs) {
+float MA735Enc::elecAng(float _eofs) {
   // comp = 0のときサンプル値更新あり
-  // 次の更新まで2周期を補間するので3で割った値を足す
-  if (comp == 0) rawElecComp = rawAng;
-  else rawElecComp = rawAng + (diff / 3);
+  if (comp == 0) rawElecComp = data->rawAng;
+  else rawElecComp = data->rawAng + (diff);
   
   // 電気角反転
   static uint16_t elecAngtemp_ = 0;
@@ -113,10 +120,9 @@ float Ang::elecAng(float _eofs) {
   elecAngtemp2_ = (elecAngtemp_ * POLE_PAIRS + offset_) % ANG_RESL_12BIT;
 
   return static_cast<float>(elecAngtemp2_) / static_cast<float>(ANG_RESL_12BIT) * user2pi;
-
 }
 
-float Ang::elecAngVirtual(float _virFreqRef) {
+float MA735Enc::elecAngVirtual(float _virFreqRef) {
   // 仮想電気角
   static float theta_ = 0.0f;
   // タスク周期で分割して足しこむ
@@ -131,7 +137,7 @@ float Ang::elecAngVirtual(float _virFreqRef) {
   return theta_ * user2pi;
 }
 
-void Ang::elecAngleIn(){
+void MA735Enc::elecAngleIn(){
   CanCom::CanData* candata = cancom.getData();
   
   data->elecAngTest = elecAng(EOFS);
@@ -142,13 +148,9 @@ void Ang::elecAngleIn(){
   }
 }
 
-// 位置生値から機械角（減速比込み）を算出
-// 電気角から算出したほうが初期応答が良くなりそうだが、
-// エンコーダ値の更新が毎周期ではなく一定値補間が入るので、
-// 位置制御の速度の収束が遅くなりそう。よって機械角から計算する。
-void Ang::mechAngleIn() {
+void MA735Enc::mechAngleIn() {
   // シングルターン値をラジアンに変換（0-2πの範囲）
-  float tempMtAng_ = raw2rad(rawAng);
+  float tempMtAng_ = raw2rad(data->rawAng);
   
   // 一回転の判定とカウント更新
   if (zeroPointTh == MULT_TURN_NEG) {
@@ -166,27 +168,21 @@ void Ang::mechAngleIn() {
   zeroPointTh = MULT_TURN_NONE;
 }
 
-// ゼロ点設定（userTaskの初期化処理時に数回実行）
-void Ang::zeroPosOffset() {
-  data->zeroPosOffs = raw2rad(rawAng);
+void MA735Enc::zeroPosOffset() {
+  data->zeroPosOffs = raw2rad(data->rawAng);
 }
 
-void Ang::prepareCanData(uint8_t* buffer, size_t bufferSize) const {
+void MA735Enc::prepareCanData(uint8_t* buffer, size_t bufferSize) const {
   memcpy(buffer, &(data->elecAng), sizeof(data->elecAng));
 }
 
-void Ang::i2cMasterTxCallback() {
-  i2c_tx_complete = true;    
+void MA735Enc::spiTxRxCallback() {
+  spi_rx_complete = true;
 }
 
-void Ang::i2cMasterRxCallback() {
-  i2c_rx_complete = true;
-}
-
-void HAL_I2C_MasterTxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  ang.i2cMasterTxCallback();
-}
-
-void HAL_I2C_MasterRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-  ang.i2cMasterRxCallback();
+// SPIコールバック関数
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+  if (hspi->Instance == SPI2) {
+    ma735enc.spiTxRxCallback();
+  }
 }

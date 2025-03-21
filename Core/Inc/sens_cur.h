@@ -30,7 +30,7 @@ private:
   uint16_t adcRawW = 0;
 
   bool adjustCur();
-  float lpfCur(float _curRaw, float _cutOffFreq);
+  float lpfCur(float _curRaw, float _curPast, float _cutOffFreq);
 
 public:
   SensCur();

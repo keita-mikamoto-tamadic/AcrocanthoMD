@@ -1,7 +1,6 @@
 #include "user_task.h"
 
 #include "main.h"
-#include "ang.h"
 #include "out_pwm.h"
 #include "can_communication.h"
 #include "mode_control.h"
@@ -10,10 +9,11 @@
 #include "elecang_calib.h"
 #include "foc.h"
 #include "bldc_ctrl.h"
+#include "ma735_enc.h"
 
 UserTask usertask;
 
-extern Ang ang;
+extern MA735Enc ma735enc;
 extern SensCur senscur;
 extern OutPwm outpwm;
 extern CanCom cancom;
@@ -23,13 +23,15 @@ extern ElecangCalib elecangcalib;
 extern Foc foc;
 extern BldcCtrl bldcctrl;
 
+#define TEST_MODE
+
 UserTask::UserTask()
   : count(0){}
 
 
 void UserTask::cyclicTask() {
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
-  Ang::AngData* angdata = ang.getData();
+  MA735Enc::MA735Data* angdata = ma735enc.getData();
 
   static bool toggleState = false;  // 出力状態
   static GPIO_PinState prevB1State = GPIO_PIN_RESET;  // 前回のボタン状態
@@ -58,9 +60,7 @@ void UserTask::cyclicTask() {
 
       HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
       senscur.sensCurIN();
-      ang.getAngle();
-      ang.getVel();
-      ang.elecAngleIn();
+      ma735enc.ma735angle();
       
       // elecAng offset
       elecangcalib.elecCalSeq();
@@ -75,14 +75,10 @@ void UserTask::cyclicTask() {
     case INIT:
       // 初期化のためにエンコーダ値の初回読み取り
       resetAll();
-      if (count < 10) {
-        ang.getAngle();
-        ang.zeroPosOffset();
-        count++;
+      if (true != ma735enc.ma735Init()) {
       } else {
         // 電流オフセット補正
-        ang.getAngle();
-        ang.getVel();
+        ma735enc.ma735angle();
         if (senscur.sensCurInit()) {
           senscur.sensCurIN();
           count = 0;
@@ -94,14 +90,11 @@ void UserTask::cyclicTask() {
       break;
     case STEP00:
       senscur.sensCurIN();
-      ang.getAngle();
-      ang.getVel();
-      ang.elecAngleIn();
-      ang.mechAngleIn();
+      ma735enc.ma735angle();
 
       // test
-      testpos = angdata->mechAng;
-      testelec = angdata->elecAngTest;
+      //testpos = angdata->mechAng;
+      //testelec = angdata->mechAngVelLPF;
       
 
       if (servoCheck()){
@@ -154,7 +147,7 @@ void UserTask::idleTask() {
 void UserTask::motorControl() {
   using namespace Acrocantho;
   ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  Ang::AngData* angdata = ang.getData();
+  MA735Enc::MA735Data* angdata = ma735enc.getData();
   Foc::FocData* focdata = foc.getData();
   CanCom::CanData* candata = cancom.getData();
   BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
@@ -178,10 +171,10 @@ void UserTask::motorControl() {
   testvel = angdata->mechAngVelLPF;
   testdiff = angdata->testdiff;
 //  testvelact = angdata->mechAngVel;
-  //testpos = angdata->mechAng;
+  testpos = angdata->mechAng;
   //testelec = angdata->elecAng;
-  //testerrD = candata->curDRef;
-  //testerrQ = candata->curQRef;
+  testerrD = bldcdata->testerrD;
+  testerrQ = bldcdata->testerrQ;
   //testCurU = senscurdata->testU;
   //testCurW = senscurdata->testW;
   //testcomp = angdata->eleccomp;
@@ -189,6 +182,7 @@ void UserTask::motorControl() {
   testrawAngPast = angdata->rawAngPasttest;
   //testvelerr = bldcdata->testvelErr;
   //testvelerrsum = bldcdata->testvelErrSum;
+  testmechpos = angdata->mechAng;
   testposerr = bldcdata->testposErr;
   testposerrsum = bldcdata->testposErrSum;
   testposout = mdctrldata->posout;
