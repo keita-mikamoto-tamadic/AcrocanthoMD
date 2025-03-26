@@ -11,7 +11,7 @@
 #define ADVOLT           (3.3f) /* AD入力電圧範囲は3.3[V] */
 #define AD_RESL (4095.0f) /* 12bit分解能 */
 #define GAIN_AMP                  (20.0f)  /* AD8418A */
-#define GAIN_SHUNT                (0.010f) /* 10mohm */
+#define GAIN_SHUNT                (0.005f) /* 10mohm */
 #define AMPGAIN                   (1.0f / (GAIN_AMP * GAIN_SHUNT))
 #define ADGAIN                    ((1.0f / AD_RESL) * ADVOLT * AMPGAIN)
 // キャリア波比較でのPWM生成をmode1で設定しており、update event　= キャリア波谷検出時 = PWM High時に

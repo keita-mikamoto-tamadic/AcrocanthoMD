@@ -23,7 +23,7 @@ extern ElecangCalib elecangcalib;
 extern Foc foc;
 extern BldcCtrl bldcctrl;
 
-#define TEST_MODE
+//define TEST_MODE
 
 UserTask::UserTask()
   : count(0){}
@@ -58,7 +58,6 @@ void UserTask::cyclicTask() {
         break;
       }
 
-      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
       senscur.sensCurIN();
       ma735enc.ma735angle();
       
@@ -93,7 +92,7 @@ void UserTask::cyclicTask() {
       ma735enc.ma735angle();
 
       // test
-      //testpos = angdata->mechAng;
+      testpos = angdata->mechAng;
       //testelec = angdata->mechAngVelLPF;
       
 
@@ -102,7 +101,6 @@ void UserTask::cyclicTask() {
         seqID = LOOP;
         break;
       }
-      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 
       outpwm.Poff();
       break;
@@ -116,10 +114,8 @@ void UserTask::cyclicTask() {
       
       // 状態に応じて出力を切り替え
       if (toggleState) {
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
         outpwm.TEST_setReg(0.5f, 0.5f, 0.5f);
       } else {
-        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
         outpwm.Poff();
       }
       

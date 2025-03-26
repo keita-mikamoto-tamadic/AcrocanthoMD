@@ -5,7 +5,6 @@
 #include <memory>
 
 // コンパイルスイッチ用マクロ定義
-#define PWMTIM_NO_8
 
 //#define TEST_MODE
 

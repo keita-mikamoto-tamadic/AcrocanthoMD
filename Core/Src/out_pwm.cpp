@@ -17,46 +17,25 @@ void OutPwm::Pon(){
 }
 
 void OutPwm::Poff(){
-#if defined(PWMTIM_NO_1)
-  //TIM1->CCR1 = 0; 
-  //TIM1->CCR2 = 0; 
-  //TIM1->CCR3 = 0; 
-
-#elif defined(PWMTIM_NO_8)
   TIM8->CCR1 = 0; 
   TIM8->CCR2 = 0; 
   TIM8->CCR3 = 0; 
-#endif
 
 }
 
 void OutPwm::setReg(float u, float v, float w){
   midVol(u, v, w);
 
-#if defined(PWMTIM_NO_1)
-  TIM1->CCR1 = (uint16_t)((1.0f - dutyGuard(u)) * (float)CCR_MAX);
-  TIM1->CCR2 = (uint16_t)((1.0f - dutyGuard(v)) * (float)CCR_MAX);
-  TIM1->CCR3 = (uint16_t)((1.0f - dutyGuard(w)) * (float)CCR_MAX);
-
-#elif defined(PWMTIM_NO_8)
   TIM8->CCR1 = (uint16_t)((1.0f - dutyGuard(u)) * (float)CCR_MAX);
   TIM8->CCR2 = (uint16_t)((1.0f - dutyGuard(v)) * (float)CCR_MAX);
   TIM8->CCR3 = (uint16_t)((1.0f - dutyGuard(w)) * (float)CCR_MAX);
-#endif
 }
 
 void OutPwm::TEST_setReg(float u, float v, float w){
 
-#if defined(PWMTIM_NO_1)
-  TIM1->CCR1 = (uint16_t)((1.0f - u) * (float)CCR_MAX);
-  TIM1->CCR2 = (uint16_t)((1.0f - v) * (float)CCR_MAX);
-  TIM1->CCR3 = (uint16_t)((1.0f - w) * (float)CCR_MAX);
-
-#elif defined(PWMTIM_NO_8)
   TIM8->CCR1 = (uint16_t)((1.0f - u) * (float)CCR_MAX);
   TIM8->CCR2 = (uint16_t)((1.0f - v) * (float)CCR_MAX);
   TIM8->CCR3 = (uint16_t)((1.0f - w) * (float)CCR_MAX);
-#endif
 }
 
 float OutPwm::dutyGuard(float _rawDuty){
