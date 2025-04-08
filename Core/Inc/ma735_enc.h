@@ -14,6 +14,7 @@
 
 constexpr uint8_t rotDir = 0;
 constexpr uint8_t elecAngDir = 1;
+constexpr uint8_t mechAngDir = 0;
 
 class MA735Enc {
 public:
@@ -41,7 +42,7 @@ private:
 
   const float lpfFreq = 150.0f;
 
-  SPI_HandleTypeDef& hspi2;
+  SPI_HandleTypeDef& hspi1;
   bool readStart;
   uint8_t comp = 0;
   uint8_t compTime = 0;
@@ -49,9 +50,9 @@ private:
   uint8_t rawEnc[2];
   float mtAng = 0.0f;
   float mechAngPast;
+  int16_t diffRaw; // 電気角に使用
   int16_t diff;
   float floatdiff;
-  int16_t diffRaw;
   volatile int8_t spi_tx_complete;
   volatile int8_t spi_rx_complete;
   uint8_t zeroPointTh = 0;
@@ -76,7 +77,7 @@ private:
   }
 
 public:
-  MA735Enc(SPI_HandleTypeDef& hspi2);
+  MA735Enc(SPI_HandleTypeDef& hspi1);
   
   bool ma735Init();
   void ma735angle();

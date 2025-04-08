@@ -107,7 +107,7 @@ float BldcCtrl::velPidCtrl(float _velRef) {
   float velCtrlOut = 0.0f;
   
   // ==== PControl ====
-  float velErr_ = _velRef + angdata->mechAngVelLPF;
+  float velErr_ = _velRef - angdata->mechAngVelLPF;
   // test
   data->testvelErr = velErr_;
   
@@ -147,7 +147,7 @@ float BldcCtrl::posPidCtrl(float _posRef) {
   float posCtrlOut = 0.0f;
   
   // ==== PControl ====
-  float posErr_ = _posRef + angdata->mechAng;
+  float posErr_ = _posRef - angdata->mechAng;
   data->testposErr = posErr_;
   
   // ==== IControl ====

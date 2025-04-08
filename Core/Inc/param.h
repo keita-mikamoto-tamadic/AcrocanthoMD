@@ -14,5 +14,5 @@
 
 // motor
 #define POLE_PAIRS          (14)
-#define EOFS               (2.24087477f)
+#define EOFS               (2.05675459f)
 #define GR_RATIO            (0.125f)

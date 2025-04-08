@@ -6,13 +6,13 @@
 #include "can_communication.h"
 
 // main.cppと同じインスタンスを使用
-extern SPI_HandleTypeDef hspi2;
+extern SPI_HandleTypeDef hspi1;
 
-MA735Enc ma735enc(hspi2);
+MA735Enc ma735enc(hspi1);
 extern CanCom cancom;
 
 MA735Enc::MA735Enc(SPI_HandleTypeDef& spiHandle)
-  : hspi2(spiHandle), readStart(false), actAngle(0.0f), spi_rx_complete(false), spi_tx_complete(false),
+  : hspi1(spiHandle), readStart(false), actAngle(0.0f), spi_rx_complete(false), spi_tx_complete(false),
     diffRaw(0), data(std::make_unique<MA735Data>()) {}
 
 bool MA735Enc::ma735Init(){
@@ -36,8 +36,8 @@ void MA735Enc::read() {
     uint16_t command = 0x0000;
     
     // CSアクティブLow
-    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);
-    HAL_SPI_TransmitReceive_DMA(&hspi2, (uint8_t*)&command, (uint8_t*)rawEnc, 2);
+    HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
+    HAL_SPI_TransmitReceive_DMA(&hspi1, (uint8_t*)&command, (uint8_t*)rawEnc, 2);
     readStart = true;
   }
 }
@@ -47,7 +47,7 @@ void MA735Enc::getAngle() {
 
   if (spi_rx_complete) {
     // CS非アクティブ
-    HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
     
     data->rawAngPast = data->rawAng;
     // 16ビットデータを受信し、後ろ4ビットを削除して12ビットに変換
@@ -82,6 +82,17 @@ void MA735Enc::getVel() {
       diff += ANG_RESL_12BIT;
       zeroPointTh = MULT_TURN_POS;
     }
+    // 電気角用に符号反転前のdiffを保存
+    diffRaw = diff;
+    
+    // 制御量と出力量の符号をあわせる
+    if (mechAngDir > 0) {/* 符号反転なし */}
+    else diff = -diff;
+    
+    // CWとCCWをユーザー任意の方向にあわせる
+    if (rotDir > 0) diff = -diff; // 極性反転
+    else {/* 符号反転なし */}
+
     data->mechAngVel = raw2rads(diff);
     mechAngleVelLPF();
   }
@@ -99,7 +110,7 @@ void MA735Enc::mechAngleVelLPF(){
 float MA735Enc::elecAng(float _eofs) {
   // comp = 0のときサンプル値更新あり
   if (comp == 0) rawElecComp = data->rawAng;
-  else rawElecComp = data->rawAng + (diff);
+  else rawElecComp = data->rawAng + (diffRaw);
   
   // 電気角反転
   static uint16_t elecAngtemp_ = 0;
@@ -164,6 +175,14 @@ void MA735Enc::mechAngleIn() {
   // マルチターン分を加算（2πの倍数を加算）
   data->mechAng = (tempMtAng_ - data->zeroPosOffs + (static_cast<float>(mtCount) * user2pi)) * GR_RATIO;
   
+  // 制御量と出力量の符号をあわせる
+  if (mechAngDir > 0) {/* 符号反転なし */}
+  else data->mechAng = -data->mechAng;
+  
+  // CWとCCWをユーザー任意の方向にあわせる
+  if (rotDir > 0) data->mechAng = -data->mechAng; // 極性反転
+  else {/* 符号反転なし */}
+  
   // マルチターンフラグリセット
   zeroPointTh = MULT_TURN_NONE;
 }
@@ -182,7 +201,7 @@ void MA735Enc::spiTxRxCallback() {
 
 // SPIコールバック関数
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
-  if (hspi->Instance == SPI2) {
+  if (hspi->Instance == SPI1) {
     ma735enc.spiTxRxCallback();
   }
 }
