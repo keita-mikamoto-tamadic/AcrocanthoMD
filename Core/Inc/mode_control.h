@@ -3,13 +3,12 @@
 #include <cstdint>
 #include <memory>
 
-typedef enum {
-  CTRLMODE_NONE = 0U,
-  CTRLMODE_VOLT,
-  CTRLMODE_CUR,
-  CTRLMODE_VEL,
-  CTRLMODE_POS
-} st_mode;
+
+#define CTRLMODE_NONE 0U
+#define CTRLMODE_VOLT 6U
+#define CTRLMODE_CUR 7U
+#define CTRLMODE_VEL 8U
+#define CTRLMODE_POS 9U
 
 class ModeControl {
 public:
@@ -25,7 +24,6 @@ public:
   
 private:
   std::unique_ptr<ModeControlData> data;
-  uint8_t s_drvMdRef = 0;
   float s_voltQRef = 0.0f;
   float s_voltDRef = 0.0f;
   float s_virAngFreq = 0.0f;
@@ -33,7 +31,6 @@ private:
   float s_curQRef  = 0.0f;
   float s_velRef = 0.0f;
   float s_posRef = 0.0f;
-  st_mode mode = CTRLMODE_NONE;
   void refCtrl();
 
 

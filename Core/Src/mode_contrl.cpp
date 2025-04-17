@@ -22,7 +22,7 @@ ModeControl::ModeControl()
 
 
 void ModeControl::modeCtrl(){
-
+  CanCom::CanData* candata = cancom.getData();
 
   float voltQRef_ = 0.0f;
   float voltDRef_ = 0.0f;
@@ -33,7 +33,7 @@ void ModeControl::modeCtrl(){
   
   refCtrl();
   
-  switch (s_drvMdRef) {
+  switch (candata->cmdRef) {
     case CTRLMODE_NONE:
       voltQRef_ = 0.0f;
       voltDRef_ = 0.0f;
@@ -60,7 +60,7 @@ void ModeControl::modeCtrl(){
       voltQRef_ = bldcctrl.voltQCtrl(velPIDOut_);
       break;
     default:
-      mode = CTRLMODE_NONE;
+      candata->cmdRef = CTRLMODE_NONE;
       break;
   }
   
@@ -98,7 +98,6 @@ void ModeControl::refCtrl(){
   if (usertask.servoCheck()) {
     // 電気角キャリブ
     if (utildata->eCalib) {
-      s_drvMdRef = elecangcalibdata->drvMd;
       s_voltQRef = elecangcalibdata->voltQRef;
       s_voltDRef = 0.0f;
       s_curDRef = 0.0f;
@@ -108,7 +107,6 @@ void ModeControl::refCtrl(){
     // どの特殊モードにも当てはまらない場合、上位指令をセット
     else
     {
-      s_drvMdRef = candata->drvMdRef;
       s_voltDRef = candata->voltDRef;
       s_voltQRef = candata->voltQRef;
       s_curDRef = candata->curDRef;

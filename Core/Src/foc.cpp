@@ -30,7 +30,7 @@ void Foc::forwardCtrl(const SinCos _sc){
 }
 
 void Foc::inverseCtrl(const SinCos _sc, float _vd, float _vq){
-  TrigonTransform tt(_sc, _vd, _vq);
+	TrigonTransform tt(_sc, _vd, _vq);
   
   // Inverse Clarke transform
   InverseClarkeTransform ict(tt._trigon1, tt._trigon2);

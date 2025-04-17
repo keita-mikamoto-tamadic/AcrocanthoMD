@@ -28,6 +28,7 @@ public:
 
 private:
   // test
+  bool  initEnd = false;
   float test = 0.0f;
   float eofsp = 0.0f;
   float eofsm = 0.0f;
@@ -68,5 +69,6 @@ public:
   void cyclicTask();
   void idleTask();
   bool servoCheck();
+  void canDataPrepare();
 
 };

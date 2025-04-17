@@ -23,7 +23,7 @@ extern ElecangCalib elecangcalib;
 extern Foc foc;
 extern BldcCtrl bldcctrl;
 
-//define TEST_MODE
+//#define TEST_MODE
 
 UserTask::UserTask()
   : count(0){}
@@ -39,12 +39,7 @@ void UserTask::cyclicTask() {
   // 現在のボタン状態を取得
   GPIO_PinState currentB1State = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
 
-#if defined (TEST_MODE) 
-  // TEST_MODE有効
-  static SeqID_t seqID = TEST;
-#else
   static SeqID_t seqID = INIT;
-#endif
 
    switch (seqID) {
     case LOOP:
@@ -74,6 +69,7 @@ void UserTask::cyclicTask() {
     case INIT:
       // 初期化のためにエンコーダ値の初回読み取り
       resetAll();
+      initEnd = false;
       if (true != ma735enc.ma735Init()) {
       } else {
         // 電流オフセット補正
@@ -82,9 +78,9 @@ void UserTask::cyclicTask() {
           senscur.sensCurIN();
           count = 0;
 
+          initEnd = true;
           seqID = STEP00;
         }
-        
       }
       break;
     case STEP00:
@@ -105,7 +101,7 @@ void UserTask::cyclicTask() {
       outpwm.Poff();
       break;
     
-    case TEST:
+/*     case TEST:
       // テストモード 50%Duty出力
       // ボタンの立ち上がりエッジを検出
       if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
@@ -121,7 +117,7 @@ void UserTask::cyclicTask() {
       
       // ボタンの状態を保存
       prevB1State = currentB1State;
-      break;
+      break; */
       
 
     default:
@@ -130,13 +126,19 @@ void UserTask::cyclicTask() {
     }
 }
 
+
 void UserTask::idleTask() {
-
-  cancom.rxTask();
-  util.genFuncCtrl();
-
-  cancom.initTxHeader(false, false);
-  cancom.txTask();
+  if (initEnd == true) {
+  #ifdef TEST_MODE
+    cancom.TEST_rxTask();
+    util.genFuncCtrl();
+  #else
+    cancom.rxTask();
+    util.genFuncCtrl();
+    cancom.initTxHeader(false, true);
+    cancom.txTask();
+  #endif
+  }
 }
 
 // PON後のモータ制御
@@ -195,10 +197,24 @@ bool UserTask::servoCheck() {
   return (candata->genFuncRef & 0x01) != 0 ? true : false;
 }
 
+void UserTask::canDataPrepare() {
+  CanCom::CanData* candata = cancom.getData();
+  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  MA735Enc::MA735Data* angdata = ma735enc.getData();
+  Foc::FocData* focdata = foc.getData();
+  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
+  SensCur::SensCurData* senscurdata = senscur.getData();
+
+  // CANデータの準備
+  candata->actPos = angdata->mechAng;
+}
+
 void UserTask::resetAll() {
   bldcctrl.resetData();
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
   usertask.cyclicTask();
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
 }
