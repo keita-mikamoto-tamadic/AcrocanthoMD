@@ -18,8 +18,11 @@
 
 #include "main.h"
 #include "mode_control.h"
+#include "bldc_ctrl.h"
 #include "ma735_enc.h"
 #include "foc.h"
+#include "util.h"
+#include "elecang_calib.h"
 
 // main.cppと同じインスタンスを使用
 extern FDCAN_HandleTypeDef hfdcan1;
@@ -29,6 +32,9 @@ CanCom cancom(hfdcan1);
 extern MA735Enc ma735enc;
 extern Foc foc;
 extern ModeControl modecontrol;
+extern BldcCtrl bldcctrl;
+extern ElecangCalib elecangcalib;
+extern Util util;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
   : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
@@ -87,6 +93,9 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   MA735Enc::MA735Data* angdata = ma735enc.getData();
   Foc::FocData* focdata = foc.getData();
   ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
+  Util::UtilData* utildata = util.getUtilData();
+  ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
 
   
   uint8_t bytes[4];
@@ -120,11 +129,15 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   tx_[15] = bytes[3];
   
   // vel Act
-  floatTouint(angdata->mechAngVel, bytes);
+  floatTouint(angdata->mechAngVelLPF, bytes);
   tx_[16] = bytes[0];
   tx_[17] = bytes[1];
   tx_[18] = bytes[2];
   tx_[19] = bytes[3];
+
+  // 電気角オフセットキャリブ終了時のみキャリブ値を送信
+  // サーボオフでフラグクリア
+  if (utildata->endECalib == true) angdata->mechAng = ecaldata->elecAngOfs;
 
   // mechAng Act
   floatTouint(angdata->mechAng, bytes);
@@ -199,14 +212,14 @@ void CanCom::rxTask() {
 }
 
 void CanCom::TEST_rxTask(){
-  data->cmdRef = CTRLMODE_POS;
+  data->cmdRef = CTRLMODE_VOLT;
   switch (data->cmdRef) {
     // volt control
     case (CTRLMODE_VOLT):
-      data->genFuncRef = 1;
-      data->virAngFreq = 20.0f;
+      data->genFuncRef = 0x11;
+      data->virAngFreq = 0.0f;
       data->voltDRef = 0.0f;
-      data->voltQRef = 2.0f;
+      data->voltQRef = 1.0f;
       break;
     // current control
     case (CTRLMODE_CUR):
@@ -225,6 +238,14 @@ void CanCom::TEST_rxTask(){
       data->posRef = 1.0f;
       break;
   }
+  uint8_t currentGenFuncRef = data->genFuncRef;
+
+  if (currentGenFuncRef == prevGenFuncRef) {
+    data->genFuncCheck = false;   
+    return;
+  }
+  data->genFuncCheck = true;
+  prevGenFuncRef = currentGenFuncRef;
 }
 
 void CanCom::txTask(){

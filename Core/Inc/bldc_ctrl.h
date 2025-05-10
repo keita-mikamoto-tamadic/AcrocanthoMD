@@ -55,6 +55,7 @@ private:
   VelPidData velData;
   PosPidData posData;
 
+  #ifdef GIM6010_8
   // hw param
   const float volMin = -24.0f;
   const float volMax = 24.0f;
@@ -68,7 +69,7 @@ private:
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
   const float curKp = 0.6f;
-  const float curKi = 550.0f;
+  const float curKi = 200.0f;
   const float curKd = 0.0f;
 
   // vel param
@@ -77,9 +78,38 @@ private:
   const float velKd = 0.0f;
 
   // pos param
-  const float posKp = 7.0f;
+  const float posKp = 8.0f;
   const float posKi = 0.5f;
   const float posKd = 0.0f;
+  #endif
+
+  #ifdef GIM8108_8
+  // hw param
+  const float volMin = -24.0f;
+  const float volMax = 24.0f;
+  const float curQMin = -10.0f;
+  const float curQMax = 10.0f;
+  const float velMin = -9.0f;
+  const float velMax = 9.0f;
+
+  // cur param
+  const float cutOffFreq = 50.0f;
+  const float TimeConst = 1.0f / (user2pi * cutOffFreq);
+  const float lpfcoef = TASK_TIME / TimeConst;
+  const float curKp = 0.6f;
+  const float curKi = 200.0f;
+  const float curKd = 0.0f;
+
+  // vel param
+  const float velKp = 0.5f;
+  const float velKi = 1.0f;
+  const float velKd = 0.0f;
+
+  // pos param
+  const float posKp = 1.0f;
+  const float posKi = 0.5f;
+  const float posKd = 0.0f;
+  #endif
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);

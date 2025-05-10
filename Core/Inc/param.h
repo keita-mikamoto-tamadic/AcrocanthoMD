@@ -8,11 +8,30 @@
 #define CCLK_Hz             (170.0e6)
 #define CCR_MAX             (16998)
 #define CCR_END             ((CCR_MAX * 2)-1)
-// 三角波なのでカウント数の2倍が1周期分
-#define TASK_TIME           ((1/CCLK_Hz)*CCR_END)
+#define TASK_TIME           ((1/CCLK_Hz)*CCR_END) // 三角波なのでカウント数の2倍が1周期分
 #define DUTY_BASE           (0.5F)
 
-// motor
+// モーター定義
+//#define GIM6010_8
+#define GIM8108_8
+
+// 極対数
+#ifdef GIM6010_8
 #define POLE_PAIRS          (14)
-#define EOFS               (2.05675459f)
+#endif
+
+#ifdef GIM8108_8
+#define POLE_PAIRS          (21)
+#endif
+
+// 電気角オフセット
+#ifdef GIM6010_8
+#define EOFS               (3.3160305f)
+#endif
+
+#ifdef GIM8108_8
+#define EOFS           (3.403f)
+#endif
+
+// ギア比
 #define GR_RATIO            (0.125f)

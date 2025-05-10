@@ -32,9 +32,11 @@ UserTask::UserTask()
 void UserTask::cyclicTask() {
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
   MA735Enc::MA735Data* angdata = ma735enc.getData();
+  Util::UtilData* utildata = util.getUtilData();
 
   static bool toggleState = false;  // 出力状態
   static GPIO_PinState prevB1State = GPIO_PIN_RESET;  // 前回のボタン状態
+  static uint8_t onewatect = 0;
       
   // 現在のボタン状態を取得
   GPIO_PinState currentB1State = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
@@ -84,21 +86,21 @@ void UserTask::cyclicTask() {
       }
       break;
     case STEP00:
+      utildata->endECalib = false;
       senscur.sensCurIN();
       ma735enc.ma735angle();
+      // ma735enc.magFieldTh();
 
-      // test
-      testpos = angdata->mechAng;
-      //testelec = angdata->mechAngVelLPF;
-      
-
-      if (servoCheck()){
-        outpwm.Pon();
-        seqID = LOOP;
-        break;
+      if (onewatect == 1){
+        if (servoCheck()){
+          outpwm.Pon();
+          seqID = LOOP;
+          break;
+        }
       }
 
       outpwm.Poff();
+      onewatect = 1;
       break;
     
 /*     case TEST:
@@ -131,13 +133,13 @@ void UserTask::idleTask() {
   if (initEnd == true) {
   #ifdef TEST_MODE
     cancom.TEST_rxTask();
-    util.genFuncCtrl();
   #else
     cancom.rxTask();
-    util.genFuncCtrl();
     cancom.initTxHeader(false, true);
     cancom.txTask();
   #endif
+
+  util.genFuncCtrl();
   }
 }
 
@@ -214,7 +216,7 @@ void UserTask::resetAll() {
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
   usertask.cyclicTask();
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
 }

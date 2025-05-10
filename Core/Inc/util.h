@@ -12,6 +12,8 @@ class Util {
 public:
   struct UtilData {
     bool eCalib = false;
+    bool endECalib = false;
+    bool sixPtRotation = false;
   };
 
 private:

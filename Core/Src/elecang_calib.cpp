@@ -112,6 +112,7 @@ void ElecangCalib::elecCalSeq(){
       data->drvMd = 0;
       data->voltQRef = 0.0f;
       utildata->eCalib = false;
+      utildata->endECalib = true;
       seqID = INIT;
       break;
       

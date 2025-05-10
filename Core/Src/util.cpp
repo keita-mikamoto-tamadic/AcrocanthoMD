@@ -16,6 +16,8 @@ void Util::genFuncCtrl() {
   if (candata->genFuncCheck){
     // genfuncRef 0b00010000
     data->eCalib = (candata->genFuncRef & 0x10) != 0 ? true : false;
+    // genfuncRef 0b00100000
+    data->sixPtRotation = (candata->genFuncRef & 0x20) != 0 ? true : false;
   }
   
 }

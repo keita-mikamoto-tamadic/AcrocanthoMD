@@ -12,8 +12,12 @@
 #define MULT_TURN_POS (1)
 #define MULT_TURN_NEG (2)
 
+#define CMD_MA735_READ ((uint16_t)0x00)
+#define CMD_MA735_MAGTH ((uint16_t)0x5B00)
+#define CMD_MA735_MGLHT ((uint16_t)0x4600)
+
 constexpr uint8_t rotDir = 0;
-constexpr uint8_t elecAngDir = 1;
+constexpr uint8_t elecAngDir = 0;
 constexpr uint8_t mechAngDir = 0;
 
 class MA735Enc {
@@ -58,7 +62,7 @@ private:
   uint8_t zeroPointTh = 0;
   int32_t mtCount = 0;
   
-  void read();
+  void read(uint16_t reg);
 
   float elecAng(float _eofs);
   uint16_t rawElecComp = 0;
@@ -73,13 +77,15 @@ private:
   }
   
   float raw2rads(int16_t raw){
-    return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME * static_cast<float>(compTime));
+//    return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME * static_cast<float>(compTime));
+    return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME);
   }
 
 public:
   MA735Enc(SPI_HandleTypeDef& hspi1);
   
   bool ma735Init();
+  void magFieldTh();
   void ma735angle();
   void getAngle();
   void getVel();

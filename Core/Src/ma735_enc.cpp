@@ -24,6 +24,29 @@ bool MA735Enc::ma735Init(){
   return false;
 };
 
+void MA735Enc::magFieldTh(){
+  // MGH/MGLレジスタを読込取付距離のチェックに使う。
+  // MGH: 0, MGL: 0 適正
+  // MGH: 1, MGL: 0 近すぎる
+  // MGH: 0, MGL: 1 遠すぎる
+  read(CMD_MA735_MGLHT);
+  if (spi_rx_complete) {
+    // CS非アクティブ
+    HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
+    
+    data->rawAng = (static_cast<uint16_t>(rawEnc[1] >> 6) & 0b00000011);
+    uint8_t mght = (rawEnc[1] >> 2) & 0b00000111;
+    uint8_t mglt = (rawEnc[1] >> 5) & 0b00000111;
+
+    // test
+    data->rawAngtest = data->rawAng;
+    // test
+    
+    readStart = false;
+    spi_rx_complete = false;
+  }
+}
+
 void MA735Enc::ma735angle(){
   getAngle();
   getVel();
@@ -31,9 +54,9 @@ void MA735Enc::ma735angle(){
   mechAngleIn();
 };
 
-void MA735Enc::read() {
+void MA735Enc::read(uint16_t reg) {
   if (!readStart) {
-    uint16_t command = 0x0000;
+    uint16_t command = reg;
     
     // CSアクティブLow
     HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
@@ -43,7 +66,7 @@ void MA735Enc::read() {
 }
 
 void MA735Enc::getAngle() {
-  read();
+  read(CMD_MA735_READ);
 
   if (spi_rx_complete) {
     // CS非アクティブ
