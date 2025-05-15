@@ -1,9 +1,0 @@
-../Core/Src/bldc_ctrl.cpp:13:1:BldcCtrl::BldcCtrl()	1
-../Core/Src/bldc_ctrl.cpp:26:7:float BldcCtrl::curDPidCtrl(float)	4
-../Core/Src/bldc_ctrl.cpp:16:7:float BldcCtrl::voltDCtrl(float)	1
-../Core/Src/bldc_ctrl.cpp:66:7:float BldcCtrl::curQPidCtrl(float)	4
-../Core/Src/bldc_ctrl.cpp:21:7:float BldcCtrl::voltQCtrl(float)	1
-../Core/Src/bldc_ctrl.cpp:104:7:float BldcCtrl::velPidCtrl(float)	4
-../Core/Src/bldc_ctrl.cpp:145:7:float BldcCtrl::posPidCtrl(float)	4
-../Core/Src/bldc_ctrl.cpp:181:1:cpp)	1
-../Core/Src/bldc_ctrl.cpp:181:1:cpp)	2

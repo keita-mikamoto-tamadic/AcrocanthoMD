@@ -1,5 +1,0 @@
-../Core/Src/mode_contrl.cpp:20:1:ModeControl::ModeControl()	16	static
-../Core/Src/mode_contrl.cpp:93:6:void ModeControl::refCtrl()	24	static
-../Core/Src/mode_contrl.cpp:24:6:void ModeControl::modeCtrl()	32	static
-../Core/Src/mode_contrl.cpp:118:1:cpp)	0	static
-../Core/Src/mode_contrl.cpp:118:1:cpp)	0	static

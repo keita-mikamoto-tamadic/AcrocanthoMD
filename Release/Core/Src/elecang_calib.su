@@ -1,5 +1,0 @@
-../Core/Src/elecang_calib.cpp:29:1:ElecangCalib::ElecangCalib()	16	static
-../Core/Src/elecang_calib.cpp:157:6:bool ElecangCalib::calibSub(float, float, float*, float)	24	static
-../Core/Src/elecang_calib.cpp:32:6:void ElecangCalib::elecCalSeq()	16	static
-../Core/Src/elecang_calib.cpp:253:1:cpp)	0	static
-../Core/Src/elecang_calib.cpp:253:1:cpp)	0	static

@@ -1,6 +1,0 @@
-../Core/Src/foc.cpp:18:6:void Foc::forwardCtrl(Acrocantho::SinCos)	24	static
-../Core/Src/foc.cpp:32:6:void Foc::inverseCtrl(Acrocantho::SinCos, float, float)	8	static
-C:\ST\STM32CubeIDE_1.18.0\STM32CubeIDE\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.13.3.rel1.win32_1.0.0.202411081344\tools\bin/../lib/gcc/arm-none-eabi/13.3.1/../../../../arm-none-eabi/include/c++/13.3.1/bits/unique_ptr.h:1069:5:) [with _Tp = Foc::FocData; _Args = {}]	16	static
-../Core/Src/foc.cpp:15:1:Foc::Foc()	8	static
-../Core/Src/foc.cpp:41:1:cpp)	8	static
-../Core/Src/foc.cpp:41:1:cpp)	0	static
