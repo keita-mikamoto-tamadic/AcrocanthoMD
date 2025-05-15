@@ -129,7 +129,7 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   tx_[15] = bytes[3];
   
   // vel Act
-  floatTouint(static_cast<float>(angdata->rawAng), bytes);
+  floatTouint(angdata->mechAngVelLPF, bytes);
   tx_[16] = bytes[0];
   tx_[17] = bytes[1];
   tx_[18] = bytes[2];

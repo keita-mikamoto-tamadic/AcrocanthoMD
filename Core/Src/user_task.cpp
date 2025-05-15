@@ -114,7 +114,7 @@ void UserTask::cyclicTask() {
       onewatect = 1;
       break;
     
-     case TEST:
+     case TESTCONST:
       // テストモード 50%Duty出力
       // ボタンの立ち上がりエッジを検出
       if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
@@ -132,7 +132,7 @@ void UserTask::cyclicTask() {
       prevB1State = currentB1State;
       break;
       
-    case TESTCONST:
+    case TEST:
       if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
         toggleState = !toggleState;  // 状態を反転
       }

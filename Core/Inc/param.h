@@ -8,7 +8,7 @@
 #define VOLT_PBM            (24.0f)       /* Power */
 //#define VOLT_PBM            (38.0f)       /* Power */
 #define CCLK_Hz             (170.0e6)
-#define CCR_MAX             ((uint16_t)16998)
+#define CCR_MAX             ((uint16_t)4249)
 #define CCR_END             ((CCR_MAX * 2)-1)
 #define TASK_TIME           ((1/CCLK_Hz)*CCR_END) // 三角波なのでカウント数の2倍が1周期分
 #define DUTY_BASE           (0.5f)
