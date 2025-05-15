@@ -6,7 +6,7 @@
 #include "util.h"
 
 constexpr float DutyGuard = 0.99f;
-constexpr float VoltGuard = 24.0f;
+constexpr float VoltGuard = VOLT_PBM;
 
 OutPwm outpwm;
 

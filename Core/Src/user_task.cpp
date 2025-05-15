@@ -51,9 +51,9 @@ void UserTask::cyclicTask() {
 
   // 初期値でtest状態へ遷移するかどうか決まる
   //static SeqID_t seqID = TEST;
-  //static SeqID_t seqID = TESTCONST;
+  static SeqID_t seqID = TESTCONST;
   //static SeqID_t seqID = TESTSINGLE;
-  static SeqID_t seqID = INIT;
+  //static SeqID_t seqID = INIT;
 
    switch (seqID) {
     case LOOP:
@@ -114,7 +114,7 @@ void UserTask::cyclicTask() {
       onewatect = 1;
       break;
     
-     case TEST:
+     case TESTCONST:
       // テストモード 50%Duty出力
       // ボタンの立ち上がりエッジを検出
       if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
@@ -132,7 +132,7 @@ void UserTask::cyclicTask() {
       prevB1State = currentB1State;
       break;
       
-    case TESTCONST:
+    case TEST:
       if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
         toggleState = !toggleState;  // 状態を反転
       }

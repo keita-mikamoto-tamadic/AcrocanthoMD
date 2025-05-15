@@ -5,8 +5,8 @@
 
 #define AS5600ADDR static_cast<int16_t>(0x36 << 1)
 
-#define VOLT_PBM            (24.0f)       /* Power */
-//#define VOLT_PBM            (38.0f)       /* Power */
+//#define VOLT_PBM            (24.0f)       /* Power */
+#define VOLT_PBM            (38.0f)       /* Power */
 #define CCLK_Hz             (170.0e6)
 #define CCR_MAX             ((uint16_t)16998)
 #define CCR_END             ((CCR_MAX * 2)-1)
