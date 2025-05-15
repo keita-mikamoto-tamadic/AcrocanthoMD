@@ -1,0 +1,19 @@
+../Core/Src/ma735_enc.cpp:60:6:0(uint16_t)	1
+../Core/Src/ma735_enc.cpp:14:1:MA735Enc::MA735Enc(SPI_HandleTypeDef&)	1
+../Core/Src/ma735_enc.cpp:60:6:void MA735Enc::read(uint16_t)	2
+../Core/Src/ma735_enc.cpp:34:6:void MA735Enc::magFieldTh()	2
+../Core/Src/ma735_enc.cpp:75:6:void MA735Enc::getAngle()	2
+../Core/Src/ma735_enc.cpp:133:6:void MA735Enc::mechAngleVelLPF()	1
+../Core/Src/ma735_enc.cpp:101:6:void MA735Enc::getVel()	4
+../Core/Src/ma735_enc.cpp:140:7:float MA735Enc::elecAng(float)	2
+../Core/Src/ma735_enc.cpp:166:7:float MA735Enc::elecAngVirtual(float)	3
+../Core/Src/ma735_enc.cpp:181:6:void MA735Enc::elecAngleIn()	2
+../Core/Src/ma735_enc.cpp:192:6:void MA735Enc::mechAngleIn()	3
+../Core/Src/ma735_enc.cpp:53:6:void MA735Enc::ma735angle()	1
+../Core/Src/ma735_enc.cpp:220:6:void MA735Enc::zeroPosOffset()	1
+../Core/Src/ma735_enc.cpp:18:6:bool MA735Enc::ma735Init()	2
+../Core/Src/ma735_enc.cpp:224:6:void MA735Enc::spiRxCallback()	1
+../Core/Src/ma735_enc.cpp:228:6:void MA735Enc::spiTxCallback()	1
+../Core/Src/ma735_enc.cpp:247:6:void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef*)	2
+../Core/Src/ma735_enc.cpp:257:1:cpp)	1
+../Core/Src/ma735_enc.cpp:257:1:cpp)	2

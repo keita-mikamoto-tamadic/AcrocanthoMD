@@ -20,7 +20,9 @@ typedef enum {
     IDLE,
     FAIL,
     END,
-    TEST
+    TEST,
+    TESTCONST,
+    TESTSINGLE
 } SeqID_t;
 
 class UserTask {

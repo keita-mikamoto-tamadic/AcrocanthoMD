@@ -20,5 +20,6 @@ public:
   void Poff();
   void setReg(float u, float v, float w);
   void TEST_setReg(float u, float v, float w);
+  void TESTSINGLE_setReg(uint8_t phase);
   
 };

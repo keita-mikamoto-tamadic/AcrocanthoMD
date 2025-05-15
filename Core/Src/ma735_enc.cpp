@@ -17,18 +17,21 @@ MA735Enc::MA735Enc(SPI_HandleTypeDef& spiHandle)
 
 bool MA735Enc::ma735Init(){
   static uint8_t count = 0;
+  // 初回のみreadで直読み
+  if (count == 0) read(CMD_MA735_READ);
   getAngle();
   zeroPosOffset();
   count++;
-  if (count > 10) return true;
+
+  if (count > 3) return true;
   return false;
 };
 
+// MGH/MGLレジスタを読込取付距離のチェックに使う。
+// MGH: 0, MGL: 0 適正
+// MGH: 1, MGL: 0 近すぎる
+// MGH: 0, MGL: 1 遠すぎる
 void MA735Enc::magFieldTh(){
-  // MGH/MGLレジスタを読込取付距離のチェックに使う。
-  // MGH: 0, MGL: 0 適正
-  // MGH: 1, MGL: 0 近すぎる
-  // MGH: 0, MGL: 1 遠すぎる
   read(CMD_MA735_MGLHT);
   if (spi_rx_complete) {
     // CS非アクティブ
@@ -60,18 +63,21 @@ void MA735Enc::read(uint16_t reg) {
     
     // CSアクティブLow
     HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_RESET);
+    //HAL_SPI_TransmitReceive_IT(&hspi1, (uint8_t*)&command, (uint8_t*)rawEnc, 2);
     HAL_SPI_TransmitReceive_DMA(&hspi1, (uint8_t*)&command, (uint8_t*)rawEnc, 2);
+    //HAL_SPI_Transmit_DMA(&hspi1, (uint8_t*)&command, 2);
+    //HAL_SPI_Transmit_IT(&hspi1, (uint8_t*)&command, 2);
+    //HAL_SPI_Receive_IT(&hspi1, (uint8_t*)rawEnc, 2);
     readStart = true;
   }
 }
 
 void MA735Enc::getAngle() {
-  read(CMD_MA735_READ);
 
   if (spi_rx_complete) {
+    
     // CS非アクティブ
     HAL_GPIO_WritePin(SPI1_CS_GPIO_Port, SPI1_CS_Pin, GPIO_PIN_SET);
-    
     data->rawAngPast = data->rawAng;
     // 16ビットデータを受信し、後ろ4ビットを削除して12ビットに変換
     data->rawAng = (static_cast<uint16_t>(rawEnc[1] << 8) | rawEnc[0]) >> 4;
@@ -85,6 +91,8 @@ void MA735Enc::getAngle() {
     // 速度時間割りのためのカウンタ保存
     compTime = comp;
     comp = 0;
+
+    read(CMD_MA735_READ);
 
   } else ++comp;
   data->eleccomp = comp;
@@ -123,17 +131,16 @@ void MA735Enc::getVel() {
 }
 
 void MA735Enc::mechAngleVelLPF(){
-  float timeConst, alpha;
+  float alpha;
   
-  timeConst = 1.0f / (user2pi * lpfFreq);
-  alpha = (TASK_TIME * static_cast<float>(compTime)) / timeConst;
+  alpha = kalpha * static_cast<float>(compTime);
   data->mechAngVelLPF = (alpha * data->mechAngVel + (1.0f - alpha) * data->mechAngVelLPF) * GR_RATIO;
 }
 
 float MA735Enc::elecAng(float _eofs) {
   // comp = 0のときサンプル値更新あり
   if (comp == 0) rawElecComp = data->rawAng;
-  else rawElecComp = data->rawAng + (diffRaw);
+  else rawElecComp = data->rawAng + (diffRaw/2);
   
   // 電気角反転
   static uint16_t elecAngtemp_ = 0;
@@ -214,17 +221,37 @@ void MA735Enc::zeroPosOffset() {
   data->zeroPosOffs = raw2rad(data->rawAng);
 }
 
-void MA735Enc::prepareCanData(uint8_t* buffer, size_t bufferSize) const {
-  memcpy(buffer, &(data->elecAng), sizeof(data->elecAng));
-}
-
-void MA735Enc::spiTxRxCallback() {
+void MA735Enc::spiRxCallback() {
   spi_rx_complete = true;
 }
 
+void MA735Enc::spiTxCallback() {
+  //HAL_SPI_Receive_DMA(&hspi1, (uint8_t*)rawEnc, 2);
+  //HAL_SPI_Receive_IT(&hspi1, (uint8_t*)rawEnc, 2);
+  
+}
+
 // SPIコールバック関数
-void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+/* void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi) {
   if (hspi->Instance == SPI1) {
-    ma735enc.spiTxRxCallback();
+    ma735enc.spiTxCallback();
+  }
+} */
+
+/* void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
+  if (hspi->Instance == SPI1) {
+    ma735enc.spiRxCallback();
+  }
+} */
+
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+    static uint8_t count = 0;
+  if (hspi->Instance == SPI1) {
+    ma735enc.spiRxCallback();
+/*     if (count == 2){
+    ma735enc.spiRxCallback();
+    count == 0;
+    }
+    count++; */
   }
 }

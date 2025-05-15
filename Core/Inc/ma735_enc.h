@@ -45,6 +45,11 @@ private:
   std::unique_ptr<MA735Data> data;
 
   const float lpfFreq = 150.0f;
+  const float timeConst = 1.0f / (user2pi * lpfFreq);
+  const float kalpha = TASK_TIME / timeConst;
+  
+  const float invResol = 1.0f / ANG_RESL_12BIT;
+  const float invTaskTime = 1.0f / TASK_TIME;
 
   SPI_HandleTypeDef& hspi1;
   bool readStart;
@@ -73,12 +78,12 @@ private:
   void mechAngleVelLPF();
   
   float raw2rad(uint16_t raw){
-    return static_cast<float>(raw) * user2pi / 4095.0f;
+    return static_cast<float>(raw) * user2pi * invResol;
   }
   
   float raw2rads(int16_t raw){
 //    return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME * static_cast<float>(compTime));
-    return static_cast<float>(raw) * user2pi / 4095.0f / (TASK_TIME);
+    return static_cast<float>(raw) * user2pi * invResol * invTaskTime;
   }
 
 public:
@@ -92,8 +97,8 @@ public:
   void elecAngleIn();
   void mechAngleIn();
   void zeroPosOffset();
-  void spiTxRxCallback();
-  void prepareCanData(uint8_t* buffer, size_t bufferSize) const;
+  void spiRxCallback();
+  void spiTxCallback();
   
   MA735Data* getData() const { return data.get(); }
 };

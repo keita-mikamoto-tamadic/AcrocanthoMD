@@ -1,0 +1,9 @@
+../Core/Src/bldc_ctrl.cpp:13:1:BldcCtrl::BldcCtrl()	16	static
+../Core/Src/bldc_ctrl.cpp:26:7:float BldcCtrl::curDPidCtrl(float)	32	static
+../Core/Src/bldc_ctrl.cpp:16:7:float BldcCtrl::voltDCtrl(float)	8	static
+../Core/Src/bldc_ctrl.cpp:66:7:float BldcCtrl::curQPidCtrl(float)	32	static
+../Core/Src/bldc_ctrl.cpp:21:7:float BldcCtrl::voltQCtrl(float)	8	static
+../Core/Src/bldc_ctrl.cpp:104:7:float BldcCtrl::velPidCtrl(float)	48	static
+../Core/Src/bldc_ctrl.cpp:145:7:float BldcCtrl::posPidCtrl(float)	48	static
+../Core/Src/bldc_ctrl.cpp:181:1:cpp)	0	static
+../Core/Src/bldc_ctrl.cpp:181:1:cpp)	0	static

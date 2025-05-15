@@ -129,7 +129,7 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   tx_[15] = bytes[3];
   
   // vel Act
-  floatTouint(angdata->mechAngVelLPF, bytes);
+  floatTouint(static_cast<float>(angdata->rawAng), bytes);
   tx_[16] = bytes[0];
   tx_[17] = bytes[1];
   tx_[18] = bytes[2];
@@ -216,8 +216,8 @@ void CanCom::TEST_rxTask(){
   switch (data->cmdRef) {
     // volt control
     case (CTRLMODE_VOLT):
-      data->genFuncRef = 0x11;
-      data->virAngFreq = 0.0f;
+      data->genFuncRef = 0x01;
+      data->virAngFreq = 10.0f;
       data->voltDRef = 0.0f;
       data->voltQRef = 1.0f;
       break;

@@ -38,6 +38,29 @@ void OutPwm::TEST_setReg(float u, float v, float w){
   TIM8->CCR3 = (uint16_t)((1.0f - w) * (float)CCR_MAX);
 }
 
+void OutPwm::TESTSINGLE_setReg(uint8_t phase){
+  switch (phase) {
+    case 0:
+      TIM8->CCR1 = (uint16_t)((1.0f - DUTY_BASE) * (float)CCR_MAX);
+      TIM8->CCR2 = 0;
+      TIM8->CCR3 = 0;
+      break;
+    case 1:
+      TIM8->CCR1 = 0;
+      TIM8->CCR2 = (uint16_t)((1.0f - DUTY_BASE) * (float)CCR_MAX);
+      TIM8->CCR3 = 0;
+      break;
+    case 2:
+      TIM8->CCR1 = 0;
+      TIM8->CCR2 = 0;
+      TIM8->CCR3 = (uint16_t)((1.0f - DUTY_BASE) * (float)CCR_MAX);
+      break;
+    default:
+      break;
+  }
+
+}
+
 float OutPwm::dutyGuard(float _rawDuty){
   float result_ = 0.0f;
   float limp = 0.0f;

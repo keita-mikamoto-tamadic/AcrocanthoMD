@@ -59,8 +59,6 @@ SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 DMA_HandleTypeDef hdma_spi1_rx;
 DMA_HandleTypeDef hdma_spi1_tx;
-DMA_HandleTypeDef hdma_spi2_tx;
-DMA_HandleTypeDef hdma_spi2_rx;
 
 TIM_HandleTypeDef htim8;
 
@@ -149,7 +147,8 @@ int main(void)
   HAL_TIMEx_PWMN_Start(&htim8, TIM_CHANNEL_3);
   
   // ゲートドライバON
-  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET);
 
   // CANフィルタ
   cancom.initFilter();
@@ -598,7 +597,7 @@ static void MX_TIM8_Init(void)
   htim8.Instance = TIM8;
   htim8.Init.Prescaler = 0;
   htim8.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
-  htim8.Init.Period = 16998;
+  htim8.Init.Period = 4249;
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim8.Init.RepetitionCounter = 1;
   htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -680,12 +679,6 @@ static void MX_DMA_Init(void)
   /* DMA1_Channel4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-  /* DMA1_Channel5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
-  /* DMA1_Channel6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
 
 }
 
@@ -713,7 +706,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;

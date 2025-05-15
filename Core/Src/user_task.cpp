@@ -23,6 +23,8 @@ extern ElecangCalib elecangcalib;
 extern Foc foc;
 extern BldcCtrl bldcctrl;
 
+volatile bool adcflag = true;
+
 //#define TEST_MODE
 
 UserTask::UserTask()
@@ -37,17 +39,27 @@ void UserTask::cyclicTask() {
   static bool toggleState = false;  // 出力状態
   static GPIO_PinState prevB1State = GPIO_PIN_RESET;  // 前回のボタン状態
   static uint8_t onewatect = 0;
+  static bool canExecute = true;     // 実行可能フラグ
+  static uint8_t stableCount = 0;    // 安定度カウンタ
+  static const uint8_t stableThreshold = 10;  // 安定判定のしきい値
+  static bool needTurnOff = false;   // 次周期でオフにするフラグ
+  static uint8_t execCount = 0;       // 実行回数カウンタ
+  static const uint8_t requiredExecs = 100;
       
   // 現在のボタン状態を取得
   GPIO_PinState currentB1State = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
 
+  // 初期値でtest状態へ遷移するかどうか決まる
+  //static SeqID_t seqID = TEST;
+  //static SeqID_t seqID = TESTCONST;
+  //static SeqID_t seqID = TESTSINGLE;
   static SeqID_t seqID = INIT;
 
    switch (seqID) {
     case LOOP:
 
       // 強制停止
-      if (!servoCheck()) {
+       if (!servoCheck()) {
         outpwm.Poff();
         resetAll();
 
@@ -55,7 +67,7 @@ void UserTask::cyclicTask() {
         break;
       }
 
-      senscur.sensCurIN();
+      //senscur.sensCurIN();
       ma735enc.ma735angle();
       
       // elecAng offset
@@ -63,7 +75,6 @@ void UserTask::cyclicTask() {
       test = ecaldata->elecAngOfs;
       eofsm = ecaldata->elecAngOfsMinus;
       eofsp = ecaldata->elecAngOfsPlus;
-      // 
       
       motorControl();
 
@@ -103,7 +114,7 @@ void UserTask::cyclicTask() {
       onewatect = 1;
       break;
     
-/*     case TEST:
+     case TEST:
       // テストモード 50%Duty出力
       // ボタンの立ち上がりエッジを検出
       if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
@@ -119,11 +130,59 @@ void UserTask::cyclicTask() {
       
       // ボタンの状態を保存
       prevB1State = currentB1State;
-      break; */
+      break;
       
+    case TESTCONST:
+      if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
+        toggleState = !toggleState;  // 状態を反転
+      }
+      // 状態に応じて出力を切り替え
+      if (toggleState) {
+        seqID = INIT;
+      } else {
+        // 何もしない
+      }
+      // ボタンの状態を保存
+      prevB1State = currentB1State;
+      break;
+
+    case TESTSINGLE:
+      
+    // ボタンの状態が変化したらカウンタリセット
+    if (currentB1State != prevB1State) {
+        stableCount = 0;
+    }
+    // 同じ状態が続いている場合、カウンタ増加
+    else if (stableCount < stableThreshold) {
+        stableCount++;
+    }
+    
+    // 状態が安定している場合の処理
+    if (stableCount >= stableThreshold) {
+        // 安定してONで、かつ実行可能な場合
+        if (currentB1State == GPIO_PIN_SET && canExecute) {
+            if (execCount < requiredExecs) {
+                outpwm.TESTSINGLE_setReg(0);  // U相:0, V相:1, W相:2
+                execCount++;                   // 実行回数をカウントアップ
+            }
+            if (execCount >= requiredExecs) {
+                outpwm.Poff();                // 2回実行完了後にPoff
+                canExecute = false;           // 次の実行をブロック
+            }
+        }
+        // 安定してOFFの場合
+        else if (currentB1State == GPIO_PIN_RESET) {
+            canExecute = true;     // 次の実行を許可
+            execCount = 0;         // 実行回数カウンタをリセット
+        }
+    }
+    
+    prevB1State = currentB1State;
+    break;
+
 
     default:
-      seqID = INIT;
+
       break;
     }
 }
@@ -175,13 +234,13 @@ void UserTask::motorControl() {
   testelec = angdata->elecAng;
   testerrD = bldcdata->testerrD;
   testerrQ = bldcdata->testerrQ;
-  //testCurU = senscurdata->testU;
-  //testCurW = senscurdata->testW;
+  testCurU = senscurdata->testU;
+  testCurW = senscurdata->testW;
   testcomp = angdata->eleccomp;
   testrawAng = angdata->rawAngtest;
   testrawAngPast = angdata->rawAngPasttest;
-  //testvelerr = bldcdata->testvelErr;
-  //testvelerrsum = bldcdata->testvelErrSum;
+  testvelerr = bldcdata->testvelErr;
+  testvelerrsum = bldcdata->testvelErrSum;
   testmechpos = angdata->mechAng;
   testposerr = bldcdata->testposErr;
   testposerrsum = bldcdata->testposErrSum;
@@ -216,7 +275,7 @@ void UserTask::resetAll() {
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
-  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
   usertask.cyclicTask();
-  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
 }

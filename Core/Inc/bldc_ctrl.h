@@ -87,8 +87,8 @@ private:
   // hw param
   const float volMin = -24.0f;
   const float volMax = 24.0f;
-  const float curQMin = -10.0f;
-  const float curQMax = 10.0f;
+  const float curQMin = -15.0f;
+  const float curQMax = 15.0f;
   const float velMin = -9.0f;
   const float velMax = 9.0f;
 
@@ -96,12 +96,12 @@ private:
   const float cutOffFreq = 50.0f;
   const float TimeConst = 1.0f / (user2pi * cutOffFreq);
   const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 0.6f;
-  const float curKi = 100.0f;
+  const float curKp = 0.1f;
+  const float curKi = 1.0f;
   const float curKd = 0.0f;
 
   // vel param
-  const float velKp = 0.5f;
+  const float velKp = 0.1f;
   const float velKi = 1.0f;
   const float velKd = 0.0f;
 

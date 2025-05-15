@@ -6,7 +6,6 @@
 
 // コンパイルスイッチ用マクロ定義
 
-//#define TEST_MODE
 
 class Util {
 public:
