@@ -25,7 +25,7 @@ extern BldcCtrl bldcctrl;
 
 volatile bool adcflag = true;
 
-//#define TEST_MODE
+#define TEST_MODE
 
 UserTask::UserTask()
   : count(0){}
@@ -50,8 +50,8 @@ void UserTask::cyclicTask() {
   GPIO_PinState currentB1State = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
 
   // 初期値でtest状態へ遷移するかどうか決まる
-  //static SeqID_t seqID = TEST;
-  static SeqID_t seqID = TESTCONST;
+  static SeqID_t seqID = TEST;
+  //static SeqID_t seqID = TESTCONST;
   //static SeqID_t seqID = TESTSINGLE;
   //static SeqID_t seqID = INIT;
 

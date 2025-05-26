@@ -217,9 +217,9 @@ void CanCom::TEST_rxTask(){
     // volt control
     case (CTRLMODE_VOLT):
       data->genFuncRef = 0x01;
-      data->virAngFreq = 10.0f;
+      data->virAngFreq = 5.0f;
       data->voltDRef = 0.0f;
-      data->voltQRef = 1.0f;
+      data->voltQRef = 3.0f;
       break;
     // current control
     case (CTRLMODE_CUR):
