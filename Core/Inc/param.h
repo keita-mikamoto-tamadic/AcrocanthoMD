@@ -6,12 +6,17 @@
 #define AS5600ADDR static_cast<int16_t>(0x36 << 1)
 
 #define VOLT_PBM            (24.0f)       /* Power */
-//#define VOLT_PBM            (38.0f)       /* Power */
+//#define VOLT_PBM            (48.0f)       /* Power */
 #define CCLK_Hz             (170.0e6)
-#define CCR_MAX             ((uint16_t)4249)
+#define CCR_MAX             ((uint16_t)8500)
 #define CCR_END             ((CCR_MAX * 2)-1)
 #define TASK_TIME           ((1/CCLK_Hz)*CCR_END) // 三角波なのでカウント数の2倍が1周期分
 #define DUTY_BASE           (0.5f)
+
+// 電流センサ定義
+//#define TMCS1107A1B
+#define AD8418A
+
 
 // モーター定義
 //#define GIM6010_8
@@ -32,7 +37,7 @@
 #endif
 
 #ifdef GIM8108_8
-#define EOFS           (5.655f)
+#define EOFS           (6.007f)
 #endif
 
 // ギア比

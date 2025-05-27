@@ -23,6 +23,7 @@
 #include "foc.h"
 #include "util.h"
 #include "elecang_calib.h"
+#include "sens_cur.h"
 
 // main.cppと同じインスタンスを使用
 extern FDCAN_HandleTypeDef hfdcan1;
@@ -35,6 +36,7 @@ extern ModeControl modecontrol;
 extern BldcCtrl bldcctrl;
 extern ElecangCalib elecangcalib;
 extern Util util;
+extern SensCur senscur;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
   : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
@@ -96,6 +98,7 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
   Util::UtilData* utildata = util.getUtilData();
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
+  SensCur::SensCurData* senscurdata = senscur.getData();
 
   
   uint8_t bytes[4];
@@ -212,25 +215,25 @@ void CanCom::rxTask() {
 }
 
 void CanCom::TEST_rxTask(){
-  data->cmdRef = CTRLMODE_VOLT;
+  data->cmdRef = CTRLMODE_POS;
   switch (data->cmdRef) {
     // volt control
     case (CTRLMODE_VOLT):
-      data->genFuncRef = 0x01;
-      data->virAngFreq = 10.0f;
+      data->genFuncRef = 0x11;
+      data->virAngFreq = 0.0f;
       data->voltDRef = 0.0f;
-      data->voltQRef = 1.0f;
+      data->voltQRef = 3.0f;
       break;
     // current control
     case (CTRLMODE_CUR):
       data->genFuncRef = 1;
       data->curDRef = 0.0f;
-      data->curQRef = 0.5f;
+      data->curQRef = 1.0f;
       break;
     // velocity control
     case (CTRLMODE_VEL):
       data->genFuncRef = 1;
-      data->velRef = 5.0f;
+      data->velRef = 0.0f;
       break;
     // position control
     case (CTRLMODE_POS):

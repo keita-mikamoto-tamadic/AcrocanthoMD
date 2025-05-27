@@ -10,6 +10,8 @@
 #define CALCOUNT (100) /* キャリブレーション回数 */
 #define ADVOLT           (3.3f) /* AD入力電圧範囲は3.3[V] */
 #define AD_RESL (4095.0f) /* 12bit分解能 */
+
+#ifdef AD8418A
 #define GAIN_AMP                  (20.0f)  /* AD8418A */
 #define GAIN_SHUNT                (0.005f) /* 10mohm */
 #define AMPGAIN                   (1.0f / (GAIN_AMP * GAIN_SHUNT))
@@ -17,6 +19,16 @@
 // キャリア波比較でのPWM生成をmode1で設定しており、update event　= キャリア波谷検出時 = PWM High時に
 // ADCをスキャンしているため、DUTYBASE基準で電圧正のときに電流は電圧とは逆の符号で流れる。
 #define ADC_TO_CUR(U2_V, U2_OFFS) (((float)((int16_t)U2_V - (int16_t)U2_OFFS)) * ADGAIN * -1) /* アンプからモータへの電流流し込みでプラス */
+#endif
+
+#ifdef TMCS1107A1B
+#define GAIN_AMP                  (0.050f)  /* TMCS1107A1B */
+#define AMP_OFS                   (AD_RESL / 2.0f)
+#define ADGAIN                    (1.0f / AD_RESL)
+// キャリア波比較でのPWM生成をmode1で設定しており、update event　= キャリア波谷検出時 = PWM High時に
+// ADCをスキャンしているため、DUTYBASE基準で電圧正のときに電流は電圧とは逆の符号で流れる。
+#define ADC_TO_CUR(U2_V, U2_OFFS) ((float)(((int16_t)U2_V - (int16_t)U2_OFFS) * ADGAIN * -1.0f) / GAIN_AMP) /* アンプからモータへの電流流し込みでプラス */
+#endif
 
 SensCur senscur;
 extern OutPwm outpwm;

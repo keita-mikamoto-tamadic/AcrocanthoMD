@@ -133,7 +133,8 @@ void MA735Enc::getVel() {
 void MA735Enc::mechAngleVelLPF(){
   float alpha;
   
-  alpha = kalpha * static_cast<float>(compTime);
+  //alpha = kalpha * static_cast<float>(compTime);
+  alpha = kalpha;
   data->mechAngVelLPF = (alpha * data->mechAngVel + (1.0f - alpha) * data->mechAngVelLPF) * GR_RATIO;
 }
 

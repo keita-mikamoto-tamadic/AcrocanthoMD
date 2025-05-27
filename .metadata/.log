@@ -1,0 +1,46 @@
+!SESSION 2025-05-15 21:24:49.665 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ja_JP
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-05-15 21:25:07.048
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-05-15 21:25:07.051
+!MESSAGE Log4j2 initialized with config file C:\Users\okyakusama\SWwork\06)STM32G474RE\AcrocanthoMD\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-05-15 21:25:12.128
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-05-15 21:26:12.921 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ja_JP
+Command-line arguments:  -os win32 -ws win32 -arch x86_64
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-05-15 21:26:32.833
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-05-15 21:26:32.834
+!MESSAGE Log4j2 initialized with config file C:\Users\okyakusama\SWwork\06)STM32G474RE\AcrocanthoMD\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-05-15 21:26:40.834
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-05-15 21:29:35.511 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=ja_JP
+Framework arguments:  C:\Users\okyakusama\SWwork\06)STM32G474RE\AcrocanthoMD\.project
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 C:\Users\okyakusama\SWwork\06)STM32G474RE\AcrocanthoMD\.project
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-05-15 21:29:50.164
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-05-15 21:29:50.166
+!MESSAGE Log4j2 initialized with config file C:\Users\okyakusama\SWwork\06)STM32G474RE\AcrocanthoMD\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-05-15 21:29:56.044
+!MESSAGE Started RMI Server, listening on port 41337
