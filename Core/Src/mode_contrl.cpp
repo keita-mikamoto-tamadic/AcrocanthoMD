@@ -2,7 +2,7 @@
 #include "user_task.h"
 #include "can_communication.h"
 #include "util.h"
-#include "elecAng_calib.h"
+#include "elecang_calib.h"
 #include "foc.h"
 #include "bldc_ctrl.h"
 #include "param.h"
