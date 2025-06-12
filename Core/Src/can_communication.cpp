@@ -75,6 +75,17 @@ void CanCom::initFilter(void) {
   
 }
 
+float CanCom::uintTofloat(const uint8_t* bytes) {
+  union {
+    float f;
+    uint32_t i;
+  } converter;
+    
+  converter.i = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
+    
+  return converter.f;
+}
+
 void CanCom::floatTouint(float value, uint8_t (&result)[4]) {
   union {
       float f;
@@ -86,79 +97,6 @@ void CanCom::floatTouint(float value, uint8_t (&result)[4]) {
   result[1] = static_cast<uint8_t>(converter.i >> 16);
   result[2] = static_cast<uint8_t>(converter.i >> 8);
   result[3] = static_cast<uint8_t>(converter.i);
-}
-
-void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
-  static uint32_t count = 0;
-  static float testdata = 48.5f;
-  
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
-  Foc::FocData* focdata = foc.getData();
-  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
-  Util::UtilData* utildata = util.getUtilData();
-  ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
-  SensCur::SensCurData* senscurdata = senscur.getData();
-
-  
-  uint8_t bytes[4];
-
-  // voltD Act
-  floatTouint(mdctrldata->voltDRef, bytes);
-  tx_[0] = bytes[0];
-  tx_[1] = bytes[1];
-  tx_[2] = bytes[2];
-  tx_[3] = bytes[3];
-
-  // voltQ Act
-  floatTouint(mdctrldata->voltQRef, bytes);
-  tx_[4] = bytes[0];
-  tx_[5] = bytes[1];
-  tx_[6] = bytes[2];
-  tx_[7] = bytes[3];
-  
-  // curD Act
-  floatTouint(focdata->id, bytes);
-  tx_[8] = bytes[0];
-  tx_[9] = bytes[1];
-  tx_[10] = bytes[2];
-  tx_[11] = bytes[3];
-
-  // curQ Act
-  floatTouint(focdata->iq, bytes);
-  tx_[12] = bytes[0];
-  tx_[13] = bytes[1];
-  tx_[14] = bytes[2];
-  tx_[15] = bytes[3];
-  
-  // vel Act
-  floatTouint(angdata->mechAngVelLPF, bytes);
-  tx_[16] = bytes[0];
-  tx_[17] = bytes[1];
-  tx_[18] = bytes[2];
-  tx_[19] = bytes[3];
-
-  // 電気角オフセットキャリブ終了時のみキャリブ値を送信
-  // サーボオフでフラグクリア
-  if (utildata->endECalib == true) angdata->mechAng = ecaldata->elecAngOfs;
-
-  // mechAng Act
-  floatTouint(angdata->mechAng, bytes);
-  tx_[20] = bytes[0];
-  tx_[21] = bytes[1];
-  tx_[22] = bytes[2];
-  tx_[23] = bytes[3];
-
-  // 32Byte固定
-  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &txHeader, tx_) != HAL_OK) {
-    Error_Handler();
-  }
-  count++;
-
-}
-
-void CanCom::txMsgList(const uint8_t* data) {
-
 }
 
 void CanCom::rxFifo0Callback(uint32_t RxFifo0ITs) {
@@ -238,7 +176,7 @@ void CanCom::TEST_rxTask(){
     // position control
     case (CTRLMODE_POS):
       data->genFuncRef = 1;
-      data->posRef = 1.0f;
+      data->posRef = 0.0f;
       break;
   }
   uint8_t currentGenFuncRef = data->genFuncRef;
@@ -251,33 +189,85 @@ void CanCom::TEST_rxTask(){
   prevGenFuncRef = currentGenFuncRef;
 }
 
-void CanCom::txTask(){
+void CanCom::txTask() {
   if (canTxFlag) {
-//    if (txHeader.FDFormat == FDCAN_FD_CAN) {
-      txMsgListFd(txDataFd);
-//    }else{
-//      txMsgList(txData);
-//    }
+    txMsgListFd(txDataFd);
     canTxFlag = false;
   }
 }
 
 void CanCom::txServoOffTask() {
-      txMsgListFd(txDataFd);
+  txMsgListFd(txDataFd);
 }
 
+void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
+  static uint32_t count = 0;
+  static float testdata = 48.5f;
+  
+  MA735Enc::MA735Data* angdata = ma735enc.getData();
+  Foc::FocData* focdata = foc.getData();
+  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
+  Util::UtilData* utildata = util.getUtilData();
+  ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
+  SensCur::SensCurData* senscurdata = senscur.getData();
 
-float CanCom::uintTofloat(const uint8_t* bytes) {
-    union {
-        float f;
-        uint32_t i;
-    } converter;
-    
-    converter.i = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
-    
-    return converter.f;
+  
+  uint8_t bytes[4];
+
+  // voltD Act
+  floatTouint(mdctrldata->voltDRef, bytes);
+  tx_[0] = bytes[0];
+  tx_[1] = bytes[1];
+  tx_[2] = bytes[2];
+  tx_[3] = bytes[3];
+
+  // voltQ Act
+  floatTouint(mdctrldata->voltQRef, bytes);
+  tx_[4] = bytes[0];
+  tx_[5] = bytes[1];
+  tx_[6] = bytes[2];
+  tx_[7] = bytes[3];
+  
+  // curD Act
+  floatTouint(focdata->id, bytes);
+  tx_[8] = bytes[0];
+  tx_[9] = bytes[1];
+  tx_[10] = bytes[2];
+  tx_[11] = bytes[3];
+
+  // curQ Act
+  floatTouint(focdata->iq, bytes);
+  tx_[12] = bytes[0];
+  tx_[13] = bytes[1];
+  tx_[14] = bytes[2];
+  tx_[15] = bytes[3];
+  
+  // vel Act
+  floatTouint(angdata->mechAngVelLPF, bytes);
+  tx_[16] = bytes[0];
+  tx_[17] = bytes[1];
+  tx_[18] = bytes[2];
+  tx_[19] = bytes[3];
+
+  // 電気角オフセットキャリブ終了時のみキャリブ値を送信
+  // サーボオフでフラグクリア
+  if (utildata->endECalib == true) angdata->mechAng = ecaldata->elecAngOfs;
+
+  // mechAng Act
+  floatTouint(angdata->mechAng, bytes);
+  tx_[20] = bytes[0];
+  tx_[21] = bytes[1];
+  tx_[22] = bytes[2];
+  tx_[23] = bytes[3];
+
+  // 32Byte固定
+  if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &txHeader, tx_) != HAL_OK) {
+    Error_Handler();
+  }
+  count++;
+
 }
-
 void CanCom::rxMsglistFd(const uint8_t (&rx)[canRxSize]) {
   if (canRxInterrupt == true) {
     data->cmdRef = rxHeader.Identifier >> 6;
@@ -319,6 +309,12 @@ void CanCom::rxMsglistFd(const uint8_t (&rx)[canRxSize]) {
     canRxInterrupt = false;
     cancom.canTxFlag = true;
   }
+}
+
+
+//------Not used in CANFD------//
+void CanCom::txMsgList(const uint8_t* data) {
+
 }
 
 void CanCom::rxMsglist(const uint8_t (&rx)[8]) {

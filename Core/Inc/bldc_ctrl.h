@@ -87,10 +87,10 @@ private:
   // hw param
   const float volMin = -24.0f;
   const float volMax = 24.0f;
-  const float curQMin = -5.0f;
-  const float curQMax = 5.0f;
-  const float velMin = -9.0f;
-  const float velMax = 9.0f;
+  const float curQMin = -10.0f;
+  const float curQMax = 10.0f;
+  const float velMin = -5.0f;
+  const float velMax = 5.0f;
 
   // cur param
   const float cutOffFreq = 50.0f;
@@ -106,8 +106,8 @@ private:
   const float velKd = 0.0f;
 
   // pos param
-  const float posKp = 1.0f;
-  const float posKi = 0.0f;
+  const float posKp = 17.0f;
+  const float posKi = 0.4f;
   const float posKd = 0.0f;
   #endif
 
