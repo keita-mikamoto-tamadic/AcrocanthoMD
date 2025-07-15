@@ -15,6 +15,7 @@
  */
 
 #include "can_communication.h"
+#include "byte_converter.h"
 
 #include "main.h"
 #include "mode_control.h"
@@ -76,117 +77,92 @@ void CanCom::initFilter(void) {
 }
 
 float CanCom::uintTofloat(const uint8_t* bytes) {
-  union {
-    float f;
-    uint32_t i;
-  } converter;
-    
-  converter.i = bytes[0] << 24 | bytes[1] << 16 | bytes[2] << 8 | bytes[3];
-    
-  return converter.f;
+  return ByteConverter::readFloat(bytes, 0);
 }
 
 void CanCom::floatTouint(float value, uint8_t (&result)[4]) {
-  union {
-      float f;
-      uint32_t i;
-  } converter;
+  ByteConverter::writeFloat(result, 0, value);
+}
 
-  converter.f = value;
-  result[0] = static_cast<uint8_t>(converter.i >> 24);
-  result[1] = static_cast<uint8_t>(converter.i >> 16);
-  result[2] = static_cast<uint8_t>(converter.i >> 8);
-  result[3] = static_cast<uint8_t>(converter.i);
+// 制御モード処理共通関数
+void CanCom::processControlMode(uint16_t cmdRef, const uint8_t* rx) {
+  switch (cmdRef) {
+    case (CTRLMODE_NONE):
+      data->genFuncRef = 0;
+      data->virAngFreq = 0;
+      data->voltDRef = 0;
+      data->voltQRef = 0;
+      data->curDRef = 0;
+      data->curQRef = 0;
+      data->velRef = 0;
+      data->posRef = 0;
+      break;
+    case (CTRLMODE_VOLT):
+      data->genFuncRef = ByteConverter::readUint32(rx, 0);
+      data->virAngFreq = ByteConverter::readFloat(rx, 4);
+      data->voltDRef = ByteConverter::readFloat(rx, 8);
+      data->voltQRef = ByteConverter::readFloat(rx, 12);
+      break;
+    case (CTRLMODE_CUR):
+      data->genFuncRef = ByteConverter::readUint32(rx, 0);
+      data->curDRef = ByteConverter::readFloat(rx, 4);
+      data->curQRef = ByteConverter::readFloat(rx, 8);
+      break;
+    case (CTRLMODE_VEL):
+      data->genFuncRef = ByteConverter::readUint32(rx, 0);
+      data->velRef = ByteConverter::readFloat(rx, 4);
+      break;
+    case (CTRLMODE_POS):
+      data->genFuncRef = ByteConverter::readUint32(rx, 0);
+      data->posRef = ByteConverter::readFloat(rx, 4);
+      break;
+  }
+}
+
+// genFuncRef状態更新共通関数
+void CanCom::updateGenFuncStatus() {
+  uint8_t currentGenFuncRef = data->genFuncRef;
+
+  if (currentGenFuncRef == prevGenFuncRef) {
+    data->genFuncCheck = false;   
+    return;
+  }
+  data->genFuncCheck = true;
+  prevGenFuncRef = currentGenFuncRef;
 }
 
 void CanCom::rxFifo0Callback(uint32_t RxFifo0ITs) {
-  FDCAN_RxHeaderTypeDef tempRxHeader;  // 一時的なヘッダー
+  FDCAN_RxHeaderTypeDef tempRxHeader;
 
-  // FDCAN用
-  //if (rxHeader.FDFormat == FDCAN_FD_CAN) {
-    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
-      if (HAL_FDCAN_GetRxMessage(&hfdcan, FDCAN_RX_FIFO0, &tempRxHeader, rxDataFd) != HAL_OK) {
-        Error_Handler();
-      }
+  if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
+    if (HAL_FDCAN_GetRxMessage(&hfdcan, FDCAN_RX_FIFO0, &tempRxHeader, rxDataFd) != HAL_OK) {
+      Error_Handler();
+    }
 
-      if (HAL_FDCAN_ActivateNotification(&hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
-        Error_Handler();
-      }
+    if (HAL_FDCAN_ActivateNotification(&hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
+      Error_Handler();
+    }
 
-      // 受信データのIDを保存
-      rxHeader = tempRxHeader;
-      canRxInterrupt = true;
-
-   // }
-  // クラシックCAN用
-/*   } else {
-    if ((RxFifo0ITs & FDCAN_IT_RX_FIFO0_NEW_MESSAGE) != RESET) {
-      if (HAL_FDCAN_GetRxMessage(&hfdcan, FDCAN_RX_FIFO0, &rxHeader, rxData) != HAL_OK) {
-        Error_Handler();
-      }
-
-      if (HAL_FDCAN_ActivateNotification(&hfdcan, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK) {
-        Error_Handler();
-      }
-
-      canRxInterrupt = true;
-
-    } */
+    // 受信データのIDを保存
+    rxHeader = tempRxHeader;
+    canRxInterrupt = true;
   }
 }
 
 void CanCom::rxTask() {
-  //if (txHeader.FDFormat == FDCAN_FD_CAN) {
-    rxMsglistFd(rxDataFd);
-/*   } else {
-    rxMsglist(rxData);
-  } */
-
-  uint8_t currentGenFuncRef = data->genFuncRef;
-
-  if (currentGenFuncRef == prevGenFuncRef) {
-    data->genFuncCheck = false;   
-    return;
-  }
-  data->genFuncCheck = true;
-  prevGenFuncRef = currentGenFuncRef;
+  rxMsglistFd(rxDataFd);
+  updateGenFuncStatus();
 }
 
 void CanCom::TEST_rxTask(){
+  // テスト用固定値設定
   data->cmdRef = CTRLMODE_VOLT;
-  switch (data->cmdRef) {
-    // volt control
-    case (CTRLMODE_VOLT):
-      data->genFuncRef = 0x11;
-      data->virAngFreq = 0.0f;
-      data->voltDRef = 0.0f;
-      data->voltQRef = 3.0f;
-      break;
-    // current control
-    case (CTRLMODE_CUR):
-      data->genFuncRef = 1;
-      data->curDRef = 0.0f;
-      data->curQRef = 1.0f;
-      break;
-    // velocity control
-    case (CTRLMODE_VEL):
-      data->genFuncRef = 1;
-      data->velRef = 0.0f;
-      break;
-    // position control
-    case (CTRLMODE_POS):
-      data->genFuncRef = 1;
-      data->posRef = 0.0f;
-      break;
-  }
-  uint8_t currentGenFuncRef = data->genFuncRef;
-
-  if (currentGenFuncRef == prevGenFuncRef) {
-    data->genFuncCheck = false;   
-    return;
-  }
-  data->genFuncCheck = true;
-  prevGenFuncRef = currentGenFuncRef;
+  data->genFuncRef = 0x11;
+  data->virAngFreq = 0.0f;
+  data->voltDRef = 0.0f;
+  data->voltQRef = 3.0f;
+  
+  updateGenFuncStatus();
 }
 
 void CanCom::txTask() {
@@ -202,153 +178,42 @@ void CanCom::txServoOffTask() {
 
 void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   static uint32_t count = 0;
-  static float testdata = 48.5f;
   
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
-  Foc::FocData* focdata = foc.getData();
-  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
-  Util::UtilData* utildata = util.getUtilData();
-  ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
-  SensCur::SensCurData* senscurdata = senscur.getData();
+  // データポインタキャッシュ（静的取得）
+  static MA735Enc::MA735Data* angdata = ma735enc.getData();
+  static Foc::FocData* focdata = foc.getData();
+  static ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  static Util::UtilData* utildata = util.getUtilData();
+  static ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
 
-  
-  uint8_t bytes[4];
-
-  // voltD Act
-  floatTouint(mdctrldata->voltDRef, bytes);
-  tx_[0] = bytes[0];
-  tx_[1] = bytes[1];
-  tx_[2] = bytes[2];
-  tx_[3] = bytes[3];
-
-  // voltQ Act
-  floatTouint(mdctrldata->voltQRef, bytes);
-  tx_[4] = bytes[0];
-  tx_[5] = bytes[1];
-  tx_[6] = bytes[2];
-  tx_[7] = bytes[3];
-  
-  // curD Act
-  floatTouint(focdata->id, bytes);
-  tx_[8] = bytes[0];
-  tx_[9] = bytes[1];
-  tx_[10] = bytes[2];
-  tx_[11] = bytes[3];
-
-  // curQ Act
-  floatTouint(focdata->iq, bytes);
-  tx_[12] = bytes[0];
-  tx_[13] = bytes[1];
-  tx_[14] = bytes[2];
-  tx_[15] = bytes[3];
-  
-  // vel Act
-  floatTouint(angdata->mechAngVelLPF, bytes);
-  tx_[16] = bytes[0];
-  tx_[17] = bytes[1];
-  tx_[18] = bytes[2];
-  tx_[19] = bytes[3];
+  // ByteConverterクラスを使用した型安全なデータ変換
+  ByteConverter::writeFloat(tx_, 0, mdctrldata->voltDRef);   // voltD Act
+  ByteConverter::writeFloat(tx_, 4, mdctrldata->voltQRef);   // voltQ Act
+  ByteConverter::writeFloat(tx_, 8, focdata->id);            // curD Act
+  ByteConverter::writeFloat(tx_, 12, focdata->iq);           // curQ Act
+  ByteConverter::writeFloat(tx_, 16, angdata->mechAngVelLPF); // vel Act
 
   // 電気角オフセットキャリブ終了時のみキャリブ値を送信
-  // サーボオフでフラグクリア
   if (utildata->endECalib == true) angdata->mechAng = ecaldata->elecAngOfs;
-
-  // mechAng Act
-  floatTouint(angdata->mechAng, bytes);
-  tx_[20] = bytes[0];
-  tx_[21] = bytes[1];
-  tx_[22] = bytes[2];
-  tx_[23] = bytes[3];
+  ByteConverter::writeFloat(tx_, 20, angdata->mechAng);       // mechAng Act
 
   // 32Byte固定
   if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &txHeader, tx_) != HAL_OK) {
     Error_Handler();
   }
   count++;
-
 }
 void CanCom::rxMsglistFd(const uint8_t (&rx)[canRxSize]) {
   if (canRxInterrupt == true) {
     data->cmdRef = rxHeader.Identifier >> 6;
-    switch (data->cmdRef) {
-      case (CTRLMODE_NONE):
-        data->genFuncRef = 0;
-        data->virAngFreq = 0;
-        data->voltDRef = 0;
-        data->voltQRef = 0;
-        data->curDRef = 0;
-        data->curQRef = 0;
-        data->velRef = 0;
-        data->posRef = 0;
-        break;
-      // volt control
-      case (CTRLMODE_VOLT):
-        data->genFuncRef = rx[0] << 24 | rx[1] << 16 | rx[2] << 8 | rx[3];
-        data->virAngFreq = uintTofloat(&rx[4]);
-        data->voltDRef = uintTofloat(&rx[8]);
-        data->voltQRef = uintTofloat(&rx[12]);
-        break;
-      // current control
-      case (CTRLMODE_CUR):
-        data->genFuncRef = rx[0] << 24 | rx[1] << 16 | rx[2] << 8 | rx[3];
-        data->curDRef = uintTofloat(&rx[4]);
-        data->curQRef = uintTofloat(&rx[8]);
-        break;
-      // velocity control
-      case (CTRLMODE_VEL):
-        data->genFuncRef = rx[0] << 24 | rx[1] << 16 | rx[2] << 8 | rx[3];
-        data->velRef = uintTofloat(&rx[4]);
-        break;
-      // position control
-      case (CTRLMODE_POS):
-        data->genFuncRef = rx[0] << 24 | rx[1] << 16 | rx[2] << 8 | rx[3];
-        data->posRef = uintTofloat(&rx[4]);
-        break;
-    }
+    processControlMode(data->cmdRef, rx);
     canRxInterrupt = false;
     cancom.canTxFlag = true;
   }
 }
 
 
-//------Not used in CANFD------//
-void CanCom::txMsgList(const uint8_t* data) {
-
-}
-
-void CanCom::rxMsglist(const uint8_t (&rx)[8]) {
-  if (canRxInterrupt == true) {
-    data->cmdRef = rxHeader.Identifier >> 6;
-    switch (data->cmdRef) {
-      // volt control
-      case (CTRLMODE_VOLT):
-        data->genFuncRef = rx[0];
-        data->virAngFreq = static_cast<float>(rx[1]);
-        data->voltDRef = static_cast<float>(rx[2]);
-        data->voltQRef = static_cast<float>(rx[3]);
-        break;
-      // current control
-      case (CTRLMODE_CUR):
-        data->genFuncRef = rx[0];
-        data->curDRef = static_cast<float>(rx[1]);
-        data->curQRef = static_cast<float>(static_cast<int8_t>(rx[2]));
-        break;
-      // velocity control
-      case (CTRLMODE_VEL):
-        data->genFuncRef = rx[0];
-        data->velRef = static_cast<float>(static_cast<int8_t>(rx[1]));
-        break;
-      // position control
-      case (CTRLMODE_POS):
-        data->genFuncRef = rx[0];
-        data->posRef = static_cast<float>(static_cast<int8_t>(rx[1]));
-        break;
-
-    }
-    canRxInterrupt = false;
-  }
-}
+// 未使用の関数（CANFD環境では不要）
 
 void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs) {
       cancom.rxFifo0Callback(RxFifo0ITs);

@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include "main.h"
+#include "byte_converter.h"
 
 constexpr uint32_t canDevID = 1;
 constexpr uint8_t canRxSize = 32;
@@ -45,10 +46,14 @@ private:
   uint8_t prevGenFuncRef;
   volatile bool canRxInterrupt;
   
-  void rxMsglist(const uint8_t (&rx)[8]);
+  // 制御処理統一関数
+  void processControlMode(uint16_t cmdRef, const uint8_t* rx);
+  void updateGenFuncStatus();
+
   void rxMsglistFd(const uint8_t (&rx)[canRxSize]);
-  void txMsgList(const uint8_t* data);
   void txMsgListFd(uint8_t (&tx_)[canTxSize]);
+  
+  // レガシー関数（内部使用）
   float uintTofloat(const uint8_t* bytes);
 
 public:
@@ -66,7 +71,7 @@ public:
   
   void TEST_rxTask(void);
 
-  // floatをuint8_t[4]に変換する関数
+  // レガシー関数（後方互換性のため残存）
   static void floatTouint(float value, uint8_t (&result)[4]);
 
   CanData* getData() { return data.get(); }
