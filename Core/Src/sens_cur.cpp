@@ -7,63 +7,72 @@
 
 #include <cstdint>
 
-#define CALCOUNT (100) /* キャリブレーション回数 */
-#define ADVOLT           (3.3f) /* AD入力電圧範囲は3.3[V] */
-#define AD_RESL (4095.0f) /* 12bit分解能 */
+constexpr uint16_t CALCOUNT = 100;  // キャリブレーション回数
+constexpr float ADVOLT = 3.3f;      // AD入力電圧範囲は3.3[V]
+constexpr float AD_RESL = 4095.0f;  // 12bit分解能
 
 #ifdef AD8418A
-#define GAIN_AMP                  (20.0f)  /* AD8418A */
-#define GAIN_SHUNT                (0.005f) /* 10mohm */
-#define AMPGAIN                   (1.0f / (GAIN_AMP * GAIN_SHUNT))
-#define ADGAIN                    ((1.0f / AD_RESL) * ADVOLT * AMPGAIN)
+constexpr float GAIN_AMP = 20.0f;   // AD8418A
+constexpr float GAIN_SHUNT = 0.005f; // 10mohm
+constexpr float AMPGAIN = 1.0f / (GAIN_AMP * GAIN_SHUNT);
+constexpr float ADGAIN = (1.0f / AD_RESL) * ADVOLT * AMPGAIN;
 // キャリア波比較でのPWM生成をmode1で設定しており、update event　= キャリア波谷検出時 = PWM High時に
 // ADCをスキャンしているため、DUTYBASE基準で電圧正のときに電流は電圧とは逆の符号で流れる。
-#define ADC_TO_CUR(U2_V, U2_OFFS) (((float)((int16_t)U2_V - (int16_t)U2_OFFS)) * ADGAIN * -1) /* アンプからモータへの電流流し込みでプラス */
+constexpr float ADC_POLARITY = -1.0f;  // アンプからモータへの電流流し込みでプラス
 #endif
 
 #ifdef TMCS1107A1B
-#define GAIN_AMP                    (0.050f)  /* TMCS1107A1B */
-#define ADC_TO_CUR(U2_V, U2_OFFS) (((f4)((s2)U2_V - (s2)U2_OFFS) / AD_RESL) * ADVOLT / GAIN_AMP)
+constexpr float GAIN_AMP = 0.050f;  // TMCS1107A1B
+constexpr float ADGAIN = ADVOLT / (AD_RESL * GAIN_AMP);
+constexpr float ADC_POLARITY = 1.0f;
 #endif
 
 SensCur senscur;
 extern OutPwm outpwm;
 
-SensCur::SensCur()
-  : data(std::make_unique<SensCurData>()) {}
+SensCur::SensCur() {
+  // ADCレジスタの設定
+  channels[0].adcRegister = &(ADC1->JDR1);  // U相
+  channels[1].adcRegister = &(ADC2->JDR1);  // W相
+}
   
 void SensCur::getRawCur() {
-  adcRawU = ADC1 -> JDR1;
-  adcRawW = ADC2 -> JDR1;
-  data->testU = adcRawU;
-  data->testW = adcRawW;
+  // 統一化されたADC読み取り
+  for (int i = 0; i < 2; i++) {
+    channels[i].adcRaw = static_cast<uint16_t>(*channels[i].adcRegister);
+  }
+  
+  // テストデータの設定
+  data.testU = channels[0].adcRaw;
+  data.testW = channels[1].adcRaw;
 }
 
 void SensCur::sensCurIN() {
   getRawCur();
   
-  curURaw = ADC_TO_CUR(adcRawU, curOffsU);
-  curWRaw = ADC_TO_CUR(adcRawW, curOffsW);
+  // 統一化されたADC→電流変換
+  for (int i = 0; i < 2; i++) {
+    const float adcValue = static_cast<float>(static_cast<int16_t>(channels[i].adcRaw - channels[i].offset));
+    channels[i].rawCurrent = adcValue * ADGAIN * ADC_POLARITY;
+  }
 
   // V相電流はIu + Iv + Iw = 0より計算
-  curVRaw = -curURaw - curWRaw;
+  const float curVRaw = -channels[0].rawCurrent - channels[1].rawCurrent;
   
-  data->curU = curURaw;
-  data->curV = curVRaw;
-  data->curW = curWRaw;
-  //data->curU = lpfCur(curURaw, data->curU, 5000.0f);
-  //data->curV = lpfCur(curVRaw, data->curV, 5000.0f);
-  //data->curW = lpfCur(curWRaw, data->curW, 5000.0f);
+  data.curU = channels[0].rawCurrent;
+  data.curV = curVRaw;
+  data.curW = channels[1].rawCurrent;
+  
+  // LPF適用（必要に応じてコメントアウト解除）
+  //data.curU = lpfCur(channels[0].rawCurrent, data.curU, 5000.0f);
+  //data.curV = lpfCur(curVRaw, data.curV, 5000.0f);
+  //data.curW = lpfCur(channels[1].rawCurrent, data.curW, 5000.0f);
 }
 
 float SensCur::lpfCur(float _curRaw, float _curPast, float _cutOffFreq) {
-  float timeConst, alpha;
-  
-  timeConst = 1.0f / (user2pi * _cutOffFreq);
-  alpha = TASK_TIME / timeConst;
-  float curLPF_ = (alpha * _curRaw + (1.0f - alpha) * _curPast);
-
-  return curLPF_;
+  const float timeConst = 1.0f / (user2pi * _cutOffFreq);
+  const float alpha = TASK_TIME / timeConst;
+  return (alpha * _curRaw + (1.0f - alpha) * _curPast);
 }
 
 bool SensCur::sensCurInit() {
@@ -78,15 +87,19 @@ bool SensCur::sensCurInit() {
       seqID = STEP01;
       break;
     case STEP01:
-      // キャリブレーション
+      // キャリブレーション - 統一化処理
       if (_calcount < CALCOUNT) {
         getRawCur();
-        curOffsU += adcRawU;
-        curOffsW += adcRawW;
+        // 両チャンネルのオフセット値を蓄積
+        for (int i = 0; i < 2; i++) {
+          channels[i].offset += channels[i].adcRaw;
+        }
         _calcount++;
       } else {
-        curOffsU /= _calcount;
-        curOffsW /= _calcount;
+        // 平均値計算
+        for (int i = 0; i < 2; i++) {
+          channels[i].offset /= _calcount;
+        }
         seqID = STEP02;
       }
       break;

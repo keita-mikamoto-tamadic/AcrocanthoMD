@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <memory>
 
 #include "main.h"
 
@@ -10,26 +9,24 @@ public:
     float curV = 0.0f;
     float curW = 0.0f;
     
-    uint16_t testU = 0.0f;
-    uint16_t testW = 0.0f;
-    
+    uint16_t testU = 0;
+    uint16_t testW = 0;
   };
 
 private:
-  std::unique_ptr<SensCurData> data;
+  SensCurData data;
   
-  uint32_t curOffsU = 0;
-  uint32_t curOffsW = 0;
-
-  float curURaw = 0.0f;
-  float curVRaw = 0.0f;
-  float curWRaw = 0.0f;
+  // チャンネル別処理用構造体
+  struct ChannelData {
+    uint32_t offset = 0;
+    float rawCurrent = 0.0f;
+    uint16_t adcRaw = 0;
+    volatile uint32_t* adcRegister;
+  };
+  
+  ChannelData channels[2];  // U相(0), W相(1)
   
   void getRawCur();
-  uint16_t adcRawU = 0;
-  uint16_t adcRawW = 0;
-
-  bool adjustCur();
   float lpfCur(float _curRaw, float _curPast, float _cutOffFreq);
 
 public:
@@ -38,6 +35,6 @@ public:
   bool sensCurInit();
   void sensCurIN();
 
-  SensCurData* getData() { return data.get(); }
-  
+  SensCurData* getData() { return &data; }
+  const SensCurData* getData() const { return &data; }
 };
