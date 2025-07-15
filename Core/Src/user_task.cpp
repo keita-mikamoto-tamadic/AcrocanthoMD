@@ -30,75 +30,107 @@ volatile bool adcflag = true;
 UserTask::UserTask()
   : count(0){}
 
+// センサ読み取り統一関数
+void UserTask::readSensors() {
+  senscur.sensCurIN();
+  ma735enc.ma735angle();
+}
 
-void UserTask::cyclicTask() {
+// テストデータ収集（デバッグ時のみ）
+void UserTask::collectTestData() {
   ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
   MA735Enc::MA735Data* angdata = ma735enc.getData();
-  Util::UtilData* utildata = util.getUtilData();
+  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  Foc::FocData* focdata = foc.getData();
+  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
+  SensCur::SensCurData* senscurdata = senscur.getData();
 
-  static bool toggleState = false;  // 出力状態
-  static GPIO_PinState prevB1State = GPIO_PIN_RESET;  // 前回のボタン状態
-  static uint8_t onewatect = 0;
-  static bool canExecute = true;     // 実行可能フラグ
-  static uint8_t stableCount = 0;    // 安定度カウンタ
-  static const uint8_t stableThreshold = 10;  // 安定判定のしきい値
-  static bool needTurnOff = false;   // 次周期でオフにするフラグ
-  static uint8_t execCount = 0;       // 実行回数カウンタ
-  static const uint8_t requiredExecs = 100;
-      
-  // 現在のボタン状態を取得
+  testData.test = ecaldata->elecAngOfs;
+  testData.eofsm = ecaldata->elecAngOfsMinus;
+  testData.eofsp = ecaldata->elecAngOfsPlus;
+  testData.testid = focdata->id;
+  testData.testiq = focdata->iq;
+  testData.testvd = mdctrldata->voltDRef;
+  testData.testvq = mdctrldata->voltQRef;
+  testData.testvel = angdata->mechAngVelLPF;
+  testData.testdiff = angdata->testdiff;
+  testData.testvelact = angdata->mechAngVel;
+  testData.testpos = angdata->mechAng;
+  testData.testelec = angdata->elecAng;
+  testData.testerrD = bldcdata->testerrD;
+  testData.testerrQ = bldcdata->testerrQ;
+  testData.testCurU = senscurdata->testU;
+  testData.testCurW = senscurdata->testW;
+  testData.testcomp = angdata->eleccomp;
+  testData.testrawAng = angdata->rawAngtest;
+  testData.testrawAngPast = angdata->rawAngPasttest;
+  testData.testvelerr = bldcdata->testvelErr;
+  testData.testvelerrsum = bldcdata->testvelErrSum;
+  testData.testmechpos = angdata->mechAng;
+  testData.testposerr = bldcdata->testposErr;
+  testData.testposerrsum = bldcdata->testposErrSum;
+  testData.testposout = mdctrldata->posout;
+}
+
+// ボタン処理共通関数
+GPIO_PinState UserTask::handleButtonInput() {
   GPIO_PinState currentB1State = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+  
+  // ボタンの状態が変化したらカウンタリセット
+  if (currentB1State != stateData.prevB1State) {
+    stateData.stableCount = 0;
+  }
+  // 同じ状態が続いている場合、カウンタ増加
+  else if (stateData.stableCount < stateData.stableThreshold) {
+    stateData.stableCount++;
+  }
+  
+  stateData.prevB1State = currentB1State;
+  return currentB1State;
+}
 
-  static SeqID_t seqID = INIT;
+void UserTask::cyclicTask() {
+  Util::UtilData* utildata = util.getUtilData();
+  static SeqID_t seqID = TESTCONST;
 
    switch (seqID) {
     case LOOP:
-
       // 強制停止
-       if (!servoCheck()) {
+      if (!servoCheck()) {
         outpwm.Poff();
         resetAll();
-
         seqID = STEP00;
         break;
       }
 
-      senscur.sensCurIN();
-      ma735enc.ma735angle();
+      readSensors();
       
       // elecAng offset
       elecangcalib.elecCalSeq();
-      test = ecaldata->elecAngOfs;
-      eofsm = ecaldata->elecAngOfsMinus;
-      eofsp = ecaldata->elecAngOfsPlus;
+      collectTestData();  // テストデータ収集
       
       motorControl();
-
       break;
     case INIT:
       // 初期化のためにエンコーダ値の初回読み取り
       resetAll();
-      initEnd = false;
+      testData.initEnd = false;
       if (true != ma735enc.ma735Init()) {
       } else {
-        // 電流オフセット補正
-        ma735enc.ma735angle();
+        // 電流オフセット補正とセンサ初期化
         if (senscur.sensCurInit()) {
-          senscur.sensCurIN();
+          readSensors();
           count = 0;
-
-          initEnd = true;
+          testData.initEnd = true;
           seqID = STEP00;
         }
       }
       break;
     case STEP00:
       utildata->endECalib = false;
-      senscur.sensCurIN();
-      ma735enc.ma735angle();
-      // ma735enc.magFieldTh();
+      readSensors();
 
-      if (onewatect == 1){
+      if (stateData.onewatect == 1){
         if (servoCheck()){
           outpwm.Pon();
           seqID = LOOP;
@@ -107,75 +139,67 @@ void UserTask::cyclicTask() {
       }
 
       outpwm.Poff();
-      onewatect = 1;
+      stateData.onewatect = 1;
       break;
     
-     case TESTCONST:
+     case TESTCONST: {
       // テストモード 50%Duty出力
+      GPIO_PinState prevState = stateData.prevB1State;
+      GPIO_PinState currentB1State = handleButtonInput();
+      
       // ボタンの立ち上がりエッジを検出
-      if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
-        toggleState = !toggleState;  // 状態を反転
+      if (currentB1State == GPIO_PIN_SET && prevState == GPIO_PIN_RESET) {
+        stateData.toggleState = !stateData.toggleState;
       }
       
       // 状態に応じて出力を切り替え
-      if (toggleState) {
+      if (stateData.toggleState) {
         outpwm.TEST_setReg(0.5f, 0.5f, 0.5f);
       } else {
         outpwm.Poff();
       }
-      
-      // ボタンの状態を保存
-      prevB1State = currentB1State;
       break;
+    }
       
-    case TEST:
+    case TEST: {
       ma735enc.ma735angle();
-      if (currentB1State == GPIO_PIN_SET && prevB1State == GPIO_PIN_RESET) {
-        toggleState = !toggleState;  // 状態を反転
-      }
-      // 状態に応じて出力を切り替え
-      if (toggleState) {
-        seqID = INIT;
-      } else {
-        // 何もしない
-      }
-      // ボタンの状態を保存
-      prevB1State = currentB1State;
-      break;
-
-    case TESTSINGLE:
+      GPIO_PinState prevState = stateData.prevB1State;
+      GPIO_PinState currentB1State = handleButtonInput();
       
-    // ボタンの状態が変化したらカウンタリセット
-    if (currentB1State != prevB1State) {
-        stableCount = 0;
+      if (currentB1State == GPIO_PIN_SET && prevState == GPIO_PIN_RESET) {
+        stateData.toggleState = !stateData.toggleState;
+      }
+      
+      if (stateData.toggleState) {
+        seqID = INIT;
+      }
+      break;
     }
-    // 同じ状態が続いている場合、カウンタ増加
-    else if (stableCount < stableThreshold) {
-        stableCount++;
-    }
-    
-    // 状態が安定している場合の処理
-    if (stableCount >= stableThreshold) {
+
+    case TESTSINGLE: {
+      GPIO_PinState currentB1State = handleButtonInput();
+      
+      // 状態が安定している場合の処理
+      if (stateData.stableCount >= stateData.stableThreshold) {
         // 安定してONで、かつ実行可能な場合
-        if (currentB1State == GPIO_PIN_SET && canExecute) {
-            if (execCount < requiredExecs) {
-                outpwm.TESTSINGLE_setReg(0);  // U相:0, V相:1, W相:2
-                execCount++;                   // 実行回数をカウントアップ
-            }
-            if (execCount >= requiredExecs) {
-                outpwm.Poff();                // 2回実行完了後にPoff
-                canExecute = false;           // 次の実行をブロック
-            }
+        if (currentB1State == GPIO_PIN_SET && stateData.canExecute) {
+          if (stateData.execCount < stateData.requiredExecs) {
+            outpwm.TESTSINGLE_setReg(0);  // U相:0, V相:1, W相:2
+            stateData.execCount++;
+          }
+          if (stateData.execCount >= stateData.requiredExecs) {
+            outpwm.Poff();
+            stateData.canExecute = false;
+          }
         }
         // 安定してOFFの場合
         else if (currentB1State == GPIO_PIN_RESET) {
-            canExecute = true;     // 次の実行を許可
-            execCount = 0;         // 実行回数カウンタをリセット
+          stateData.canExecute = true;
+          stateData.execCount = 0;
         }
+      }
+      break;
     }
-    
-    prevB1State = currentB1State;
-    break;
 
 
     default:
@@ -186,7 +210,7 @@ void UserTask::cyclicTask() {
 
 
 void UserTask::idleTask() {
-  if (initEnd == true) {
+  if (testData.initEnd == true) {
   #ifdef TEST_MODE
     cancom.TEST_rxTask();
   #else
@@ -202,12 +226,12 @@ void UserTask::idleTask() {
 // PON後のモータ制御
 void UserTask::motorControl() {
   using namespace Acrocantho;
-  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
-  Foc::FocData* focdata = foc.getData();
-  CanCom::CanData* candata = cancom.getData();
-  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
-  SensCur::SensCurData* senscurdata = senscur.getData();
+  
+  // データポインタキャッシュ（1回取得のみ）
+  static ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  static MA735Enc::MA735Data* angdata = ma735enc.getData();
+  static Foc::FocData* focdata = foc.getData();
+  
   Cordic cordic;
 
   // SinCos演算
@@ -216,33 +240,8 @@ void UserTask::motorControl() {
   // dq変換
   foc.forwardCtrl(result);
   
-  testid = focdata->id;
-  testiq = focdata->iq;
-  
   // drvMdとgenfuncによる指令値切替
   modecontrol.modeCtrl();
-  
-  testvd = mdctrldata->voltDRef;
-  testvq = mdctrldata->voltQRef;
-  testvel = angdata->mechAngVelLPF;
-  testdiff = angdata->testdiff;
-  testvelact = angdata->mechAngVel;
-  testpos = angdata->mechAng;
-  testelec = angdata->elecAng;
-  testerrD = bldcdata->testerrD;
-  testerrQ = bldcdata->testerrQ;
-  testCurU = senscurdata->testU;
-  testCurW = senscurdata->testW;
-  testcomp = angdata->eleccomp;
-  testrawAng = angdata->rawAngtest;
-  testrawAngPast = angdata->rawAngPasttest;
-  testvelerr = bldcdata->testvelErr;
-  testvelerrsum = bldcdata->testvelErrSum;
-  testmechpos = angdata->mechAng;
-  testposerr = bldcdata->testposErr;
-  testposerrsum = bldcdata->testposErrSum;
-  testposout = mdctrldata->posout;
-
 
   // dq逆変換
   foc.inverseCtrl(result, mdctrldata->voltDRef, mdctrldata->voltQRef);
@@ -251,17 +250,13 @@ void UserTask::motorControl() {
 }
 
 bool UserTask::servoCheck() {
-  CanCom::CanData* candata = cancom.getData();
+  static CanCom::CanData* candata = cancom.getData();
   return (candata->genFuncRef & 0x01) != 0 ? true : false;
 }
 
 void UserTask::canDataPrepare() {
-  CanCom::CanData* candata = cancom.getData();
-  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
-  Foc::FocData* focdata = foc.getData();
-  BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
-  SensCur::SensCurData* senscurdata = senscur.getData();
+  static CanCom::CanData* candata = cancom.getData();
+  static MA735Enc::MA735Data* angdata = ma735enc.getData();
 
   // CANデータの準備
   candata->actPos = angdata->mechAng;
