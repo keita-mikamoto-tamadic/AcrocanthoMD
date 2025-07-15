@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include "user_math.h"
 
 
@@ -16,12 +15,13 @@ public:
   };
 
 private:
-  std::unique_ptr<FocData> data;
+  FocData data;
 
 public:
-  Foc();
+  Foc() = default;
   void forwardCtrl(const Acrocantho::SinCos _sc);
   void inverseCtrl(const Acrocantho::SinCos _sc, float _vd, float _vq);
 
-  FocData* getData() const { return data.get(); }
+  FocData* getData() { return &data; }
+  const FocData* getData() const { return &data; }
 };

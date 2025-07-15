@@ -157,8 +157,8 @@ void CanCom::rxTask() {
 void CanCom::TEST_rxTask(){
   // テスト用固定値設定
   data->cmdRef = CTRLMODE_VOLT;
-  data->genFuncRef = 0x11;
-  data->virAngFreq = 0.0f;
+  data->genFuncRef = 0x01;
+  data->virAngFreq = 10.0f;
   data->voltDRef = 0.0f;
   data->voltQRef = 3.0f;
   

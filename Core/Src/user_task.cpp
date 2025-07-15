@@ -25,7 +25,7 @@ extern BldcCtrl bldcctrl;
 
 volatile bool adcflag = true;
 
-//#define TEST_MODE
+#define TEST_MODE
 
 UserTask::UserTask()
   : count(0){}
@@ -91,7 +91,7 @@ GPIO_PinState UserTask::handleButtonInput() {
 
 void UserTask::cyclicTask() {
   Util::UtilData* utildata = util.getUtilData();
-  static SeqID_t seqID = TESTCONST;
+  static SeqID_t seqID = TEST;
 
    switch (seqID) {
     case LOOP:

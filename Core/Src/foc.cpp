@@ -12,30 +12,25 @@ extern SensCur senscur;
 
 using namespace Acrocantho;
 
-Foc::Foc()
-    : data(std::make_unique<FocData>()) {}
-
 void Foc::forwardCtrl(const SinCos _sc){
-  SensCur::SensCurData* senscurdata = senscur.getData();
-  Cordic cordic;
+  static SensCur::SensCurData* senscurdata = senscur.getData();
   
-  // Clarke transform
-  ClarkeTransform ct(senscurdata->curU, senscurdata->curV, senscurdata->curW);
+  // Clarke transform - direct calculation
+  const float alpha = absqrt1 * senscurdata->curU;
+  const float beta = (absqrt2 * senscurdata->curU) + (absqrt3 * senscurdata->curV);
   
-  // Park transform
-  ParkTransform pt(_sc, ct.alpha, ct.beta);
-  data->id = pt.id;
-  data->iq = pt.iq;
-  
+  // Park transform - direct calculation
+  data.id = _sc.c * alpha + _sc.s * beta;
+  data.iq = -_sc.s * alpha + _sc.c * beta;
 }
 
 void Foc::inverseCtrl(const SinCos _sc, float _vd, float _vq){
-	TrigonTransform tt(_sc, _vd, _vq);
+  // Inverse Park transform - direct calculation
+  const float trigon1 = _sc.c * _vd - _sc.s * _vq;
+  const float trigon2 = _sc.s * _vd + _sc.c * _vq;
   
-  // Inverse Clarke transform
-  InverseClarkeTransform ict(tt._trigon1, tt._trigon2);
-  
-  data->vu = ict.u_ini;
-  data->vv = ict.v_ini;
-  data->vw = ict.w_ini;
+  // Inverse Clarke transform - direct calculation
+  data.vu = trigon1 * invsqrt1;
+  data.vv = -(trigon1 * invsqrt3) + trigon2 * invsqrt2;
+  data.vw = -(trigon1 * invsqrt3) - trigon2 * invsqrt2;
 }
