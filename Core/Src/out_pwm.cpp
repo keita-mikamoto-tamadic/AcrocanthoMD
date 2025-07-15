@@ -5,12 +5,7 @@
 #include "param.h"
 #include "util.h"
 
-constexpr float DutyGuard = 0.99f;
-constexpr float VoltGuard = VOLT_PBM;
-
 OutPwm outpwm;
-
-OutPwm::OutPwm(){}
 
 void OutPwm::Pon(){
   setReg(DUTY_BASE, DUTY_BASE, DUTY_BASE);
@@ -24,81 +19,64 @@ void OutPwm::Poff(){
 }
 
 void OutPwm::setReg(float u, float v, float w){
-  midVol(u, v, w);
-
-  TIM8->CCR1 = (uint16_t)((1.0f - dutyGuard(u)) * (float)CCR_MAX);
-  TIM8->CCR2 = (uint16_t)((1.0f - dutyGuard(v)) * (float)CCR_MAX);
-  TIM8->CCR3 = (uint16_t)((1.0f - dutyGuard(w)) * (float)CCR_MAX);
+  calculateMidVoltage(u, v, w);
+  setCCR(dutyGuard(u), dutyGuard(v), dutyGuard(w));
 }
 
 void OutPwm::TEST_setReg(float u, float v, float w){
-
-  TIM8->CCR1 = (uint16_t)((1.0f - u) * (float)CCR_MAX);
-  TIM8->CCR2 = (uint16_t)((1.0f - v) * (float)CCR_MAX);
-  TIM8->CCR3 = (uint16_t)((1.0f - w) * (float)CCR_MAX);
+  setCCR(u, v, w);
 }
 
 void OutPwm::TESTSINGLE_setReg(uint8_t phase){
+  constexpr float DUTY_VAL = DUTY_BASE;
+  
   switch (phase) {
     case 0:
-      TIM8->CCR1 = (uint16_t)((1.0f - DUTY_BASE) * (float)CCR_MAX);
-      TIM8->CCR2 = 0;
-      TIM8->CCR3 = 0;
+      setCCR(DUTY_VAL, 0.0f, 0.0f);
       break;
     case 1:
-      TIM8->CCR1 = 0;
-      TIM8->CCR2 = (uint16_t)((1.0f - DUTY_BASE) * (float)CCR_MAX);
-      TIM8->CCR3 = 0;
+      setCCR(0.0f, DUTY_VAL, 0.0f);
       break;
     case 2:
-      TIM8->CCR1 = 0;
-      TIM8->CCR2 = 0;
-      TIM8->CCR3 = (uint16_t)((1.0f - DUTY_BASE) * (float)CCR_MAX);
+      setCCR(0.0f, 0.0f, DUTY_VAL);
       break;
     default:
+      setCCR(0.0f, 0.0f, 0.0f);
       break;
   }
-
 }
 
-float OutPwm::dutyGuard(float _rawDuty){
-  float result_ = 0.0f;
-  float limp = 0.0f;
-  float limm = 0.0f;
-  float powerSwitch_ = 0.0f;
-  
-  if (VOLT_PBM >= VoltGuard) {
-    powerSwitch_ = VOLT_PBM;
-  } else {
-    powerSwitch_ = VoltGuard;
-  }
+float OutPwm::dutyGuard(float rawDuty){
+  const float powerSwitch = std::max(VOLT_PBM, VOLT_GUARD);
   
   // 中間電位差し引く
-  limp = ((_rawDuty - midvol) / powerSwitch_) + DUTY_BASE;
-  limm = 1.0f - DutyGuard;
+  const float normalizedDuty = ((rawDuty - midvol) / powerSwitch) + DUTY_BASE;
+  const float lowerLimit = 1.0f - DUTY_GUARD;
   
-  if (limp > DutyGuard){
-    result_ = DutyGuard;
-  } else if (limp < limm){
-    result_ = limm;
-  } else {
-    result_ = limp;
+  // クランプ処理（C++14対応）
+  if (normalizedDuty < lowerLimit) {
+    return lowerLimit;
   }
-  
-  return result_;
+  else if (normalizedDuty > DUTY_GUARD) {
+    return DUTY_GUARD;
+  }
+  else {
+    return normalizedDuty;
+  }
 }
 
-void OutPwm::midVol(float u_, float v_, float w_){
-  // 3相の中で最大電圧を算出
-  maxvol = u_;
-  if (v_ > maxvol) maxvol = v_;
-  if (w_ > maxvol) maxvol = w_;
-  
-  // 3相の中で最小電圧を算出
-  minvol = u_;
-  if (v_ < minvol) minvol = v_;
-  if (w_ < minvol) minvol = w_;
+void OutPwm::calculateMidVoltage(float u, float v, float w){
+  // 3相の最大値と最小値を効率的に算出
+  const float maxvol = std::max({u, v, w});
+  const float minvol = std::min({u, v, w});
   
   // 中間電位を算出
-  midvol = (maxvol + minvol) / 2.0f;
+  midvol = (maxvol + minvol) * 0.5f;
+}
+
+// CCR設定の共通化
+void OutPwm::setCCR(float u, float v, float w){
+  TIM8->CCR1 = static_cast<uint16_t>((1.0f - u) * static_cast<float>(CCR_MAX));
+  TIM8->CCR2 = static_cast<uint16_t>((1.0f - v) * static_cast<float>(CCR_MAX));
+  TIM8->CCR3 = static_cast<uint16_t>((1.0f - w) * static_cast<float>(CCR_MAX));
 }
