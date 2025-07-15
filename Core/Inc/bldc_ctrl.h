@@ -18,98 +18,85 @@ public:
   };
 
 private:
+  // PID制御共通データ構造
+  struct PidData {
+    float pidRaw = 0.0f;
+    float errSum = 0.0f;
+    float errLPF = 0.0f;
+    float errLPFPast = 0.0f;
+  };
+
+  // PID制御パラメータ構造
+  struct PidParams {
+    float kp;
+    float ki;
+    float kd;
+    float outMin;
+    float outMax;
+  };
   // クリアしたいデータは構造体に入れておく
   struct VoltCtrlData {
     float voltD = 0.0f;
     float voltQ = 0.0f;
   };
 
-  struct CurPidData {
-    float curDPidRaw = 0.0f;
-    float curDErrSum = 0.0f;
-    float curDErrLPF = 0.0f;
-    float curDErrLPFPast = 0.0f;
-
-    float curQPidRaw = 0.0f;
-    float curQErrSum = 0.0f;
-    float curQErrLPF = 0.0f;
-    float curQErrLPFPast = 0.0f;
-  };
-
-  struct VelPidData {
-    float velPidRaw = 0.0f;
-    float velErrLPF = 0.0f;
-    float velErrLPFPast = 0.0f;
-    float velErrSum = 0.0f;
-  };
-  
-  struct PosPidData {
-    float posPidRaw = 0.0f;
-    float posErrSum = 0.0f;
-    float posErrLPF = 0.0f;
-    float posErrLPFPast = 0.0f;
-  };
-
   VoltCtrlData voltData;
-  CurPidData curData;
-  VelPidData velData;
-  PosPidData posData;
+  PidData curDData;
+  PidData curQData;
+  PidData velData;
+  PidData posData;
 
+  // モーター設定構造体
+  struct MotorConfig {
+    float volMin;
+    float volMax;
+    float curQMin;
+    float curQMax;
+    float velMin;
+    float velMax;
+    float curKp;
+    float curKi;
+    float curKd;
+    float velKp;
+    float velKi;
+    float velKd;
+    float posKp;
+    float posKi;
+    float posKd;
+  };
+
+  // constexpr定数
+  static constexpr float cutOffFreq = 50.0f;
+  static constexpr float timeConst = 1.0f / (user2pi * cutOffFreq);
+  static constexpr float lpfCoef = TASK_TIME / timeConst;
+
+  // モーター固有設定
   #ifdef GIM6010_8
-  // hw param
-  const float volMin = -24.0f;
-  const float volMax = 24.0f;
-  const float curQMin = -10.0f;
-  const float curQMax = 10.0f;
-  const float velMin = -9.0f;
-  const float velMax = 9.0f;
-
-  // cur param
-  const float cutOffFreq = 50.0f;
-  const float TimeConst = 1.0f / (user2pi * cutOffFreq);
-  const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 0.2f;
-  const float curKi = 100.0f;
-  const float curKd = 0.0f;
-
-  // vel param
-  const float velKp = 5.0f;
-  const float velKi = 30.0f;
-  const float velKd = 0.0f;
-
-  // pos param
-  const float posKp = 8.0f;
-  const float posKi = 0.5f;
-  const float posKd = 0.0f;
+  static constexpr MotorConfig motorConfig = {
+    -24.0f, 24.0f,    // volMin, volMax
+    -10.0f, 10.0f,    // curQMin, curQMax
+    -9.0f, 9.0f,      // velMin, velMax
+    0.2f, 100.0f, 0.0f, // curKp, curKi, curKd
+    5.0f, 30.0f, 0.0f,  // velKp, velKi, velKd
+    8.0f, 0.5f, 0.0f    // posKp, posKi, posKd
+  };
   #endif
 
   #ifdef GIM8108_8
-  // hw param
-  const float volMin = -24.0f;
-  const float volMax = 24.0f;
-  const float curQMin = -10.0f;
-  const float curQMax = 10.0f;
-  const float velMin = -5.0f;
-  const float velMax = 5.0f;
-
-  // cur param
-  const float cutOffFreq = 50.0f;
-  const float TimeConst = 1.0f / (user2pi * cutOffFreq);
-  const float lpfcoef = TASK_TIME / TimeConst;
-  const float curKp = 0.2f;
-  const float curKi = 20.0f;
-  const float curKd = 0.0f;
-
-  // vel param
-  const float velKp = 10.0f;
-  const float velKi = 0.5f;
-  const float velKd = 0.0f;
-
-  // pos param
-  const float posKp = 17.0f;
-  const float posKi = 0.4f;
-  const float posKd = 0.0f;
+  static constexpr MotorConfig motorConfig = {
+    -24.0f, 24.0f,    // volMin, volMax
+    -10.0f, 10.0f,    // curQMin, curQMax
+    -5.0f, 5.0f,      // velMin, velMax
+    0.2f, 20.0f, 0.0f,  // curKp, curKi, curKd
+    10.0f, 0.5f, 0.0f,  // velKp, velKi, velKd
+    17.0f, 0.4f, 0.0f   // posKp, posKi, posKd
+  };
   #endif
+
+  // PID制御共通関数
+  float pidControl(float reference, float feedback, PidData& pidData, 
+                   const PidParams& params, float* testErr = nullptr, 
+                   float* testErrSum = nullptr);
 
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);
@@ -127,9 +114,10 @@ public:
   // サーボオフ時にデータをリセット
   void resetData() {
     voltData = VoltCtrlData();
-    curData = CurPidData();
-    velData = VelPidData();
-    posData = PosPidData();
+    curDData = PidData();
+    curQData = PidData();
+    velData = PidData();
+    posData = PidData();
   }
   
   BldcCtrl::BldcCtrlData* getData() { return data.get(); }

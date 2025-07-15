@@ -153,7 +153,7 @@ void CanCom::rxTask() {
 }
 
 void CanCom::TEST_rxTask(){
-  data->cmdRef = CTRLMODE_POS;
+  data->cmdRef = CTRLMODE_VOLT;
   switch (data->cmdRef) {
     // volt control
     case (CTRLMODE_VOLT):
