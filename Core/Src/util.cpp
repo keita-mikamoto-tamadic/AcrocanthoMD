@@ -6,18 +6,26 @@
 Util util;
 extern CanCom cancom;
 
-Util::Util()
-  : data(std::make_unique<UtilData>()) {}
+Util::Util() {
+}
 
 // PON以外の機能制御
 void Util::genFuncCtrl() {
-  CanCom::CanData* candata = cancom.getData();
+  const CanCom::CanData* candata = cancom.getData();
 
-  if (candata->genFuncCheck){
-    // genfuncRef 0b00010000
-    data->eCalib = (candata->genFuncRef & 0x10) != 0 ? true : false;
-    // genfuncRef 0b00100000
-    data->sixPtRotation = (candata->genFuncRef & 0x20) != 0 ? true : false;
+  if (candata->genFuncCheck) {
+    // 電気角キャリブレーション制御
+    if ((candata->genFuncRef & GENFUNC_ECALIB_MASK) != 0) {
+      data.eCalib = true;
+    } else {
+      data.eCalib = false;
+    }
+    
+    // 6点回転制御
+    if ((candata->genFuncRef & GENFUNC_SIXPT_MASK) != 0) {
+      data.sixPtRotation = true;
+    } else {
+      data.sixPtRotation = false;
+    }
   }
-  
 }

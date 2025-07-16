@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include "user_task.h"
 
-#define CALIB_NUM       (60)                           /* 分割数 [-] */
+// 電気角キャリブレーション定数
+static constexpr uint32_t CALIB_NUM = 60;
 
 class ElecangCalib
 {
@@ -20,7 +20,7 @@ public:
   };
 
 private:
-  std::unique_ptr<ElecangCalibData> data;
+  ElecangCalibData data;
 
   SeqID_t seqIDSub = STEP00;
 
@@ -36,7 +36,7 @@ private:
 
   int32_t count = 0;
   float elecAngOfsVal = 0.0f;
-  uint32_t indexnum = 0.0f;
+  uint32_t indexnum = 0;
   float velOutAxLast = 0.0f;
   float velOut[CALIB_NUM] = {0.0f};
   float elecAngOfs[CALIB_NUM] = {0.0f};
@@ -46,5 +46,5 @@ public:
   
   void elecCalSeq();
 
-  ElecangCalibData* getData() const { return data.get(); }
+  ElecangCalibData* getData() { return &data; }
 };

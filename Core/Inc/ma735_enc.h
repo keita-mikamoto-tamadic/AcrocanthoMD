@@ -2,23 +2,25 @@
 
 #include "main.h"
 
-#include <memory>
 #include "user_math.h"
 #include "user_task.h"
 #include "param.h"
 
-#define ANG_RESL_12BIT (4095)
-#define MULT_TURN_NONE (0)
-#define MULT_TURN_POS (1)
-#define MULT_TURN_NEG (2)
+// MA735エンコーダ定数
+static constexpr uint16_t ANG_RESL_12BIT = 4095;
+static constexpr uint8_t MULT_TURN_NONE = 0;
+static constexpr uint8_t MULT_TURN_POS = 1;
+static constexpr uint8_t MULT_TURN_NEG = 2;
+static constexpr uint16_t ANG_RESL_HALF = ANG_RESL_12BIT / 2;
 
-#define CMD_MA735_READ ((uint16_t)0x00)
-#define CMD_MA735_MAGTH ((uint16_t)0x5B00)
-#define CMD_MA735_MGLHT ((uint16_t)0x4600)
+// MA735コマンド定数
+static constexpr uint16_t CMD_MA735_READ = 0x00;
+static constexpr uint16_t CMD_MA735_MAGTH = 0x5B00;
+static constexpr uint16_t CMD_MA735_MGLHT = 0x4600;
 
-constexpr uint8_t rotDir = 0;
-constexpr uint8_t elecAngDir = 0;
-constexpr uint8_t mechAngDir = 0;
+static constexpr uint8_t rotDir = 0;
+static constexpr uint8_t elecAngDir = 0;
+static constexpr uint8_t mechAngDir = 0;
 
 class MA735Enc {
 public:
@@ -41,15 +43,14 @@ public:
   };
 
 private:
-  // ユニークポインタでデータ保持
-  std::unique_ptr<MA735Data> data;
+  // データ保持
+  MA735Data data;
 
-  const float lpfFreq = 150.0f;
-  const float timeConst = 1.0f / (user2pi * lpfFreq);
-  const float kalpha = TASK_TIME / timeConst;
-  
-  const float invResol = 1.0f / ANG_RESL_12BIT;
-  const float invTaskTime = 1.0f / TASK_TIME;
+  static constexpr float lpfFreq = 150.0f;
+  static constexpr float timeConst = 1.0f / (user2pi * lpfFreq);
+  static constexpr float kalpha = TASK_TIME / timeConst;
+  static constexpr float invResol = 1.0f / ANG_RESL_12BIT;
+  static constexpr float invTaskTime = 1.0f / TASK_TIME;
 
   SPI_HandleTypeDef& hspi1;
   bool readStart;
@@ -100,5 +101,5 @@ public:
   void spiRxCallback();
   void spiTxCallback();
   
-  MA735Data* getData() const { return data.get(); }
+  MA735Data* getData() { return &data; }
 };
