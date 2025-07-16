@@ -40,8 +40,7 @@ extern Util util;
 extern SensCur senscur;
 
 CanCom::CanCom(FDCAN_HandleTypeDef& fdcanHandle)
-  : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0),
-    data(std::make_unique<CanData>()) {}
+  : hfdcan(fdcanHandle), canRxInterrupt(0), prevGenFuncRef(0), canTxFlag(0) {}
 
 void CanCom::initTxHeader(bool extendedId, bool fdFormat) {
   txHeader.Identifier = 0x14 << 6 | canDevID;  // デバイスIDのみを設定
@@ -88,46 +87,46 @@ void CanCom::floatTouint(float value, uint8_t (&result)[4]) {
 void CanCom::processControlMode(uint16_t cmdRef, const uint8_t* rx) {
   switch (cmdRef) {
     case (CTRLMODE_NONE):
-      data->genFuncRef = 0;
-      data->virAngFreq = 0;
-      data->voltDRef = 0;
-      data->voltQRef = 0;
-      data->curDRef = 0;
-      data->curQRef = 0;
-      data->velRef = 0;
-      data->posRef = 0;
+      data.genFuncRef = 0;
+      data.virAngFreq = 0;
+      data.voltDRef = 0;
+      data.voltQRef = 0;
+      data.curDRef = 0;
+      data.curQRef = 0;
+      data.velRef = 0;
+      data.posRef = 0;
       break;
     case (CTRLMODE_VOLT):
-      data->genFuncRef = ByteConverter::readUint32(rx, 0);
-      data->virAngFreq = ByteConverter::readFloat(rx, 4);
-      data->voltDRef = ByteConverter::readFloat(rx, 8);
-      data->voltQRef = ByteConverter::readFloat(rx, 12);
+      data.genFuncRef = ByteConverter::readUint32(rx, 0);
+      data.virAngFreq = ByteConverter::readFloat(rx, 4);
+      data.voltDRef = ByteConverter::readFloat(rx, 8);
+      data.voltQRef = ByteConverter::readFloat(rx, 12);
       break;
     case (CTRLMODE_CUR):
-      data->genFuncRef = ByteConverter::readUint32(rx, 0);
-      data->curDRef = ByteConverter::readFloat(rx, 4);
-      data->curQRef = ByteConverter::readFloat(rx, 8);
+      data.genFuncRef = ByteConverter::readUint32(rx, 0);
+      data.curDRef = ByteConverter::readFloat(rx, 4);
+      data.curQRef = ByteConverter::readFloat(rx, 8);
       break;
     case (CTRLMODE_VEL):
-      data->genFuncRef = ByteConverter::readUint32(rx, 0);
-      data->velRef = ByteConverter::readFloat(rx, 4);
+      data.genFuncRef = ByteConverter::readUint32(rx, 0);
+      data.velRef = ByteConverter::readFloat(rx, 4);
       break;
     case (CTRLMODE_POS):
-      data->genFuncRef = ByteConverter::readUint32(rx, 0);
-      data->posRef = ByteConverter::readFloat(rx, 4);
+      data.genFuncRef = ByteConverter::readUint32(rx, 0);
+      data.posRef = ByteConverter::readFloat(rx, 4);
       break;
   }
 }
 
 // genFuncRef状態更新共通関数
 void CanCom::updateGenFuncStatus() {
-  uint8_t currentGenFuncRef = data->genFuncRef;
+  uint8_t currentGenFuncRef = data.genFuncRef;
 
   if (currentGenFuncRef == prevGenFuncRef) {
-    data->genFuncCheck = false;   
+    data.genFuncCheck = false;   
     return;
   }
-  data->genFuncCheck = true;
+  data.genFuncCheck = true;
   prevGenFuncRef = currentGenFuncRef;
 }
 
@@ -156,11 +155,11 @@ void CanCom::rxTask() {
 
 void CanCom::TEST_rxTask(){
   // テスト用固定値設定
-  data->cmdRef = CTRLMODE_VOLT;
-  data->genFuncRef = 0x11;
-  data->virAngFreq = 0.0f;
-  data->voltDRef = 0.0f;
-  data->voltQRef = 3.0f;
+  data.cmdRef = CTRLMODE_VOLT;
+  data.genFuncRef = 0x11;
+  data.virAngFreq = 0.0f;
+  data.voltDRef = 0.0f;
+  data.voltQRef = 3.0f;
   
   updateGenFuncStatus();
 }
@@ -181,10 +180,10 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   
   // データポインタキャッシュ（静的取得）
   static MA735Enc::MA735Data* angdata = ma735enc.getData();
-  static Foc::FocData* focdata = foc.getData();
-  static ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  static Util::UtilData* utildata = util.getUtilData();
-  static ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
+  static const Foc::FocData* focdata = foc.getData();
+  static const ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  static Util::UtilData* utildata = util.getData();
+  static const ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
 
   // ByteConverterクラスを使用した型安全なデータ変換
   ByteConverter::writeFloat(tx_, 0, mdctrldata->voltDRef);   // voltD Act
@@ -205,8 +204,8 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
 }
 void CanCom::rxMsglistFd(const uint8_t (&rx)[canRxSize]) {
   if (canRxInterrupt == true) {
-    data->cmdRef = rxHeader.Identifier >> 6;
-    processControlMode(data->cmdRef, rx);
+    data.cmdRef = rxHeader.Identifier >> 6;
+    processControlMode(data.cmdRef, rx);
     canRxInterrupt = false;
     cancom.canTxFlag = true;
   }

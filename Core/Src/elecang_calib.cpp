@@ -31,7 +31,7 @@ extern CanCom cancom;
 ElecangCalib::ElecangCalib(){}
 
 void ElecangCalib::elecCalSeq(){
-  Util::UtilData* utildata = util.getUtilData();
+  Util::UtilData* utildata = util.getData();
   CanCom::CanData* candata = cancom.getData();
 
   static SeqID_t seqID = INIT;
@@ -168,7 +168,7 @@ void ElecangCalib::elecCalSeq(){
 
 bool ElecangCalib::calibSub(float _voltDRef, float _elecAngOfsCur, float *_elecAngOfsMax, float _calDelta) {
   MA735Enc::MA735Data* ma735data = ma735enc.getData();
-  Util::UtilData* utildata = util.getUtilData();
+  Util::UtilData* utildata = util.getData();
   bool returnVal = false;
   
   // forloop用

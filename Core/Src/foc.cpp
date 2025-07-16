@@ -7,13 +7,13 @@
 
 Foc foc;
 
-extern MA735Enc ang;
+extern MA735Enc ma735enc;
 extern SensCur senscur;
 
 using namespace Acrocantho;
 
 void Foc::forwardCtrl(const SinCos _sc){
-  static SensCur::SensCurData* senscurdata = senscur.getData();
+  static const SensCur::SensCurData* senscurdata = senscur.getData();
   
   // Clarke transform - direct calculation
   const float alpha = absqrt1 * senscurdata->curU;

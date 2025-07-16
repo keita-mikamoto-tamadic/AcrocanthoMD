@@ -38,6 +38,7 @@ public:
   void modeCtrlReset();
   
   ModeControlData* getData() { return &data; }
+  const ModeControlData* getData() const { return &data; }
 
 private:
   void limitVoltage(float& voltDRef, float& voltQRef);

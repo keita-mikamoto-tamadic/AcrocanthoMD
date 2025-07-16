@@ -27,8 +27,6 @@ typedef enum {
 } SeqID_t;
 
 class UserTask {
-public:
-
 private:
   // テストデータ構造体（統一管理）
   struct TestData {
@@ -79,6 +77,19 @@ private:
   bool servocheck = false;
   SeqID_t seqID = STEP00;
 
+public:
+  // 統一データアクセス構造体
+  struct UserTaskData {
+    TestData* testData;
+    StateData* stateData;
+    uint8_t* count;
+    bool* servocheck;
+    SeqID_t* seqID;
+  };
+
+private:
+  UserTaskData data;
+
   // センサ読み取り統一関数
   void readSensors();
   // テストデータ収集（デバッグ時のみ）
@@ -96,5 +107,8 @@ public:
   void idleTask();
   bool servoCheck();
   void canDataPrepare();
+
+  UserTaskData* getData() { return &data; }
+  const UserTaskData* getData() const { return &data; }
 
 };

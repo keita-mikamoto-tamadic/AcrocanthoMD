@@ -1,5 +1,8 @@
 # AcrocanthoMD
 
+## 仕様書
+- [CANFDプロトコル仕様書](README_IF.md)
+
 ## 概要
 AcrocanthoMDは、STM32G4マイコンを使用したブラシレスDCモーター制御システムです。フィールド指向制御（FOC）技術を用いて高精度なサーボモーター制御を実現します。
 

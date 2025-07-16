@@ -24,5 +24,6 @@ public:
   
   void genFuncCtrl();
 
-  UtilData* getUtilData() { return &data; }
+  UtilData* getData() { return &data; }
+  const UtilData* getData() const { return &data; }
 };

@@ -176,7 +176,7 @@ float MA735Enc::elecAngVirtual(float _virFreqRef) {
 }
 
 void MA735Enc::elecAngleIn(){
-  CanCom::CanData* candata = cancom.getData();
+  const CanCom::CanData* candata = cancom.getData();
   
   data.elecAngTest = elecAng(EOFS);
   if (candata->virAngFreq > 0.0f) {

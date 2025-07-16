@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 
 #include "param.h"
 #include "user_math.h"
@@ -101,7 +100,7 @@ private:
   float curDPidCtrl(float _curDRef);
   float curQPidCtrl(float _curQRef);
   
-  std::unique_ptr<BldcCtrlData> data;
+  BldcCtrlData data;
   
 public:
   BldcCtrl();
@@ -120,6 +119,7 @@ public:
     posData = PidData();
   }
   
-  BldcCtrl::BldcCtrlData* getData() { return data.get(); }
+  BldcCtrlData* getData() { return &data; }
+  const BldcCtrlData* getData() const { return &data; }
 
 };

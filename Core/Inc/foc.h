@@ -22,6 +22,5 @@ public:
   void forwardCtrl(const Acrocantho::SinCos _sc);
   void inverseCtrl(const Acrocantho::SinCos _sc, float _vd, float _vq);
 
-  FocData* getData() { return &data; }
   const FocData* getData() const { return &data; }
 };

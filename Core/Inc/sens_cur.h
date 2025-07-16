@@ -35,6 +35,5 @@ public:
   bool sensCurInit();
   void sensCurIN();
 
-  SensCurData* getData() { return &data; }
   const SensCurData* getData() const { return &data; }
 };

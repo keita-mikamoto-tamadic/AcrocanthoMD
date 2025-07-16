@@ -102,4 +102,5 @@ public:
   void spiTxCallback();
   
   MA735Data* getData() { return &data; }
+  const MA735Data* getData() const { return &data; }
 };

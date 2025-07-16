@@ -2,7 +2,7 @@
 #include "user_task.h"
 #include "can_communication.h"
 #include "util.h"
-#include "elecAng_calib.h"
+#include "elecang_calib.h"
 #include "foc.h"
 #include "bldc_ctrl.h"
 #include "param.h"
@@ -72,9 +72,9 @@ void ModeControl::modeCtrl(){
 }
 
 void ModeControl::refCtrl(){
-  Util::UtilData* utildata = util.getUtilData();
+  Util::UtilData* utildata = util.getData();
   CanCom::CanData* candata = cancom.getData();
-  ElecangCalib::ElecangCalibData* elecangcalibdata = elecangcalib.getData();
+  const ElecangCalib::ElecangCalibData* elecangcalibdata = elecangcalib.getData();
 
   if (usertask.servoCheck()) {
     // 電気角キャリブ

@@ -47,4 +47,5 @@ public:
   void elecCalSeq();
 
   ElecangCalibData* getData() { return &data; }
+  const ElecangCalibData* getData() const { return &data; }
 };

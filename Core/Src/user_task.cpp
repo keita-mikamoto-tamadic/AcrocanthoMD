@@ -28,7 +28,14 @@ volatile bool adcflag = true;
 #define TEST_MODE
 
 UserTask::UserTask()
-  : count(0){}
+  : count(0) {
+  // データポインタの初期化
+  data.testData = &testData;
+  data.stateData = &stateData;
+  data.count = &count;
+  data.servocheck = &servocheck;
+  data.seqID = &seqID;
+}
 
 // センサ読み取り統一関数
 void UserTask::readSensors() {
@@ -38,12 +45,12 @@ void UserTask::readSensors() {
 
 // テストデータ収集（デバッグ時のみ）
 void UserTask::collectTestData() {
-  ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
-  ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
-  Foc::FocData* focdata = foc.getData();
+  const ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
+  const MA735Enc::MA735Data* angdata = ma735enc.getData();
+  const ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
+  const Foc::FocData* focdata = foc.getData();
   BldcCtrl::BldcCtrlData* bldcdata = bldcctrl.getData();
-  SensCur::SensCurData* senscurdata = senscur.getData();
+  const SensCur::SensCurData* senscurdata = senscur.getData();
 
   testData.test = ecaldata->elecAngOfs;
   testData.eofsm = ecaldata->elecAngOfsMinus;
@@ -90,7 +97,7 @@ GPIO_PinState UserTask::handleButtonInput() {
 }
 
 void UserTask::cyclicTask() {
-  Util::UtilData* utildata = util.getUtilData();
+  Util::UtilData* utildata = util.getData();
   static SeqID_t seqID = TEST;
 
    switch (seqID) {
@@ -230,7 +237,7 @@ void UserTask::motorControl() {
   // データポインタキャッシュ（1回取得のみ）
   static ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
   static MA735Enc::MA735Data* angdata = ma735enc.getData();
-  static Foc::FocData* focdata = foc.getData();
+  static const Foc::FocData* focdata = foc.getData();
   
   Cordic cordic;
 

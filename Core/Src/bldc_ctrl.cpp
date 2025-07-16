@@ -1,6 +1,5 @@
 #include "bldc_ctrl.h"
 
-#include <memory>
 
 #include "ma735_enc.h"
 #include "param.h"
@@ -10,8 +9,7 @@ BldcCtrl bldcctrl;
 extern Foc foc;
 extern MA735Enc ma735enc;
 
-BldcCtrl::BldcCtrl()
-  : data(std::make_unique<BldcCtrlData>()){}
+BldcCtrl::BldcCtrl() {}
 
 // PID制御共通関数
 float BldcCtrl::pidControl(float reference, float feedback, PidData& pidData, 
@@ -60,29 +58,29 @@ float BldcCtrl::voltQCtrl(float _curQ) {
 }
 
 float BldcCtrl::curDPidCtrl(float _curDRef) {
-  Foc::FocData* focdata = foc.getData();
+  const Foc::FocData* focdata = foc.getData();
   
   const PidParams curDParams = {
     motorConfig.curKp, motorConfig.curKi, motorConfig.curKd,
     motorConfig.volMin, motorConfig.volMax
   };
   
-  return pidControl(_curDRef, focdata->id, curDData, curDParams, &data->testerrD);
+  return pidControl(_curDRef, focdata->id, curDData, curDParams, &data.testerrD);
 }
 
 float BldcCtrl::curQPidCtrl(float _curQRef) {
-  Foc::FocData* focdata = foc.getData();
+  const Foc::FocData* focdata = foc.getData();
   
   const PidParams curQParams = {
     motorConfig.curKp, motorConfig.curKi, motorConfig.curKd,
     motorConfig.volMin, motorConfig.volMax
   };
   
-  return pidControl(_curQRef, focdata->iq, curQData, curQParams, &data->testerrQ);
+  return pidControl(_curQRef, focdata->iq, curQData, curQParams, &data.testerrQ);
 }
 
 float BldcCtrl::velPidCtrl(float _velRef) {
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
+  const MA735Enc::MA735Data* angdata = ma735enc.getData();
   
   const PidParams velParams = {
     motorConfig.velKp, motorConfig.velKi, motorConfig.velKd,
@@ -90,11 +88,11 @@ float BldcCtrl::velPidCtrl(float _velRef) {
   };
   
   return pidControl(_velRef, angdata->mechAngVelLPF, velData, velParams, 
-                   &data->testvelErr, &data->testvelErrSum);
+                   &data.testvelErr, &data.testvelErrSum);
 }
 
 float BldcCtrl::posPidCtrl(float _posRef) {
-  MA735Enc::MA735Data* angdata = ma735enc.getData();
+  const MA735Enc::MA735Data* angdata = ma735enc.getData();
   
   const PidParams posParams = {
     motorConfig.posKp, motorConfig.posKi, motorConfig.posKd,
@@ -102,5 +100,5 @@ float BldcCtrl::posPidCtrl(float _posRef) {
   };
   
   return pidControl(_posRef, angdata->mechAng, posData, posParams, 
-                   &data->testposErr, &data->testposErrSum);
+                   &data.testposErr, &data.testposErrSum);
 }

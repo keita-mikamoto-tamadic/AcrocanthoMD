@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <memory>
 #include "main.h"
 #include "byte_converter.h"
 
@@ -34,7 +33,7 @@ public:
   };
 
 private:
-  std::unique_ptr<CanData> data;
+  CanData data;
 
   FDCAN_HandleTypeDef& hfdcan;
   FDCAN_TxHeaderTypeDef txHeader;
@@ -74,5 +73,6 @@ public:
   // レガシー関数（後方互換性のため残存）
   static void floatTouint(float value, uint8_t (&result)[4]);
 
-  CanData* getData() { return data.get(); }
+  CanData* getData() { return &data; }
+  const CanData* getData() const { return &data; }
 };
