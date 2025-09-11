@@ -19,7 +19,7 @@ static constexpr uint16_t CMD_MA735_MAGTH = 0x5B00;
 static constexpr uint16_t CMD_MA735_MGLHT = 0x4600;
 
 static constexpr uint8_t rotDir = 0;
-static constexpr uint8_t elecAngDir = 0;
+static constexpr uint8_t elecAngDir = 1;
 static constexpr uint8_t mechAngDir = 0;
 
 class MA735Enc {

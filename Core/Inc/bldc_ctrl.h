@@ -14,6 +14,7 @@ public:
     float testvelErrSum = 0.0f;
     float testposErr = 0.0f;
     float testposErrSum = 0.0f;
+    bool voltageSaturated = false;  // 電圧飽和フラグ
   };
 
 private:
@@ -75,7 +76,7 @@ private:
     -24.0f, 24.0f,    // volMin, volMax
     -10.0f, 10.0f,    // curQMin, curQMax
     -9.0f, 9.0f,      // velMin, velMax
-    0.2f, 100.0f, 0.0f, // curKp, curKi, curKd
+    0.5f, 10.0f, 0.001f, // curKp, curKi, curKd - Kiを100→10、Kpを0.2→0.5、Kdを0→0.001に調整
     5.0f, 30.0f, 0.0f,  // velKp, velKi, velKd
     8.0f, 0.5f, 0.0f    // posKp, posKi, posKd
   };
@@ -86,9 +87,9 @@ private:
     -24.0f, 24.0f,    // volMin, volMax
     -10.0f, 10.0f,    // curQMin, curQMax
     -5.0f, 5.0f,      // velMin, velMax
-    0.2f, 20.0f, 0.0f,  // curKp, curKi, curKd
-    10.0f, 0.5f, 0.0f,  // velKp, velKi, velKd
-    17.0f, 0.4f, 0.0f   // posKp, posKi, posKd
+    0.4f, 20.0f, 0.0f,  // curKp, curKi, curKd
+    12.0f, 2.0f, 0.0f,  // velKp, velKi, velKd
+    35.0f, 1.0f, 0.0f   // posKp, posKi, posKd
   };
   #endif
 

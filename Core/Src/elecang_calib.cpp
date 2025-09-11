@@ -118,6 +118,8 @@ void ElecangCalib::elecCalSeq(){
           data.elecAngOfs += user2pi;
         }
 
+        cancom.canTxFlag = true;
+        cancom.txTask();
         seqID = END;
         seqID_prev = IDLE;
       }

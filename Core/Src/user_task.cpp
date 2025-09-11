@@ -25,7 +25,7 @@ extern BldcCtrl bldcctrl;
 
 volatile bool adcflag = true;
 
-#define TEST_MODE
+//#define TEST_MODE
 
 UserTask::UserTask()
   : count(0) {
@@ -98,7 +98,7 @@ GPIO_PinState UserTask::handleButtonInput() {
 
 void UserTask::cyclicTask() {
   Util::UtilData* utildata = util.getData();
-  static SeqID_t seqID = TEST;
+  static SeqID_t seqID = INIT;
 
    switch (seqID) {
     case LOOP:
@@ -134,6 +134,7 @@ void UserTask::cyclicTask() {
       }
       break;
     case STEP00:
+      //testData.initEnd = true;
       utildata->endECalib = false;
       readSensors();
 
@@ -274,7 +275,7 @@ void UserTask::resetAll() {
 }
 
 void HAL_ADCEx_InjectedConvCpltCallback(ADC_HandleTypeDef *hadc){
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
   usertask.cyclicTask();
-//  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
 }

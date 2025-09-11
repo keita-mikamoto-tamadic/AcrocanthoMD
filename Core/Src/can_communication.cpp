@@ -25,6 +25,7 @@
 #include "util.h"
 #include "elecang_calib.h"
 #include "sens_cur.h"
+#include "param.h"
 
 // main.cppと同じインスタンスを使用
 extern FDCAN_HandleTypeDef hfdcan1;
@@ -156,10 +157,12 @@ void CanCom::rxTask() {
 void CanCom::TEST_rxTask(){
   // テスト用固定値設定
   data.cmdRef = CTRLMODE_VOLT;
-  data.genFuncRef = 0x11;
-  data.virAngFreq = 0.0f;
-  data.voltDRef = 0.0f;
-  data.voltQRef = 3.0f;
+  data.genFuncRef = 0x01;
+  data.virAngFreq = 5.0f;
+  data.voltDRef = 2.0f;
+  data.voltQRef = 0.0f;
+  data.curDRef = 0.0f;
+  data.curQRef = 0.0f;
   
   updateGenFuncStatus();
 }
@@ -176,20 +179,18 @@ void CanCom::txServoOffTask() {
 }
 
 void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
-  static uint32_t count = 0;
-  
   // データポインタキャッシュ（静的取得）
   static MA735Enc::MA735Data* angdata = ma735enc.getData();
   static const Foc::FocData* focdata = foc.getData();
   static const ModeControl::ModeControlData* mdctrldata = modecontrol.getData();
   static Util::UtilData* utildata = util.getData();
   static const ElecangCalib::ElecangCalibData* ecaldata = elecangcalib.getData();
+  static const SensCur::SensCurData* senscurdata = senscur.getData();
 
-  // ByteConverterクラスを使用した型安全なデータ変換
   ByteConverter::writeFloat(tx_, 0, mdctrldata->voltDRef);   // voltD Act
   ByteConverter::writeFloat(tx_, 4, mdctrldata->voltQRef);   // voltQ Act
-  ByteConverter::writeFloat(tx_, 8, focdata->id);            // curD Act
-  ByteConverter::writeFloat(tx_, 12, focdata->iq);           // curQ Act
+  ByteConverter::writeFloat(tx_, 8, focdata->id);   // U相ADC値
+  ByteConverter::writeFloat(tx_, 12, focdata->iq);  // W相ADC値
   ByteConverter::writeFloat(tx_, 16, angdata->mechAngVelLPF); // vel Act
 
   // 電気角オフセットキャリブ終了時のみキャリブ値を送信
@@ -200,7 +201,6 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   if (HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan, &txHeader, tx_) != HAL_OK) {
     Error_Handler();
   }
-  count++;
 }
 void CanCom::rxMsglistFd(const uint8_t (&rx)[canRxSize]) {
   if (canRxInterrupt == true) {

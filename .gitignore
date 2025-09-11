@@ -2,6 +2,10 @@ Debug
 Release
 /.metadata
 /.settings
+/.claude
+/.serena
+/serena_config.json
+CLAUDE.md
 
 # Working history (Claude Code session logs)
 working_history/

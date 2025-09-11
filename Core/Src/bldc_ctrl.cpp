@@ -20,13 +20,6 @@ float BldcCtrl::pidControl(float reference, float feedback, PidData& pidData,
   float err = reference - feedback;
   if (testErr) *testErr = err;
 
-  // ==== IControl ====
-  // アンチワインドアップ
-  if ((params.outMin < pidData.pidRaw) && (pidData.pidRaw < params.outMax)) {
-    pidData.errSum += (err * TASK_TIME);
-  }
-  if (testErrSum) *testErrSum = pidData.errSum;
-
   // ==== DControl ====
   pidData.errLPF = (1.0f - lpfCoef) * pidData.errLPF + lpfCoef * err;
   float errDiff = (err - pidData.errLPFPast) / TASK_TIME;
@@ -35,14 +28,28 @@ float BldcCtrl::pidControl(float reference, float feedback, PidData& pidData,
   // ==== PID Control ====
   pidData.pidRaw = params.kp * err + params.ki * pidData.errSum + params.kd * errDiff;
 
-  // 出力飽和
+  // 出力飽和判定
+  bool saturated = false;
   if (pidData.pidRaw > params.outMax) {
     ctrlOut = params.outMax;
+    saturated = true;
   } else if (pidData.pidRaw < params.outMin) {
     ctrlOut = params.outMin;
+    saturated = true;
   } else {
     ctrlOut = pidData.pidRaw;
   }
+
+  // ==== IControl with Anti-windup ====
+  // 飽和していない場合のみ積分値を更新（条件付き積分）
+  if (!saturated) {
+    pidData.errSum += (err * TASK_TIME);
+  } else {
+    // 自身の出力飽和時は積分値を減衰
+    pidData.errSum *= 0.99f;
+  }
+  
+  if (testErrSum) *testErrSum = pidData.errSum;
 
   return ctrlOut;
 }
@@ -65,6 +72,11 @@ float BldcCtrl::curDPidCtrl(float _curDRef) {
     motorConfig.volMin, motorConfig.volMax
   };
   
+  // 下位層（電圧制限）の飽和時は積分値を減衰
+  if (data.voltageSaturated) {
+    curDData.errSum *= 0.99f;
+  }
+  
   return pidControl(_curDRef, focdata->id, curDData, curDParams, &data.testerrD);
 }
 
@@ -76,6 +88,11 @@ float BldcCtrl::curQPidCtrl(float _curQRef) {
     motorConfig.volMin, motorConfig.volMax
   };
   
+  // 下位層（電圧制限）の飽和時は積分値を減衰
+  if (data.voltageSaturated) {
+    curQData.errSum *= 0.99f;
+  }
+  
   return pidControl(_curQRef, focdata->iq, curQData, curQParams, &data.testerrQ);
 }
 
@@ -86,6 +103,11 @@ float BldcCtrl::velPidCtrl(float _velRef) {
     motorConfig.velKp, motorConfig.velKi, motorConfig.velKd,
     motorConfig.curQMin, motorConfig.curQMax
   };
+  
+  // 下位層（電圧制限）の飽和時は積分値を減衰
+  if (data.voltageSaturated) {
+    velData.errSum *= 0.99f;
+  }
   
   return pidControl(_velRef, angdata->mechAngVelLPF, velData, velParams, 
                    &data.testvelErr, &data.testvelErrSum);

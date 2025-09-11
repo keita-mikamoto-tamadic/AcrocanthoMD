@@ -65,7 +65,10 @@ void ModeControl::modeCtrl(){
       break;
   }
   
-  limitVoltage(voltDRef, voltQRef);
+  bool voltageSaturated = limitVoltage(voltDRef, voltQRef);
+  
+  // 電圧飽和フラグをBldcCtrlに伝達
+  bldcctrl.getData()->voltageSaturated = voltageSaturated;
   
   data.voltDRef = voltDRef;
   data.voltQRef = voltQRef;
@@ -99,23 +102,31 @@ void ModeControl::refCtrl(){
 }
 
 // 電圧制限処理（過変調防止）
-void ModeControl::limitVoltage(float& voltDRef, float& voltQRef) {
+bool ModeControl::limitVoltage(float& voltDRef, float& voltQRef) {
   // 電圧ノルムによる出力制限、3倍高調波の重畳による効果を加味して、
   // MOSが駆動できる最大の電圧は1.155倍になる
   // 相電圧のピーク値 = sqrt(2/3) * sqrt(voltD^2 + voltQ^2)
   // 過変調にならない領域は、相電圧のピーク値 < K * PBM/2 
   // Vq < sqrt(3/8 * PBM^2 * K^2 - Vd^2)
   
+  bool saturated = false;
   const float voltageLimit = VOLTAGE_COEFF * VOLT_PBM * VOLT_PBM * PBM_SCALE_SQUARED;
   const float voltQMax = voltageLimit - (voltDRef * voltDRef);
   
   if (voltQMax >= 0.0f) {
     const float voltQLimit = sqrtf(voltQMax);
-    if (voltQRef > voltQLimit) voltQRef = voltQLimit;
-    else if (voltQRef < -voltQLimit) voltQRef = -voltQLimit;
+    if (voltQRef > voltQLimit) {
+      voltQRef = voltQLimit;
+      saturated = true;
+    }
+    else if (voltQRef < -voltQLimit) {
+      voltQRef = -voltQLimit;
+      saturated = true;
+    }
   }
   else {
     voltQRef = 0.0f;
+    saturated = true;
     const float voltDLimit = VOLTAGE_SQRT_COEFF * VOLT_PBM * PBM_SCALEFACTOR;
     if (voltDRef > voltDLimit) {
       voltDRef = voltDLimit;
@@ -124,6 +135,8 @@ void ModeControl::limitVoltage(float& voltDRef, float& voltQRef) {
       voltDRef = -voltDLimit;
     }
   }
+  
+  return saturated;
 }
 
 void ModeControl::modeCtrlReset() {

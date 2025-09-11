@@ -41,5 +41,5 @@ public:
   const ModeControlData* getData() const { return &data; }
 
 private:
-  void limitVoltage(float& voltDRef, float& voltQRef);
+  bool limitVoltage(float& voltDRef, float& voltQRef);
 };

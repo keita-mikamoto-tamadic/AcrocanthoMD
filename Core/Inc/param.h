@@ -17,6 +17,8 @@
 //#define TMCS1107A1B
 #define AD8418A
 
+// CANID
+constexpr uint32_t canDevID = 1;
 
 // モーター定義
 //#define GIM6010_8
@@ -37,7 +39,10 @@
 #endif
 
 #ifdef GIM8108_8
-#define EOFS           (6.007f)
+// ID 1
+#define EOFS           (3.58283f)
+// ID 3
+//#define EOFS           (0.216519f)
 #endif
 
 // ギア比

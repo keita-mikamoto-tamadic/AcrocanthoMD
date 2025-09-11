@@ -4,7 +4,6 @@
 #include "main.h"
 #include "byte_converter.h"
 
-constexpr uint32_t canDevID = 1;
 constexpr uint8_t canRxSize = 32;
 constexpr uint8_t canTxSize = 32;
 
