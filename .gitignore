@@ -1,7 +1,7 @@
 Debug
 Release
 /.metadata
-/.settings
+/.settings/
 /.claude
 /.serena
 /serena_config.json

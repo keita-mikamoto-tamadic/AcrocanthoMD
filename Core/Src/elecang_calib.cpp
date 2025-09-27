@@ -119,7 +119,6 @@ void ElecangCalib::elecCalSeq(){
         }
 
         cancom.canTxFlag = true;
-        cancom.txTask();
         seqID = END;
         seqID_prev = IDLE;
       }

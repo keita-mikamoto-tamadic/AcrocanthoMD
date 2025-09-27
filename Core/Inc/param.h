@@ -18,11 +18,11 @@
 #define AD8418A
 
 // CANID
-constexpr uint32_t canDevID = 1;
+constexpr uint32_t canDevID = 2;
 
 // モーター定義
-//#define GIM6010_8
-#define GIM8108_8
+#define GIM6010_8
+//#define GIM8108_8
 
 // 極対数
 #ifdef GIM6010_8
@@ -35,14 +35,17 @@ constexpr uint32_t canDevID = 1;
 
 // 電気角オフセット
 #ifdef GIM6010_8
-#define EOFS               (3.3160305f)
+// ID 2
+#define EOFS                (0.221829f)
+// ID 4
+//#define EOFS               (0.42152f)
 #endif
 
 #ifdef GIM8108_8
 // ID 1
-#define EOFS           (3.58283f)
+//#define EOFS           (0.339161634f)
 // ID 3
-//#define EOFS           (0.216519f)
+#define EOFS           (2.7897923f)
 #endif
 
 // ギア比

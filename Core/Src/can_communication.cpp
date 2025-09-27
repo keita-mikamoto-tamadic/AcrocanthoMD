@@ -156,13 +156,14 @@ void CanCom::rxTask() {
 
 void CanCom::TEST_rxTask(){
   // テスト用固定値設定
-  data.cmdRef = CTRLMODE_VOLT;
+  data.cmdRef = CTRLMODE_POS;
   data.genFuncRef = 0x01;
-  data.virAngFreq = 5.0f;
-  data.voltDRef = 2.0f;
+  data.virAngFreq = 0.0f;
+  data.voltDRef = 0.0f;
   data.voltQRef = 0.0f;
   data.curDRef = 0.0f;
   data.curQRef = 0.0f;
+  data.posRef = 0.1f;
   
   updateGenFuncStatus();
 }
@@ -194,7 +195,10 @@ void CanCom::txMsgListFd(uint8_t (&tx_)[canTxSize]) {
   ByteConverter::writeFloat(tx_, 16, angdata->mechAngVelLPF); // vel Act
 
   // 電気角オフセットキャリブ終了時のみキャリブ値を送信
-  if (utildata->endECalib == true) angdata->mechAng = ecaldata->elecAngOfs;
+  if (utildata->endECalib == true) {
+	  angdata->mechAng = ecaldata->elecAngOfs;
+	  uint8_t count=1;
+  }
   ByteConverter::writeFloat(tx_, 20, angdata->mechAng);       // mechAng Act
 
   // 32Byte固定

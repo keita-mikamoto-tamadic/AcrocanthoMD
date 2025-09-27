@@ -17,8 +17,8 @@ static constexpr uint16_t ANG_RESL_HALF = ANG_RESL_12BIT / 2;
 static constexpr uint16_t CMD_MA735_READ = 0x00;
 static constexpr uint16_t CMD_MA735_MAGTH = 0x5B00;
 static constexpr uint16_t CMD_MA735_MGLHT = 0x4600;
-
-static constexpr uint8_t rotDir = 0;
+//static constexpr uint8_t rotDir = 0;
+static constexpr uint8_t rotDir = 1;//なぜかID2,ID3だけ1
 static constexpr uint8_t elecAngDir = 1;
 static constexpr uint8_t mechAngDir = 0;
 
